@@ -407,7 +407,7 @@ def jogo_novo(request):
                 # Campos complexos
                 'mecanicas': request.POST.getlist('mecanicas[]'),
                 'temas': request.POST.getlist('temas[]'),
-                'componentes': request.POST.getlist('componentes[]'),
+                'componentes': [],
                 'condicoes_vitoria': [c for c in request.POST.getlist('condicoes_vitoria[]') if c.strip()],
                 'condicoes_derrota': [c for c in request.POST.getlist('condicoes_derrota[]') if c.strip()],
                 
@@ -415,6 +415,15 @@ def jogo_novo(request):
                 'estruturas': [],
                 'glossario': []
             }
+            
+            # Processar componentes com quantidade
+            componentes_nomes = request.POST.getlist('componentes[]')
+            componentes_qtds = request.POST.getlist('componentes_qtd[]')
+            
+            for i, nome_comp in enumerate(componentes_nomes):
+                if nome_comp.strip():
+                    qtd = componentes_qtds[i] if i < len(componentes_qtds) else '1'
+                    novo_jogo['componentes'].append(f"{nome_comp} (x{qtd})")
             
             # Processar estruturas
             estruturas_nomes = request.POST.getlist('estruturas_nome[]')
@@ -641,7 +650,16 @@ def jogo_editar(request, jogo_id):
         # Atualizar campos complexos
         jogo['mecanicas'] = request.POST.getlist('mecanicas[]')
         jogo['temas'] = request.POST.getlist('temas[]')
-        jogo['componentes'] = request.POST.getlist('componentes[]')
+        
+        # Processar componentes com quantidade
+        jogo['componentes'] = []
+        componentes_nomes = request.POST.getlist('componentes[]')
+        componentes_qtds = request.POST.getlist('componentes_qtd[]')
+        
+        for i, nome_comp in enumerate(componentes_nomes):
+            if nome_comp.strip():
+                qtd = componentes_qtds[i] if i < len(componentes_qtds) else '1'
+                jogo['componentes'].append(f"{nome_comp} (x{qtd})")
         jogo['condicoes_vitoria'] = [c for c in request.POST.getlist('condicoes_vitoria[]') if c.strip()]
         jogo['condicoes_derrota'] = [c for c in request.POST.getlist('condicoes_derrota[]') if c.strip()]
         
@@ -712,6 +730,22 @@ def jogo_detalhes(request, jogo_id):
         return redirect('jogos_lista')
     
     return render(request, 'jogos/detalhes.html', {'jogo': jogo})
+
+def jogo_imprimir(request, jogo_id):
+    global jogos_criados
+    
+    # Encontrar o jogo
+    jogo = None
+    for j in jogos_criados:
+        if j['id'] == int(jogo_id):
+            jogo = j
+            break
+    
+    if not jogo:
+        messages.error(request, 'Jogo não encontrado!')
+        return redirect('jogos_lista')
+    
+    return render(request, 'jogos/imprimir.html', {'jogo': jogo})
 
 def calcular_peso_jogo(jogo_data):
     """Calcula o peso do jogo baseado nas regras de negócio"""

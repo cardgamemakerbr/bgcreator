@@ -178,6 +178,7 @@
                 <div id="componentes-container">
                     <div class="d-flex mb-2">
                         <input type="text" class="form-control me-2 componente-search" placeholder="Digite para buscar componente..." autocomplete="off">
+                        <input type="number" class="form-control me-2" name="componentes_qtd[]" placeholder="Qtd" min="1" value="1" style="width: 80px;">
                         <input type="hidden" name="componentes[]" class="componente-id">
                         <button type="button" class="btn btn-success" onclick="addComponente()">+</button>
                     </div>
@@ -335,6 +336,7 @@ function addComponente() {
     div.className = 'd-flex mb-2';
     div.innerHTML = `
         <input type="text" class="form-control me-2 componente-search" placeholder="Digite para buscar componente..." autocomplete="off">
+        <input type="number" class="form-control me-2" name="componentes_qtd[]" placeholder="Qtd" min="1" value="1" style="width: 80px;">
         <input type="hidden" name="componentes[]" class="componente-id">
         <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
     `;
@@ -530,7 +532,7 @@ function selectItem(input, item, type) {
     input.value = item.nome;
     const hiddenInput = input.parentElement.querySelector(`.${type.slice(0, -1)}-id`);
     if (hiddenInput) {
-        hiddenInput.value = item.id;
+        hiddenInput.value = item.nome;  // Salvar nome em vez de ID
     }
     hideSuggestions(input);
     calcularPesoTempo();

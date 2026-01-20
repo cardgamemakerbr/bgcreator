@@ -8,6 +8,7 @@ urlpatterns = [
     path('jogos/novo/', views.jogo_novo, name='jogo_novo'),
     path('jogos/<int:jogo_id>/', views.jogo_detalhes, name='jogo_detalhes'),
     path('jogos/editar/<int:jogo_id>/', views.jogo_editar, name='jogo_editar'),
+    path('jogos/imprimir/<int:jogo_id>/', views.jogo_imprimir, name='jogo_imprimir'),
     path('jogos/excluir/<int:jogo_id>/', views.jogo_excluir, name='jogo_excluir'),
     path('mecanicas/', views.mecanicas_lista, name='mecanicas_lista'),
     path('mecanicas/novo/', views.mecanica_novo, name='mecanica_novo'),
