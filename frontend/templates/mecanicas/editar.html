@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Mecânica - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-cogs"></i> Editar Mecânica</h2>
+    <a href="{% url 'mecanicas_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Nome da Mecânica *</label>
+                <input type="text" class="form-control" name="nome" value="{{ item.nome }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-control" name="descricao" rows="3">{{ item.descricao }}</textarea>
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Atualizar Mecânica
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
