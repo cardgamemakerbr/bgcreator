@@ -1,0 +1,798 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Jogo - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-edit"></i> Editar Jogo</h2>
+    <a href="{% url 'jogos_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Informações Básicas -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Jogo *</label>
+                        <input type="text" class="form-control" name="nome" value="{{ jogo.nome }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subtítulo</label>
+                        <input type="text" class="form-control" name="subtitulo" value="{{ jogo.subtitulo }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição Curta *</label>
+                        <textarea class="form-control" name="descricao_curta" rows="3" required>{{ jogo.descricao_curta }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">História do Jogo</label>
+                        <textarea class="form-control" name="historia" rows="4" placeholder="Conte a história e ambientação do jogo...">{{ jogo.historia }}</textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Capa (JPG/PNG)</label>
+                        <input type="file" class="form-control" name="capa" accept="image/jpeg,image/png">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Peso</label>
+                        <input type="text" class="form-control" id="peso-calculado" value="{{ jogo.peso }}" readonly>
+                        <small class="text-muted">Calculado automaticamente</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configurações do Jogo -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Jogadores</label>
+                        <div class="d-flex">
+                            <select class="form-select me-2" name="jogadores_min">
+                                <option value="0" {% if jogo.jogadores_min == 0 %}selected{% endif %}>0</option>
+                                <option value="1" {% if jogo.jogadores_min == 1 %}selected{% endif %}>1</option>
+                            </select>
+                            <span class="align-self-center mx-2">a</span>
+                            <select class="form-select" name="jogadores_max">
+                                <option value="1" {% if jogo.jogadores_max == 1 %}selected{% endif %}>1</option>
+                                <option value="2" {% if jogo.jogadores_max == 2 %}selected{% endif %}>2</option>
+                                <option value="3" {% if jogo.jogadores_max == 3 %}selected{% endif %}>3</option>
+                                <option value="4" {% if jogo.jogadores_max == 4 %}selected{% endif %}>4</option>
+                                <option value="5" {% if jogo.jogadores_max == 5 %}selected{% endif %}>5</option>
+                                <option value="6" {% if jogo.jogadores_max == 6 %}selected{% endif %}>6</option>
+                                <option value="7" {% if jogo.jogadores_max == 7 %}selected{% endif %}>7</option>
+                                <option value="8" {% if jogo.jogadores_max == 8 %}selected{% endif %}>8</option>
+                                <option value="9" {% if jogo.jogadores_max == 9 %}selected{% endif %}>9</option>
+                                <option value="10" {% if jogo.jogadores_max == 10 %}selected{% endif %}>10</option>
+                                <option value="12" {% if jogo.jogadores_max == 12 %}selected{% endif %}>12</option>
+                                <option value="15" {% if jogo.jogadores_max == 15 %}selected{% endif %}>15</option>
+                                <option value="20" {% if jogo.jogadores_max == 20 %}selected{% endif %}>20</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Tempo Médio (min)</label>
+                        <div class="d-flex">
+                            <select class="form-select me-2" name="tempo_min">
+                                <option value="5" {% if jogo.tempo_min == 5 %}selected{% endif %}>5</option>
+                                <option value="10" {% if jogo.tempo_min == 10 %}selected{% endif %}>10</option>
+                                <option value="15" {% if jogo.tempo_min == 15 %}selected{% endif %}>15</option>
+                                <option value="20" {% if jogo.tempo_min == 20 %}selected{% endif %}>20</option>
+                                <option value="25" {% if jogo.tempo_min == 25 %}selected{% endif %}>25</option>
+                                <option value="30" {% if jogo.tempo_min == 30 %}selected{% endif %}>30</option>
+                                <option value="35" {% if jogo.tempo_min == 35 %}selected{% endif %}>35</option>
+                                <option value="40" {% if jogo.tempo_min == 40 %}selected{% endif %}>40</option>
+                                <option value="45" {% if jogo.tempo_min == 45 %}selected{% endif %}>45</option>
+                                <option value="50" {% if jogo.tempo_min == 50 %}selected{% endif %}>50</option>
+                                <option value="60" {% if jogo.tempo_min == 60 %}selected{% endif %}>60</option>
+                                <option value="80" {% if jogo.tempo_min == 80 %}selected{% endif %}>80</option>
+                                <option value="100" {% if jogo.tempo_min == 100 %}selected{% endif %}>100</option>
+                                <option value="120" {% if jogo.tempo_min == 120 %}selected{% endif %}>120</option>
+                                <option value="140" {% if jogo.tempo_min == 140 %}selected{% endif %}>140</option>
+                                <option value="180" {% if jogo.tempo_min == 180 %}selected{% endif %}>180</option>
+                                <option value="200" {% if jogo.tempo_min == 200 %}selected{% endif %}>200</option>
+                                <option value="240" {% if jogo.tempo_min == 240 %}selected{% endif %}>240</option>
+                                <option value="300" {% if jogo.tempo_min == 300 %}selected{% endif %}>300</option>
+                                <option value="360" {% if jogo.tempo_min == 360 %}selected{% endif %}>360</option>
+                            </select>
+                            <span class="align-self-center mx-2">a</span>
+                            <select class="form-select" name="tempo_max">
+                                <option value="5" {% if jogo.tempo_max == 5 %}selected{% endif %}>5</option>
+                                <option value="10" {% if jogo.tempo_max == 10 %}selected{% endif %}>10</option>
+                                <option value="15" {% if jogo.tempo_max == 15 %}selected{% endif %}>15</option>
+                                <option value="20" {% if jogo.tempo_max == 20 %}selected{% endif %}>20</option>
+                                <option value="25" {% if jogo.tempo_max == 25 %}selected{% endif %}>25</option>
+                                <option value="30" {% if jogo.tempo_max == 30 %}selected{% endif %}>30</option>
+                                <option value="35" {% if jogo.tempo_max == 35 %}selected{% endif %}>35</option>
+                                <option value="40" {% if jogo.tempo_max == 40 %}selected{% endif %}>40</option>
+                                <option value="45" {% if jogo.tempo_max == 45 %}selected{% endif %}>45</option>
+                                <option value="50" {% if jogo.tempo_max == 50 %}selected{% endif %}>50</option>
+                                <option value="60" {% if jogo.tempo_max == 60 %}selected{% endif %}>60</option>
+                                <option value="80" {% if jogo.tempo_max == 80 %}selected{% endif %}>80</option>
+                                <option value="100" {% if jogo.tempo_max == 100 %}selected{% endif %}>100</option>
+                                <option value="120" {% if jogo.tempo_max == 120 %}selected{% endif %}>120</option>
+                                <option value="140" {% if jogo.tempo_max == 140 %}selected{% endif %}>140</option>
+                                <option value="180" {% if jogo.tempo_max == 180 %}selected{% endif %}>180</option>
+                                <option value="200" {% if jogo.tempo_max == 200 %}selected{% endif %}>200</option>
+                                <option value="240" {% if jogo.tempo_max == 240 %}selected{% endif %}>240</option>
+                                <option value="300" {% if jogo.tempo_max == 300 %}selected{% endif %}>300</option>
+                                <option value="360" {% if jogo.tempo_max == 360 %}selected{% endif %}>360</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Idade Recomendada</label>
+                        <select class="form-select" name="idade_recomendada">
+                            <option value="2" {% if jogo.idade_recomendada == 2 %}selected{% endif %}>2+</option>
+                            <option value="4" {% if jogo.idade_recomendada == 4 %}selected{% endif %}>4+</option>
+                            <option value="6" {% if jogo.idade_recomendada == 6 %}selected{% endif %}>6+</option>
+                            <option value="8" {% if jogo.idade_recomendada == 8 %}selected{% endif %}>8+</option>
+                            <option value="10" {% if jogo.idade_recomendada == 10 %}selected{% endif %}>10+</option>
+                            <option value="11" {% if jogo.idade_recomendada == 11 %}selected{% endif %}>11+</option>
+                            <option value="12" {% if jogo.idade_recomendada == 12 %}selected{% endif %}>12+</option>
+                            <option value="14" {% if jogo.idade_recomendada == 14 %}selected{% endif %}>14+</option>
+                            <option value="16" {% if jogo.idade_recomendada == 16 %}selected{% endif %}>16+</option>
+                            <option value="18" {% if jogo.idade_recomendada == 18 %}selected{% endif %}>18+</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mecânicas -->
+            <div class="mb-4">
+                <h5><i class="fas fa-cogs"></i> Mecânicas</h5>
+                <div id="mecanicas-container">
+                    {% for mecanica in jogo.mecanicas %}
+                        {% if mecanica %}
+                        <div class="d-flex mb-2">
+                            <input type="text" class="form-control me-2 mecanica-search" value="{{ mecanica }}" autocomplete="off">
+                            <input type="hidden" name="mecanicas[]" class="mecanica-id" value="{{ mecanica }}">
+                            <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+                        </div>
+                        {% endif %}
+                    {% empty %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2 mecanica-search" placeholder="Digite para buscar mecânica..." autocomplete="off">
+                        <input type="hidden" name="mecanicas[]" class="mecanica-id">
+                        <button type="button" class="btn btn-success" onclick="addMecanica()">+</button>
+                    </div>
+                    {% endfor %}
+                    {% if jogo.mecanicas %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2 mecanica-search" placeholder="Digite para buscar mecânica..." autocomplete="off">
+                        <input type="hidden" name="mecanicas[]" class="mecanica-id">
+                        <button type="button" class="btn btn-success" onclick="addMecanica()">+</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Temas -->
+            <div class="mb-4">
+                <h5><i class="fas fa-palette"></i> Temas</h5>
+                <div id="temas-container">
+                    {% for tema in jogo.temas %}
+                        {% if tema %}
+                        <div class="d-flex mb-2">
+                            <input type="text" class="form-control me-2 tema-search" value="{{ tema }}" autocomplete="off">
+                            <input type="hidden" name="temas[]" class="tema-id" value="{{ tema }}">
+                            <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+                        </div>
+                        {% endif %}
+                    {% empty %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2 tema-search" placeholder="Digite para buscar tema..." autocomplete="off">
+                        <input type="hidden" name="temas[]" class="tema-id">
+                        <button type="button" class="btn btn-success" onclick="addTema()">+</button>
+                    </div>
+                    {% endfor %}
+                    {% if jogo.temas %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2 tema-search" placeholder="Digite para buscar tema..." autocomplete="off">
+                        <input type="hidden" name="temas[]" class="tema-id">
+                        <button type="button" class="btn btn-success" onclick="addTema()">+</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Componentes -->
+            <div class="mb-4">
+                <h5><i class="fas fa-puzzle-piece"></i> Componentes</h5>
+                <div id="componentes-container">
+                    {% for componente in jogo.componentes %}
+                        {% if componente %}
+                        <div class="d-flex mb-2">
+                            <input type="text" class="form-control me-2 componente-search" value="{{ componente }}" autocomplete="off">
+                            <input type="hidden" name="componentes[]" class="componente-id" value="{{ componente }}">
+                            <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+                        </div>
+                        {% endif %}
+                    {% empty %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2 componente-search" placeholder="Digite para buscar componente..." autocomplete="off">
+                        <input type="hidden" name="componentes[]" class="componente-id">
+                        <button type="button" class="btn btn-success" onclick="addComponente()">+</button>
+                    </div>
+                    {% endfor %}
+                    {% if jogo.componentes %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2 componente-search" placeholder="Digite para buscar componente..." autocomplete="off">
+                        <input type="hidden" name="componentes[]" class="componente-id">
+                        <button type="button" class="btn btn-success" onclick="addComponente()">+</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Condições de Vitória -->
+            <div class="mb-4">
+                <h5><i class="fas fa-trophy"></i> Condições de Vitória</h5>
+                <div id="vitorias-container">
+                    {% for condicao in jogo.condicoes_vitoria %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2" name="condicoes_vitoria[]" value="{{ condicao }}">
+                        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+                    </div>
+                    {% empty %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2" name="condicoes_vitoria[]" placeholder="Descreva uma condição de vitória">
+                        <button type="button" class="btn btn-success" onclick="addVitoria()">+</button>
+                    </div>
+                    {% endfor %}
+                    {% if jogo.condicoes_vitoria %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2" name="condicoes_vitoria[]" placeholder="Descreva uma condição de vitória">
+                        <button type="button" class="btn btn-success" onclick="addVitoria()">+</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Condições de Derrota -->
+            <div class="mb-4">
+                <h5><i class="fas fa-skull"></i> Condições de Derrota</h5>
+                <div id="derrotas-container">
+                    {% for condicao in jogo.condicoes_derrota %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2" name="condicoes_derrota[]" value="{{ condicao }}">
+                        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+                    </div>
+                    {% empty %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2" name="condicoes_derrota[]" placeholder="Descreva uma condição de derrota">
+                        <button type="button" class="btn btn-success" onclick="addDerrota()">+</button>
+                    </div>
+                    {% endfor %}
+                    {% if jogo.condicoes_derrota %}
+                    <div class="d-flex mb-2">
+                        <input type="text" class="form-control me-2" name="condicoes_derrota[]" placeholder="Descreva uma condição de derrota">
+                        <button type="button" class="btn btn-success" onclick="addDerrota()">+</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Estruturas do Jogo (Fases/Ações/Rodadas) -->
+            <div class="mb-4">
+                <h5><i class="fas fa-list-ol"></i> Estruturas do Jogo</h5>
+                <div id="estruturas-container">
+                    {% for estrutura in jogo.estruturas %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control mb-2" name="estruturas_nome[]" value="{{ estrutura.nome }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select mb-2" name="estruturas_tipo[]">
+                                        <option value="FASE" {% if estrutura.tipo == 'FASE' %}selected{% endif %}>Fase</option>
+                                        <option value="ACAO" {% if estrutura.tipo == 'ACAO' %}selected{% endif %}>Ação</option>
+                                        <option value="RODADA" {% if estrutura.tipo == 'RODADA' %}selected{% endif %}>Rodada</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <textarea class="form-control mb-2" name="estruturas_descricao[]" rows="3">{{ estrutura.descricao }}</textarea>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Condições Especiais:</label>
+                                <div class="condicoes-especiais">
+                                    {% for condicao in estrutura.condicoes_especiais %}
+                                    <div class="row mb-1">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="condicoes_especiais_nome[{{ forloop.parentloop.counter0 }}][]" value="{{ condicao.nome }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <textarea class="form-control" name="condicoes_especiais_desc[{{ forloop.parentloop.counter0 }}][]" rows="2">{{ condicao.descricao }}</textarea>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.row').remove()">-</button>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="row mb-1">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="condicoes_especiais_nome[{{ forloop.counter0 }}][]" placeholder="Nome da condição">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <textarea class="form-control" name="condicoes_especiais_desc[{{ forloop.counter0 }}][]" placeholder="Descrição da condição" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-success" onclick="addCondicaoEspecial(this)">+</button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% if estrutura.condicoes_especiais %}
+                                    <div class="row mb-1">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="condicoes_especiais_nome[{{ forloop.counter0 }}][]" placeholder="Nome da condição">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <textarea class="form-control" name="condicoes_especiais_desc[{{ forloop.counter0 }}][]" placeholder="Descrição da condição" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-success" onclick="addCondicaoEspecial(this)">+</button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control mb-2" name="estruturas_nome[]" placeholder="Nome da Fase/Ação/Rodada">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select mb-2" name="estruturas_tipo[]">
+                                        <option value="FASE">Fase</option>
+                                        <option value="ACAO">Ação</option>
+                                        <option value="RODADA">Rodada</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <textarea class="form-control mb-2" name="estruturas_descricao[]" placeholder="Descrição da estrutura" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-success" onclick="addEstrutura()">+</button>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Condições Especiais:</label>
+                                <div class="condicoes-especiais">
+                                    <div class="row mb-1">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="condicoes_especiais_nome[0][]" placeholder="Nome da condição">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <textarea class="form-control" name="condicoes_especiais_desc[0][]" placeholder="Descrição da condição" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-success" onclick="addCondicaoEspecial(this)">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <!-- Botão para adicionar nova estrutura sempre visível -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success" onclick="addEstrutura()">
+                            <i class="fas fa-plus"></i> Adicionar Nova Estrutura
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Glossário -->
+            <div class="mb-4">
+                <h5><i class="fas fa-book"></i> Glossário</h5>
+                <div id="glossario-container">
+                    {% for termo in jogo.glossario %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" name="glossario_palavra[]" value="{{ termo.palavra }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="glossario_definicao[]" value="{{ termo.definicao }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" name="glossario_palavra[]" placeholder="Palavra">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="glossario_definicao[]" placeholder="Definição">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-success" onclick="addGlossario()">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if jogo.glossario %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" name="glossario_palavra[]" placeholder="Palavra">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="glossario_definicao[]" placeholder="Definição">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-success" onclick="addGlossario()">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Aguardar carregamento da página
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar busca nos campos existentes
+    document.querySelectorAll('.mecanica-search').forEach(input => setupSearch(input, 'mecanicas'));
+    document.querySelectorAll('.tema-search').forEach(input => setupSearch(input, 'temas'));
+    document.querySelectorAll('.componente-search').forEach(input => setupSearch(input, 'componentes'));
+    
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-dropdown') && !e.target.matches('.mecanica-search, .tema-search, .componente-search')) {
+            document.querySelectorAll('.search-dropdown').forEach(dropdown => dropdown.remove());
+        }
+    });
+});
+
+function addMecanica() {
+    const container = document.getElementById('mecanicas-container');
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-2';
+    div.innerHTML = `
+        <input type="text" class="form-control me-2 mecanica-search" placeholder="Digite para buscar mecânica..." autocomplete="off">
+        <input type="hidden" name="mecanicas[]" class="mecanica-id">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+    setupSearch(div.querySelector('.mecanica-search'), 'mecanicas');
+}
+
+function addTema() {
+    const container = document.getElementById('temas-container');
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-2';
+    div.innerHTML = `
+        <input type="text" class="form-control me-2 tema-search" placeholder="Digite para buscar tema..." autocomplete="off">
+        <input type="hidden" name="temas[]" class="tema-id">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+    setupSearch(div.querySelector('.tema-search'), 'temas');
+}
+
+function addComponente() {
+    const container = document.getElementById('componentes-container');
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-2';
+    div.innerHTML = `
+        <input type="text" class="form-control me-2 componente-search" placeholder="Digite para buscar componente..." autocomplete="off">
+        <input type="hidden" name="componentes[]" class="componente-id">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+    setupSearch(div.querySelector('.componente-search'), 'componentes');
+}
+
+function addVitoria() {
+    const container = document.getElementById('vitorias-container');
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-2';
+    div.innerHTML = `
+        <input type="text" class="form-control me-2" name="condicoes_vitoria[]" placeholder="Descreva uma condição de vitória">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+}
+
+function addDerrota() {
+    const container = document.getElementById('derrotas-container');
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-2';
+    div.innerHTML = `
+        <input type="text" class="form-control me-2" name="condicoes_derrota[]" placeholder="Descreva uma condição de derrota">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+}
+
+function addEstrutura() {
+    const container = document.getElementById('estruturas-container');
+    const index = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'card mb-3';
+    div.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" class="form-control mb-2" name="estruturas_nome[]" placeholder="Nome da Fase/Ação/Rodada">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select mb-2" name="estruturas_tipo[]">
+                        <option value="FASE">Fase</option>
+                        <option value="ACAO">Ação</option>
+                        <option value="RODADA">Rodada</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <textarea class="form-control mb-2" name="estruturas_descricao[]" placeholder="Descrição da estrutura" rows="3"></textarea>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
+                </div>
+            </div>
+            <div class="mt-2">
+                <label class="form-label">Condições Especiais:</label>
+                <div class="condicoes-especiais">
+                    <div class="row mb-1">
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="condicoes_especiais_nome[${index}][]" placeholder="Nome da condição">
+                        </div>
+                        <div class="col-md-6">
+                            <textarea class="form-control" name="condicoes_especiais_desc[${index}][]" placeholder="Descrição da condição" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-success" onclick="addCondicaoEspecial(this)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function addCondicaoEspecial(button) {
+    const container = button.closest('.condicoes-especiais');
+    const estruturaIndex = Array.from(document.querySelectorAll('.card')).indexOf(button.closest('.card'));
+    const div = document.createElement('div');
+    div.className = 'row mb-1';
+    div.innerHTML = `
+        <div class="col-md-5">
+            <input type="text" class="form-control" name="condicoes_especiais_nome[${estruturaIndex}][]" placeholder="Nome da condição">
+        </div>
+        <div class="col-md-6">
+            <textarea class="form-control" name="condicoes_especiais_desc[${estruturaIndex}][]" placeholder="Descrição da condição" rows="2"></textarea>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.row').remove()">-</button>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function addGlossario() {
+    const container = document.getElementById('glossario-container');
+    const div = document.createElement('div');
+    div.className = 'card mb-2';
+    div.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="glossario_palavra[]" placeholder="Palavra">
+                </div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="glossario_definicao[]" placeholder="Definição">
+                </div>
+                <div class="col-md-2">
+                    <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+// Sistema de busca para mecânicas, temas e componentes
+function setupSearch(input, type) {
+    let timeout;
+    input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const query = this.value;
+            console.log('Buscando:', query, 'em:', type);
+            if (query.length >= 2) {
+                fetch(`/api/api/${type}/?search=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Dados recebidos:', data);
+                        showSuggestions(this, data.results, type);
+                    })
+                    .catch(error => {
+                        console.error('Erro na busca:', error);
+                    });
+            } else {
+                hideSuggestions(this);
+            }
+        }, 300);
+    });
+}
+
+function showSuggestions(input, items, type) {
+    hideSuggestions(input);
+    
+    if (!items || items.length === 0) {
+        console.log('Nenhum item encontrado');
+        return;
+    }
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'search-dropdown';
+    dropdown.style.cssText = `
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    `;
+    
+    items.forEach(item => {
+        const option = document.createElement('div');
+        option.className = 'search-option';
+        option.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;';
+        option.textContent = item.nome;
+        option.addEventListener('click', () => selectItem(input, item, type));
+        option.addEventListener('mouseenter', () => option.style.backgroundColor = '#f8f9fa');
+        option.addEventListener('mouseleave', () => option.style.backgroundColor = 'white');
+        dropdown.appendChild(option);
+    });
+    
+    input.parentElement.style.position = 'relative';
+    input.parentElement.appendChild(dropdown);
+}
+
+function hideSuggestions(input) {
+    const dropdown = input.parentElement.querySelector('.search-dropdown');
+    if (dropdown) dropdown.remove();
+}
+
+function selectItem(input, item, type) {
+    input.value = item.nome;
+    const hiddenInput = input.parentElement.querySelector(`.${type.slice(0, -1)}-id`);
+    if (hiddenInput) {
+        hiddenInput.value = item.id;
+    }
+    hideSuggestions(input);
+    calcularPesoTempo();
+}
+
+// Função para calcular peso em tempo real
+function calcularPesoTempo() {
+    let peso = 0.1; // Peso base
+    
+    // Peso por tempo (0,1 a cada 30min, máx 1,0)
+    const tempoMax = parseInt(document.querySelector('select[name="tempo_max"]').value) || 30;
+    const pesoTempo = Math.min(Math.floor(tempoMax / 30) * 0.1, 1.0);
+    peso += pesoTempo;
+    
+    // Peso por mecânicas (0,1 por mecânica, máx 1,0)
+    const mecanicas = document.querySelectorAll('input[name="mecanicas[]"]');
+    const mecanicasPreenchidas = Array.from(mecanicas).filter(input => input.value.trim() !== '').length;
+    const pesoMecanicas = Math.min(mecanicasPreenchidas * 0.1, 1.0);
+    peso += pesoMecanicas;
+    
+    // Peso por componentes (0,1 por componente, máx 1,0)
+    const componentes = document.querySelectorAll('input[name="componentes[]"]');
+    const componentesPreenchidos = Array.from(componentes).filter(input => input.value.trim() !== '').length;
+    const pesoComponentes = Math.min(componentesPreenchidos * 0.1, 1.0);
+    peso += pesoComponentes;
+    
+    // Peso por condições de vitória (0,1 por condição, máx 0,3)
+    const vitorias = document.querySelectorAll('input[name="condicoes_vitoria[]"]');
+    const vitoriasPreenchidas = Array.from(vitorias).filter(input => input.value.trim() !== '').length;
+    const pesoVitorias = Math.min(vitoriasPreenchidas * 0.1, 0.3);
+    peso += pesoVitorias;
+    
+    // Peso por condições de derrota (0,1 por condição, máx 0,3)
+    const derrotas = document.querySelectorAll('input[name="condicoes_derrota[]"]');
+    const derrotasPreenchidas = Array.from(derrotas).filter(input => input.value.trim() !== '').length;
+    const pesoDerrotas = Math.min(derrotasPreenchidas * 0.1, 0.3);
+    peso += pesoDerrotas;
+    
+    // Peso por estruturas (0,1 por estrutura, máx 1,0)
+    const estruturas = document.querySelectorAll('input[name="estruturas_nome[]"]');
+    const estruturasPreenchidas = Array.from(estruturas).filter(input => input.value.trim() !== '').length;
+    const pesoEstruturas = Math.min(estruturasPreenchidas * 0.1, 1.0);
+    peso += pesoEstruturas;
+    
+    // Peso por condições especiais (0,1 por condição, máx 1,0)
+    const condicoesEspeciais = document.querySelectorAll('input[name*="condicoes_especiais_nome"]');
+    const especialPreenchidas = Array.from(condicoesEspeciais).filter(input => input.value.trim() !== '').length;
+    const pesoEspeciais = Math.min(especialPreenchidas * 0.1, 1.0);
+    peso += pesoEspeciais;
+    
+    // Atualizar campo de peso
+    const campoPeso = document.getElementById('peso-calculado');
+    if (campoPeso) {
+        campoPeso.value = peso.toFixed(1);
+    }
+}
+
+// Adicionar eventos para recalcular peso
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular peso inicial
+    setTimeout(calcularPesoTempo, 500);
+    
+    // Eventos para recalcular peso
+    document.addEventListener('change', calcularPesoTempo);
+    document.addEventListener('input', calcularPesoTempo);
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('button[onclick*="add"], button[onclick*="remove"]')) {
+            setTimeout(calcularPesoTempo, 100);
+        }
+    });
+});
+</script>
+{% endblock %}

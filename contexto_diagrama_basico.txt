@@ -1,0 +1,116 @@
+LEGENDA:
+<BOTOÕES>
+# PAGINA OU SESSÃO #
+[CAMPO]
+[+] # ADICIONADA MAIS UM ITEM MENCIONADO
+
+## TELA: HOMEPAGE ##
+
+# MENU DE OPCÕES # # ESTE MENU DEVE SER FIXO NA NAVEGAÇÃO DE TODAS AS PAGINAS DA APLICAÇÃO
+<JOGO> <MECANICAS> <COMPONENTES> <TEMAS>
+
+# PAGIGNAS DE GERENCIAMENTOS DE CADA SESSÃO #
+# OPÇÕES
+- NOVO
+- LISTA
+- EDITAR ITEM
+- RENOMEAR
+
+# PAGINA DE GERENCIAMENTO DOS JOGOS #
+
+ : Listar jogos
+    - procurar jogo por; nome, id, mecanica ou tema
+
+# FORMULARIO PARA NOVO JOGO #
+<SALVAR>
+
+Id do jogo
+[Nome do jogo]
+[Sub titulo]
+[Descrição curto]
+[Capa] # UPLOAD DE IMAGEM
+
+Jogadores  [X] a [x] # DENTRO DOS X DEVE CONTER UMA LISTA DE 0 A 50 JOGADORES
+Tempo Medio [x] a [x] # DENTRO DOS X DEVE CONTER OS TEMPOS OS TEMPOS (5,10,15,20,25,30,35,40,45,50,60,80,100,120,140,180,200,240,300,360) # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA 30MINUTOS COM NO MAXIMO 0,5 OU 1 DE PESO
+Idade recomendad [X] # DENTRO DESTE ITEM DEVER CONTER UMA LISTA DE IDADES (2,4,6,8,10,11,12,14,16,+18,)
+Peso: 0,1  # ESTE ITEM DEVE SER CALCULADO AUTOMATICAMENTE DEPENDEDO DOS CAMPOS QUE INDIQUE PESO NO JOGO
+
+Mecanica
+- [SELEÇÃO DA MECANICA] [+] # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA MECANICA ADICIONADA COM NO MAXIMO 0,5 OU 1 DE PESO
+
+Tema
+- [SELEÇÃO DE TEMAS] [+]
+
+Componentes 
+ - [SELEÇÃO DE COMPONENTES] [+] # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA COMPONENRTE ADICIONADO COM NO MAXIMO 0,5 OU 1 DE PESO
+
+
+Condições de vitoria # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA CONDIÇÃO E VITORIA ADICIONADA COM NO MAXIMO 0,3 OU 1 DE PESO
+[+] [CAMPO DE DESCRIÇÃO]
+
+Condição de derrota # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA CONDIÇÃO E DERROTA ADICIONADA COM NO MAXIMO 0,3 OU 1 DE PESO
+[+] [CAMPO DE DESCRIÇÃO] 
+
+[NOME DA FASE OU AÇÃO] [SELECIONA TIPO: FASE, AÇÃO OU RODADA] # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA (FASE, AÇÃO OU RODADA) ADICIONADA COM NO MAXIMO 0,5 OU 1 DE PESO
+    [+]  [SUB CONDIÇÃO CHAMADA: CONDIÇÃO ESPECIAL] Condição especial 0,1 # ESTE ITEM ACIONA 0,1 NO PESO DO JOGO A CADA (CONDIÇÃO ESPECIAL) ADICIONADA COM NO MAXIMO 0,5 OU 1 DE PESO
+
+[+] [NOME DA FASE OU AÇÃO]
+    [+] [CONDIÇÃO ESPECIAL]
+
+Glossario
+[+] [PALAVRA] [DEFINIÇÃO] [UPLOAD IMAGEM]
+
+--------------------------------------------------------------------------
+
+📜 Documentação de Regras de Negócio (RN)
+Este documento descreve o funcionamento lógico e as restrições do sistema de gerenciamento de Board Games.
+
+1. Navegação e Interface Global
+RN01 - Menu Fixo: O menu principal contendo as opções <JOGO>, <MECANICAS>, <COMPONENTES> e <TEMAS> deve ser persistente (fixo) em todas as páginas da aplicação.
+
+RN02 - Ações de Gerenciamento: Cada sessão (Mecânicas, Temas, Componentes) deve obrigatoriamente prover as funções:
+
+Novo: Criar novo registro.
+
+Lista: Visualizar todos os itens.
+
+Editar: Alterar dados existentes.
+
+Renomear: Alteração rápida de rótulo.
+
+2. Gerenciamento de Jogos
+RN03 - Busca e Filtros: A listagem de jogos deve permitir a filtragem por:
+
+Nome do jogo ou ID (busca textual).
+
+Mecânica associada.
+
+Tema associado.
+
+RN04 - Upload de Capa: O sistema deve permitir o upload de uma imagem para a capa. Formatos suportados: JPG/PNG.
+
+3. Lógica de Cálculo de Peso (Complexidade)O Peso do jogo é um valor calculado dinamicamente com base nos componentes e regras adicionadas. O valor base inicia em 0.1 e cresce conforme os critérios abaixo:Fórmula de CálculoO cálculo segue a soma de variáveis $P$ (Peso), onde cada categoria possui um incremento e um teto:$$Peso = P_{tempo} + P_{mecanica} + P_{componentes} + P_{vitoria} + P_{derrota} + P_{estrutura} + P_{especial}$$
+
+Tabela de ParâmetrosCategoriaRegra de IncrementoLimite Máximo (Teto)Tempo Médio+0,1 a cada 30 minutos de duração.0,5 ou 1,0Mecânicas+0,1 para cada mecânica selecionada.0,5 ou 1,0Componentes+0,1 para cada componente adicionado.0,5 ou 1,0Cond. Vitória+0,1 para cada condição de vitória.0,3 ou 1,0Cond. Derrota+0,1 para cada condição de derrota.0,3 ou 1,0Estrutura+0,1 por (Fase, Ação ou Rodada).0,5 ou 1,0Cond. Especial+0,1 por cada condição especial vinculada.0,5 ou 1,0
+
+4. Restrições do Formulário de Jogo
+Listas Pré-definidas
+Jogadores: Seleção de um intervalo entre 0 e 50.
+
+Tempo Médio (minutos): 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 100, 120, 140, 180, 200, 240, 300, 360.
+
+Idade Recomendada: 2, 4, 6, 8, 10, 11, 12, 14, 16, +18.
+
+Estrutura de Fases e Ações
+Hierarquia: Cada item de estrutura deve ser classificado como Fase, Ação ou Rodada.
+
+Condições Especiais: São sub-itens vinculados a uma Fase/Ação específica. Cada uma adiciona 0,1 ao peso total, respeitando o teto da categoria.
+
+5. Glossário Visual
+RN05 - Composição do Glossário: Cada termo deve conter:
+
+Palavra: O termo técnico ou nome do componente.
+
+Definição: Texto explicativo.
+
+Imagem: Upload opcional para auxílio visual.

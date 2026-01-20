@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Jogos - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-gamepad"></i> Gerenciar Jogos</h2>
+    <a href="{% url 'jogo_novo' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Jogo
+    </a>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Buscar por nome, ID, mecânica ou tema...">
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todas as mecânicas</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option>Todos os temas</option>
+        </select>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if jogos.results %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Subtítulo</th>
+                            <th>Jogadores</th>
+                            <th>Tempo (min)</th>
+                            <th>Idade</th>
+                            <th>Peso</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for jogo in jogos.results %}
+                        <tr>
+                            <td>{{ jogo.id }}</td>
+                            <td><a href="{% url 'jogo_detalhes' jogo.id %}" class="text-decoration-none"><strong>{{ jogo.nome }}</strong></a></td>
+                            <td>{{ jogo.subtitulo|default:"-" }}</td>
+                            <td>{{ jogo.jogadores_min }}-{{ jogo.jogadores_max }}</td>
+                            <td>{{ jogo.tempo_min }}-{{ jogo.tempo_max }}</td>
+                            <td>{{ jogo.idade_recomendada }}+</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ jogo.peso }}</span>
+                            </td>
+                            <td>
+                                {% if jogo.id >= 100 %}
+                                    <a href="{% url 'jogo_editar' jogo.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'jogo_excluir' jogo.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza que deseja excluir este jogo?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Exemplo</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-gamepad fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum jogo cadastrado</h5>
+                <p class="text-muted">Clique em "Novo Jogo" para começar</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

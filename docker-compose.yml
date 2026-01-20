@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: bgcreator_db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: bgcreator
+    volumes:
+      - mongodb_data:/data/db
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - bgcreator_network
+
+  backend:
+    build: ./backend
+    container_name: bgcreator_api
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - MONGODB_URL=mongodb://admin:password123@mongodb:27017/bgcreator?authSource=admin
+      - DEBUG=True
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend:/app
+      - media_files:/app/media
+    networks:
+      - bgcreator_network
+
+  frontend:
+    build: ./frontend
+    container_name: bgcreator_web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - API_URL=http://backend:8001
+      - DEBUG=True
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - media_files:/app/media
+    networks:
+      - bgcreator_network
+
+volumes:
+  mongodb_data:
+  media_files:
+
+networks:
+  bgcreator_network:
+    driver: bridge

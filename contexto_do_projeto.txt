@@ -1,0 +1,17 @@
+Nome da aplicação: bgcreator
+Contexto
+Quero criar uma aplicação chamada dw BGCreater, esta aplicação tem como objetivo ajudar um desenvolvedor de jogos de board game a criar novos jogos e padronizar a documentação do jogo.
+
+As tecnologias que pretendo usar neste projeto são:
+- backend: pyton
+- usando api para backend
+- frontend: jango
+- database: mongodb
+- modular em 3 container docker
+- deploy docker compose
+
+Preciso que seja criado; 
+- Documentação readme.md completa
+- Criar as regras de negocio
+- Criar a arquitetura
+- Modulos de testes para o backend e o frontend
