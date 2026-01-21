@@ -12,27 +12,40 @@
 
 <div class="row mb-3">
     <div class="col-md-6">
-        <input type="text" class="form-control" placeholder="Buscar por nome, ID, mecânica ou tema...">
+        <form method="get" class="d-flex">
+            <input type="text" class="form-control me-2" name="busca" value="{{ request.GET.busca }}" placeholder="Buscar por nome, ID, mecânica ou tema...">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-search"></i>
+            </button>
+            {% if request.GET.busca %}
+            <a href="{% url 'jogos_lista' %}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </form>
     </div>
-    <div class="col-md-3">
-        <select class="form-select">
-            <option>Todas as mecânicas</option>
-        </select>
-    </div>
-    <div class="col-md-3">
-        <select class="form-select">
-            <option>Todos os temas</option>
-        </select>
+    <div class="col-md-6 text-end">
+        {% if request.GET.busca %}
+        <small class="text-muted">Resultados para: "{{ request.GET.busca }}"</small>
+        {% endif %}
     </div>
 </div>
 
 <div class="card">
     <div class="card-body">
+        {% if request.GET.busca %}
+        <div class="alert alert-info">
+            <i class="fas fa-search"></i> 
+            Encontrados {{ jogos.results|length }} resultado{{ jogos.results|length|pluralize }} para "{{ request.GET.busca }}"
+        </div>
+        {% endif %}
+        
         {% if jogos.results %}
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th>Capa</th>
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Subtítulo</th>
@@ -46,6 +59,15 @@
                     <tbody>
                         {% for jogo in jogos.results %}
                         <tr>
+                            <td>
+                                {% if jogo.capa %}
+                                <img src="{{ jogo.capa }}" class="rounded" alt="Capa" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </td>
                             <td>{{ jogo.id }}</td>
                             <td><a href="{% url 'jogo_detalhes' jogo.id %}" class="text-decoration-none"><strong>{{ jogo.nome }}</strong></a></td>
                             <td>{{ jogo.subtitulo|default:"-" }}</td>

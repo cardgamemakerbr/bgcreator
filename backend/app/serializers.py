@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Jogo, Mecanica, Tema, Componente, CondicoesVitoria, CondicoesDerrota, EstruturaJogo, CondicoesEspeciais, Glossario
+from .models import Jogo, Mecanica, Tema, Componente, CondicoesVitoria, CondicoesDerrota, EstruturaJogo, CondicoesEspeciais, Glossario, SetupJogo, SetupImagem
 
 class MecanicaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,6 +38,18 @@ class EstruturaJogoSerializer(serializers.ModelSerializer):
         model = EstruturaJogo
         fields = '__all__'
 
+class SetupImagemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SetupImagem
+        fields = '__all__'
+
+class SetupJogoSerializer(serializers.ModelSerializer):
+    imagens = SetupImagemSerializer(source='setupimagem_set', many=True, read_only=True)
+    
+    class Meta:
+        model = SetupJogo
+        fields = '__all__'
+
 class GlossarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Glossario
@@ -50,6 +62,7 @@ class JogoSerializer(serializers.ModelSerializer):
     condicoes_vitoria = CondicoesVitoriaSerializer(source='condicoesvitoria_set', many=True, read_only=True)
     condicoes_derrota = CondicoesDerrotaSerializer(source='condicoesderrota_set', many=True, read_only=True)
     estruturas = EstruturaJogoSerializer(source='estruturajogo_set', many=True, read_only=True)
+    setup = SetupJogoSerializer(source='setupjogo_set', many=True, read_only=True)
     glossario = GlossarioSerializer(source='glossario_set', many=True, read_only=True)
     
     class Meta:

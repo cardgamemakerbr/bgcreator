@@ -207,6 +207,44 @@
                 </div>
             </div>
 
+            <!-- Setup do Jogo -->
+            <div class="mb-4">
+                <h5><i class="fas fa-cog"></i> Setup do Jogo</h5>
+                <div id="setup-container">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control mb-2" name="setup_nome[]" placeholder="Nome da etapa de setup">
+                                </div>
+                                <div class="col-md-6">
+                                    <textarea class="form-control mb-2" name="setup_descricao[]" placeholder="Descrição da etapa" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-success" onclick="addSetup()">+</button>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Imagens do Setup:</label>
+                                <div class="setup-imagens">
+                                    <div class="row mb-1">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="setup_img_desc[0][]" placeholder="Descrição da imagem">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="file" class="form-control" name="setup_img_file[0][]" accept="image/*">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-success" onclick="addSetupImagem(this)">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Estruturas do Jogo (Fases/Ações/Rodadas) -->
             <div class="mb-4">
                 <h5><i class="fas fa-list-ol"></i> Estruturas do Jogo</h5>
@@ -362,6 +400,64 @@ function addDerrota() {
     div.innerHTML = `
         <input type="text" class="form-control me-2" name="condicoes_derrota[]" placeholder="Descreva uma condição de derrota">
         <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+}
+
+function addSetup() {
+    const container = document.getElementById('setup-container');
+    const index = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'card mb-3';
+    div.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <input type="text" class="form-control mb-2" name="setup_nome[]" placeholder="Nome da etapa de setup">
+                </div>
+                <div class="col-md-6">
+                    <textarea class="form-control mb-2" name="setup_descricao[]" placeholder="Descrição da etapa" rows="3"></textarea>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
+                </div>
+            </div>
+            <div class="mt-2">
+                <label class="form-label">Imagens do Setup:</label>
+                <div class="setup-imagens">
+                    <div class="row mb-1">
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="setup_img_desc[${index}][]" placeholder="Descrição da imagem">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" name="setup_img_file[${index}][]" accept="image/*">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-success" onclick="addSetupImagem(this)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function addSetupImagem(button) {
+    const container = button.closest('.setup-imagens');
+    const setupIndex = Array.from(document.querySelectorAll('.card')).indexOf(button.closest('.card'));
+    const div = document.createElement('div');
+    div.className = 'row mb-1';
+    div.innerHTML = `
+        <div class="col-md-5">
+            <input type="text" class="form-control" name="setup_img_desc[${setupIndex}][]" placeholder="Descrição da imagem">
+        </div>
+        <div class="col-md-6">
+            <input type="file" class="form-control" name="setup_img_file[${setupIndex}][]" accept="image/*">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.row').remove()">-</button>
+        </div>
     `;
     container.appendChild(div);
 }

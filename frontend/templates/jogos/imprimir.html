@@ -62,6 +62,9 @@
     <div class="print-container">
         <!-- Capa -->
         <div class="text-center mb-5">
+            {% if jogo.capa %}
+            <img src="{{ jogo.capa }}" class="img-fluid rounded mb-3" alt="Capa de {{ jogo.nome }}" style="max-height: 200px;">
+            {% endif %}
             <h1 class="display-4">{{ jogo.nome }}</h1>
             {% if jogo.subtitulo %}
             <h2 class="text-muted">{{ jogo.subtitulo }}</h2>
@@ -79,26 +82,32 @@
                     <span>1. Informações Básicas</span>
                     <span>3</span>
                 </div>
+                {% if jogo.setup %}
                 <div class="index-item">
-                    <span>2. Componentes do Jogo</span>
+                    <span>2. Setup do Jogo</span>
                     <span>4</span>
+                </div>
+                {% endif %}
+                <div class="index-item">
+                    <span>{% if jogo.setup %}3{% else %}2{% endif %}. Componentes do Jogo</span>
+                    <span>{% if jogo.setup %}5{% else %}4{% endif %}</span>
                 </div>
                 {% if jogo.condicoes_vitoria or jogo.condicoes_derrota %}
                 <div class="index-item">
-                    <span>3. Objetivo do Jogo</span>
-                    <span>5</span>
+                    <span>{% if jogo.setup %}4{% else %}3{% endif %}. Objetivo do Jogo</span>
+                    <span>{% if jogo.setup %}6{% else %}5{% endif %}</span>
                 </div>
                 {% endif %}
                 {% if jogo.estruturas %}
                 <div class="index-item">
-                    <span>4. Como Jogar</span>
-                    <span>6</span>
+                    <span>{% if jogo.setup %}5{% else %}4{% endif %}. Como Jogar</span>
+                    <span>{% if jogo.setup %}7{% else %}6{% endif %}</span>
                 </div>
                 {% endif %}
                 {% if jogo.glossario %}
                 <div class="index-item">
-                    <span>5. Glossário</span>
-                    <span>{{ jogo.estruturas|length|add:7 }}</span>
+                    <span>{% if jogo.setup %}6{% else %}5{% endif %}. Glossário</span>
+                    <span>{{ jogo.estruturas|length|add:8 }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -145,10 +154,45 @@
             {% endif %}
         </div>
 
-        <!-- 2. Componentes -->
+        <!-- 2. Setup do Jogo -->
+        {% if jogo.setup %}
+        <div class="page-break">
+            <h2><span class="section-number">2.</span> Setup do Jogo</h2>
+            
+            {% for setup in jogo.setup %}
+            <div class="mt-4">
+                <h4>2.{{ forloop.counter }} {{ setup.nome }}</h4>
+                {% if setup.descricao %}
+                <p>{{ setup.descricao }}</p>
+                {% endif %}
+                
+                {% if setup.imagens %}
+                <div class="row mt-3">
+                    {% for imagem in setup.imagens %}
+                    <div class="col-md-6 mb-3">
+                        <div class="text-center">
+                            {% if imagem.imagem %}
+                            <img src="{{ imagem.imagem }}" class="img-fluid rounded border" alt="{{ imagem.descricao }}" style="max-height: 200px;">
+                            {% else %}
+                            <div class="border rounded p-2 text-muted">
+                                <i class="fas fa-image"></i> Sem imagem
+                            </div>
+                            {% endif %}
+                            <p class="mt-2 mb-0"><small><strong>{{ imagem.descricao }}</strong></small></p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- {% if jogo.setup %}3{% else %}2{% endif %}. Componentes -->
         {% if jogo.componentes %}
         <div class="page-break">
-            <h2><span class="section-number">2.</span> Componentes do Jogo</h2>
+            <h2><span class="section-number">{% if jogo.setup %}3{% else %}2{% endif %}.</span> Componentes do Jogo</h2>
             <div class="mt-4">
                 <ul class="list-group list-group-flush">
                     {% for componente in jogo.componentes %}
@@ -166,10 +210,10 @@
         <!-- 3. Objetivo -->
         {% if jogo.condicoes_vitoria or jogo.condicoes_derrota %}
         <div class="page-break">
-            <h2><span class="section-number">3.</span> Objetivo do Jogo</h2>
+            <h2><span class="section-number">{% if jogo.setup %}4{% else %}3{% endif %}.</span> Objetivo do Jogo</h2>
             
             {% if jogo.condicoes_vitoria %}
-            <h4>3.1 Condições de Vitória</h4>
+            <h4>{% if jogo.setup %}4{% else %}3{% endif %}.1 Condições de Vitória</h4>
             <ul>
                 {% for condicao in jogo.condicoes_vitoria %}
                 <li>{{ condicao }}</li>
@@ -178,7 +222,7 @@
             {% endif %}
 
             {% if jogo.condicoes_derrota %}
-            <h4>3.2 Condições de Derrota</h4>
+            <h4>{% if jogo.setup %}4{% else %}3{% endif %}.2 Condições de Derrota</h4>
             <ul>
                 {% for condicao in jogo.condicoes_derrota %}
                 <li>{{ condicao }}</li>
@@ -191,11 +235,11 @@
         <!-- 4. Como Jogar -->
         {% if jogo.estruturas %}
         <div class="page-break">
-            <h2><span class="section-number">4.</span> Como Jogar</h2>
+            <h2><span class="section-number">{% if jogo.setup %}5{% else %}4{% endif %}.</span> Como Jogar</h2>
             
             {% for estrutura in jogo.estruturas %}
             <div class="mt-4">
-                <h4>4.{{ forloop.counter }} {{ estrutura.nome }} 
+                <h4>{% if jogo.setup %}5{% else %}4{% endif %}.{{ forloop.counter }} {{ estrutura.nome }} 
                     <span class="badge bg-info">{{ estrutura.tipo }}</span>
                 </h4>
                 {% if estrutura.descricao %}
@@ -203,7 +247,7 @@
                 {% endif %}
                 
                 {% if estrutura.condicoes_especiais %}
-                <h5>4.{{ forloop.counter }}.1 Condições Especiais</h5>
+                <h5>{% if jogo.setup %}5{% else %}4{% endif %}.{{ forloop.counter }}.1 Condições Especiais</h5>
                 <ul>
                     {% for condicao in estrutura.condicoes_especiais %}
                     <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao }}</li>
@@ -218,7 +262,7 @@
         <!-- 5. Glossário -->
         {% if jogo.glossario %}
         <div class="page-break">
-            <h2><span class="section-number">5.</span> Glossário</h2>
+            <h2><span class="section-number">{% if jogo.setup %}6{% else %}5{% endif %}.</span> Glossário</h2>
             <div class="mt-4">
                 {% for termo in jogo.glossario %}
                 <div class="mb-3">

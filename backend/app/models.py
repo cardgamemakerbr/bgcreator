@@ -16,8 +16,18 @@ class Tema(models.Model):
         return self.nome
 
 class Componente(models.Model):
+    TIPOS_CHOICES = [
+        ('TATICO', 'Tático'),
+        ('SORTE', 'Sorte'),
+        ('LUDICO', 'Lúdico'),
+        ('HABILIDADE', 'Habilidade'),
+        ('GERENCIAMENTO', 'Gerenciamento'),
+        ('NEUTRO', 'Neutro')
+    ]
+    
     nome = models.CharField(max_length=100, unique=True)
     descricao = models.TextField(blank=True)
+    tipo = models.CharField(max_length=15, choices=TIPOS_CHOICES, default='TATICO')
     
     def __str__(self):
         return self.nome
@@ -111,6 +121,26 @@ class CondicoesDerrota(models.Model):
     
     def __str__(self):
         return f"{self.jogo.nome} - Derrota"
+
+class SetupJogo(models.Model):
+    jogo = models.ForeignKey(Jogo, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=200)
+    descricao = models.TextField()
+    ordem = models.IntegerField(default=1)
+    
+    class Meta:
+        ordering = ['ordem']
+    
+    def __str__(self):
+        return f"{self.jogo.nome} - Setup: {self.nome}"
+
+class SetupImagem(models.Model):
+    setup = models.ForeignKey(SetupJogo, on_delete=models.CASCADE)
+    descricao = models.CharField(max_length=200)
+    imagem = models.ImageField(upload_to='setup/', blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.setup.nome} - {self.descricao}"
 
 class EstruturaJogo(models.Model):
     TIPOS_CHOICES = [

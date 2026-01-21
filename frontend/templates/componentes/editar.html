@@ -19,6 +19,17 @@
                 <input type="text" class="form-control" name="nome" value="{{ item.nome }}" required>
             </div>
             <div class="mb-3">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" name="tipo">
+                    <option value="TATICO" {% if item.tipo == 'TATICO' %}selected{% endif %}>Tático</option>
+                    <option value="SORTE" {% if item.tipo == 'SORTE' %}selected{% endif %}>Sorte</option>
+                    <option value="LUDICO" {% if item.tipo == 'LUDICO' %}selected{% endif %}>Lúdico</option>
+                    <option value="HABILIDADE" {% if item.tipo == 'HABILIDADE' %}selected{% endif %}>Habilidade</option>
+                    <option value="GERENCIAMENTO" {% if item.tipo == 'GERENCIAMENTO' %}selected{% endif %}>Gerenciamento</option>
+                    <option value="NEUTRO" {% if item.tipo == 'NEUTRO' %}selected{% endif %}>Neutro</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Descrição</label>
                 <textarea class="form-control" name="descricao" rows="3">{{ item.descricao }}</textarea>
             </div>

@@ -84,6 +84,17 @@
     </div>
 
     <div class="col-md-4">
+        {% if jogo.capa %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-image"></i> Capa do Jogo</h6>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ jogo.capa }}" class="img-fluid rounded" alt="Capa de {{ jogo.nome }}" style="max-height: 300px;">
+            </div>
+        </div>
+        {% endif %}
+        
         {% if jogo.condicoes_vitoria %}
         <div class="card mb-4">
             <div class="card-header">
@@ -115,6 +126,43 @@
         {% endif %}
     </div>
 </div>
+
+{% if jogo.setup %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-cog"></i> Setup do Jogo</h5>
+    </div>
+    <div class="card-body">
+        {% for setup in jogo.setup %}
+        <div class="border rounded p-3 mb-3">
+            <h6>{{ setup.nome }}</h6>
+            {% if setup.descricao %}
+            <p class="text-muted">{{ setup.descricao }}</p>
+            {% endif %}
+            {% if setup.imagens %}
+            <div class="row mt-2">
+                {% for imagem in setup.imagens %}
+                <div class="col-md-4 mb-2">
+                    <div class="text-center">
+                        {% if imagem.imagem %}
+                        <img src="{{ imagem.imagem }}" class="img-fluid rounded" alt="{{ imagem.descricao }}" style="max-height: 200px;">
+                        {% else %}
+                        <div class="border rounded p-3 text-muted">
+                            <i class="fas fa-image fa-2x"></i>
+                            <br><small>Sem imagem</small>
+                        </div>
+                        {% endif %}
+                        <small class="d-block text-muted mt-1">{{ imagem.descricao }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 {% if jogo.estruturas %}
 <div class="card mb-4">

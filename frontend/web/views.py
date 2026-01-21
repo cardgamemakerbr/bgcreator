@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 import requests
 from django.conf import settings
+import os
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 # Lista para armazenar dados criados
 mecanicas_criadas = []
@@ -9,7 +12,53 @@ componentes_criados = []
 temas_criados = []
 jogos_criados = []
 
-def get_api_data(endpoint, page=1, per_page=1000):
+def salvar_imagem_capa(arquivo):
+    """Salva imagem da capa e retorna o caminho"""
+    if arquivo:
+        try:
+            # Criar diretório se não existir
+            capas_dir = 'media/capas'
+            if not os.path.exists(capas_dir):
+                os.makedirs(capas_dir)
+            
+            # Salvar arquivo
+            filename = f"capa_{arquivo.name}"
+            filepath = os.path.join(capas_dir, filename)
+            
+            with open(filepath, 'wb+') as destination:
+                for chunk in arquivo.chunks():
+                    destination.write(chunk)
+            
+            return f'/media/capas/{filename}'
+        except Exception as e:
+            print(f"Erro ao salvar capa: {e}")
+            return None
+    return None
+
+def salvar_imagem_setup(arquivo):
+    """Salva imagem do setup e retorna o caminho"""
+    if arquivo:
+        try:
+            # Criar diretório se não existir
+            setup_dir = 'media/setup'
+            if not os.path.exists(setup_dir):
+                os.makedirs(setup_dir)
+            
+            # Salvar arquivo
+            filename = f"setup_{arquivo.name}"
+            filepath = os.path.join(setup_dir, filename)
+            
+            with open(filepath, 'wb+') as destination:
+                for chunk in arquivo.chunks():
+                    destination.write(chunk)
+            
+            return f'/media/setup/{filename}'
+        except Exception as e:
+            print(f"Erro ao salvar imagem: {e}")
+            return None
+    return None
+
+def get_api_data(endpoint, page=1, per_page=1000, busca=None):
     """Busca dados da API real do backend com fallback local"""
     global mecanicas_criadas, componentes_criados, temas_criados
     
@@ -293,7 +342,7 @@ def get_api_data(endpoint, page=1, per_page=1000):
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(temas_completos)]
         dados.extend(temas_criados)
     elif endpoint == 'componentes':
-        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(componentes_completos)]
+        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': 'TATICO'} for i, (nome, descricao) in enumerate(componentes_completos)]
         dados.extend(componentes_criados)
     else:
         dados = []
@@ -301,6 +350,17 @@ def get_api_data(endpoint, page=1, per_page=1000):
     # Paginação
     start = (page - 1) * per_page
     end = start + per_page
+    
+    # Aplicar filtro de busca se fornecido
+    if busca:
+        busca_lower = busca.lower()
+        dados_filtrados = []
+        for item in dados:
+            if (busca_lower in item['nome'].lower() or 
+                busca_lower in item.get('descricao', '').lower() or
+                (endpoint == 'componentes' and busca_lower in item.get('tipo', '').lower())):
+                dados_filtrados.append(item)
+        dados = dados_filtrados
     
     return {
         'results': dados[start:end],
@@ -362,7 +422,10 @@ def jogos_lista(request):
             'tempo_min': 60,
             'tempo_max': 90,
             'idade_recomendada': 10,
-            'peso': 2.3
+            'peso': 2.3,
+            'setup': [],
+            'mecanicas': ['Construção', 'Negociação'],
+            'temas': ['Medieval', 'Colonização']
         },
         {
             'id': 2,
@@ -374,12 +437,49 @@ def jogos_lista(request):
             'tempo_min': 30,
             'tempo_max': 60,
             'idade_recomendada': 8,
-            'peso': 1.8
+            'peso': 1.8,
+            'setup': [],
+            'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
+            'temas': ['Transporte', 'Viagem']
         }
     ]
     
     # Adicionar jogos criados pelo usuário
     todos_jogos = jogos_exemplo + jogos_criados
+    
+    # Processar busca
+    busca = request.GET.get('busca', '').strip().lower()
+    if busca:
+        jogos_filtrados = []
+        for jogo in todos_jogos:
+            # Buscar no nome
+            if busca in jogo.get('nome', '').lower():
+                jogos_filtrados.append(jogo)
+                continue
+            
+            # Buscar no ID
+            if busca in str(jogo.get('id', '')):
+                jogos_filtrados.append(jogo)
+                continue
+            
+            # Buscar no subtítulo
+            if busca in jogo.get('subtitulo', '').lower():
+                jogos_filtrados.append(jogo)
+                continue
+            
+            # Buscar nas mecânicas
+            mecanicas = jogo.get('mecanicas', [])
+            if any(busca in str(mecanica).lower() for mecanica in mecanicas):
+                jogos_filtrados.append(jogo)
+                continue
+            
+            # Buscar nos temas
+            temas = jogo.get('temas', [])
+            if any(busca in str(tema).lower() for tema in temas):
+                jogos_filtrados.append(jogo)
+                continue
+        
+        todos_jogos = jogos_filtrados
     
     return render(request, 'jogos/lista.html', {'jogos': {'results': todos_jogos}})
 
@@ -391,6 +491,11 @@ def jogo_novo(request):
         
         nome = request.POST.get('nome')
         if nome:
+            # Processar upload da capa
+            capa_path = None
+            if 'capa' in request.FILES:
+                capa_path = salvar_imagem_capa(request.FILES['capa'])
+            
             # Criar novo jogo
             novo_jogo = {
                 'id': len(jogos_criados) + 100,  # ID único
@@ -398,6 +503,7 @@ def jogo_novo(request):
                 'subtitulo': request.POST.get('subtitulo', ''),
                 'descricao_curta': request.POST.get('descricao_curta', ''),
                 'historia': request.POST.get('historia', ''),
+                'capa': capa_path,
                 'jogadores_min': int(request.POST.get('jogadores_min', 1)),
                 'jogadores_max': int(request.POST.get('jogadores_max', 4)),
                 'tempo_min': int(request.POST.get('tempo_min', 30)),
@@ -405,14 +511,15 @@ def jogo_novo(request):
                 'idade_recomendada': int(request.POST.get('idade_recomendada', 10)),
                 
                 # Campos complexos
-                'mecanicas': request.POST.getlist('mecanicas[]'),
-                'temas': request.POST.getlist('temas[]'),
+                'mecanicas': [m for m in request.POST.getlist('mecanicas[]') if m.strip()],
+                'temas': [t for t in request.POST.getlist('temas[]') if t.strip()],
                 'componentes': [],
                 'condicoes_vitoria': [c for c in request.POST.getlist('condicoes_vitoria[]') if c.strip()],
                 'condicoes_derrota': [c for c in request.POST.getlist('condicoes_derrota[]') if c.strip()],
                 
-                # Estruturas
+                # Estruturas e setup
                 'estruturas': [],
+                'setup': [],
                 'glossario': []
             }
             
@@ -456,6 +563,51 @@ def jogo_novo(request):
                     
                     novo_jogo['estruturas'].append(estrutura)
             
+            # Processar setup
+            novo_jogo['setup'] = []
+            setup_nomes = request.POST.getlist('setup_nome[]')
+            setup_desc = request.POST.getlist('setup_descricao[]')
+            
+            for i, nome_setup in enumerate(setup_nomes):
+                if nome_setup.strip():
+                    setup = {
+                        'nome': nome_setup,
+                        'descricao': setup_desc[i] if i < len(setup_desc) else '',
+                        'imagens': []
+                    }
+                    
+                    # Processar imagens do setup
+                    img_desc_key = f'setup_img_desc[{i}][]'
+                    
+                    if img_desc_key in request.POST:
+                        img_desc = request.POST.getlist(img_desc_key)
+                        
+                        for j, desc in enumerate(img_desc):
+                            if desc.strip():
+                                # Verificar se há arquivo de imagem correspondente
+                                img_file_key = f'setup_img_file[{i}][]'
+                                if img_file_key in request.FILES:
+                                    files = request.FILES.getlist(img_file_key)
+                                    if j < len(files) and files[j]:
+                                        # Salvar imagem no sistema de arquivos
+                                        caminho_imagem = salvar_imagem_setup(files[j])
+                                        setup['imagens'].append({
+                                            'descricao': desc,
+                                            'imagem': caminho_imagem
+                                        })
+                                    else:
+                                        setup['imagens'].append({
+                                            'descricao': desc,
+                                            'imagem': None
+                                        })
+                                else:
+                                    setup['imagens'].append({
+                                        'descricao': desc,
+                                        'imagem': None
+                                    })
+                    
+                    novo_jogo['setup'].append(setup)
+            
             # Processar glossário
             glossario_palavras = request.POST.getlist('glossario_palavra[]')
             glossario_definicoes = request.POST.getlist('glossario_definicao[]')
@@ -484,8 +636,9 @@ def jogo_novo(request):
 def mecanicas_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
+    busca = request.GET.get('busca', '').strip()
     
-    data = get_api_data('mecanicas', page, per_page)
+    data = get_api_data('mecanicas', page, per_page, busca)
     
     return render(request, 'mecanicas/lista.html', {
         'mecanicas': data['results'],
@@ -513,8 +666,9 @@ def mecanica_novo(request):
 def componentes_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
+    busca = request.GET.get('busca', '').strip()
     
-    data = get_api_data('componentes', page, per_page)
+    data = get_api_data('componentes', page, per_page, busca)
     
     return render(request, 'componentes/lista.html', {
         'componentes': data['results'],
@@ -526,11 +680,13 @@ def componente_novo(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
+        tipo = request.POST.get('tipo', 'TATICO')
         if nome:
             novo_componente = {
                 'id': len(componentes_criados) + 2000,
                 'nome': nome,
-                'descricao': descricao
+                'descricao': descricao,
+                'tipo': tipo
             }
             componentes_criados.append(novo_componente)
             messages.success(request, 'Componente criado com sucesso!')
@@ -542,8 +698,9 @@ def componente_novo(request):
 def temas_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
+    busca = request.GET.get('busca', '').strip()
     
-    data = get_api_data('temas', page, per_page)
+    data = get_api_data('temas', page, per_page, busca)
     
     return render(request, 'temas/lista.html', {
         'temas': data['results'],
@@ -598,17 +755,7 @@ def api_proxy(request, path):
         print(f"Erro na API: {e}")
     
     # Fallback para dados locais
-    data = get_api_data(endpoint, page=1, per_page=1000)
-    
-    # Filtrar por busca se fornecida
-    if search_query:
-        filtered_results = []
-        for item in data['results']:
-            if (search_query in item['nome'].lower() or 
-                search_query in item.get('descricao', '').lower()):
-                filtered_results.append(item)
-        data['results'] = filtered_results
-        data['count'] = len(filtered_results)
+    data = get_api_data(endpoint, page=1, per_page=1000, busca=search_query)
     
     return JsonResponse(data)
 
@@ -636,6 +783,12 @@ def jogo_editar(request, jogo_id):
         return redirect('jogos_lista')
     
     if request.method == 'POST':
+        # Processar upload da capa
+        if 'capa' in request.FILES:
+            capa_path = salvar_imagem_capa(request.FILES['capa'])
+            if capa_path:
+                jogo['capa'] = capa_path
+        
         # Atualizar campos básicos
         jogo['nome'] = request.POST.get('nome', jogo['nome'])
         jogo['subtitulo'] = request.POST.get('subtitulo', jogo['subtitulo'])
@@ -648,8 +801,8 @@ def jogo_editar(request, jogo_id):
         jogo['idade_recomendada'] = int(request.POST.get('idade_recomendada', jogo['idade_recomendada']))
         
         # Atualizar campos complexos
-        jogo['mecanicas'] = request.POST.getlist('mecanicas[]')
-        jogo['temas'] = request.POST.getlist('temas[]')
+        jogo['mecanicas'] = [m for m in request.POST.getlist('mecanicas[]') if m.strip()]
+        jogo['temas'] = [t for t in request.POST.getlist('temas[]') if t.strip()]
         
         # Processar componentes com quantidade
         jogo['componentes'] = []
@@ -694,6 +847,51 @@ def jogo_editar(request, jogo_id):
                             })
                 
                 jogo['estruturas'].append(estrutura)
+        
+        # Atualizar setup
+        jogo['setup'] = []
+        setup_nomes = request.POST.getlist('setup_nome[]')
+        setup_desc = request.POST.getlist('setup_descricao[]')
+        
+        for i, nome_setup in enumerate(setup_nomes):
+            if nome_setup.strip():
+                setup = {
+                    'nome': nome_setup,
+                    'descricao': setup_desc[i] if i < len(setup_desc) else '',
+                    'imagens': []
+                }
+                
+                # Processar imagens do setup
+                img_desc_key = f'setup_img_desc[{i}][]'
+                
+                if img_desc_key in request.POST:
+                    img_desc = request.POST.getlist(img_desc_key)
+                    
+                    for j, desc in enumerate(img_desc):
+                        if desc.strip():
+                            # Verificar se há arquivo de imagem correspondente
+                            img_file_key = f'setup_img_file[{i}][]'
+                            if img_file_key in request.FILES:
+                                files = request.FILES.getlist(img_file_key)
+                                if j < len(files) and files[j]:
+                                    # Salvar imagem no sistema de arquivos
+                                    caminho_imagem = salvar_imagem_setup(files[j])
+                                    setup['imagens'].append({
+                                        'descricao': desc,
+                                        'imagem': caminho_imagem
+                                    })
+                                else:
+                                    setup['imagens'].append({
+                                        'descricao': desc,
+                                        'imagem': None
+                                    })
+                            else:
+                                setup['imagens'].append({
+                                    'descricao': desc,
+                                    'imagem': None
+                                })
+                
+                jogo['setup'].append(setup)
         
         # Atualizar glossário
         jogo['glossario'] = []
@@ -839,6 +1037,7 @@ def componente_editar(request, item_id):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
+        tipo = request.POST.get('tipo', 'TATICO')
         
         # Atualizar se for item criado pelo usuário (ID >= 2000)
         if item_id >= 2000:
@@ -846,6 +1045,7 @@ def componente_editar(request, item_id):
                 if c['id'] == item_id:
                     componentes_criados[i]['nome'] = nome
                     componentes_criados[i]['descricao'] = descricao
+                    componentes_criados[i]['tipo'] = tipo
                     break
             messages.success(request, 'Componente atualizado com sucesso!')
         else:

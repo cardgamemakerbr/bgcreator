@@ -13,7 +13,17 @@
 
 <div class="row mb-3">
     <div class="col-md-4">
-        <input type="text" class="form-control" id="searchInput" placeholder="Buscar componente..." onkeyup="searchItems()">
+        <form method="get" class="d-flex">
+            <input type="text" class="form-control me-2" name="busca" value="{{ request.GET.busca }}" placeholder="Buscar componente..." onkeyup="searchItems()">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-search"></i>
+            </button>
+            {% if request.GET.busca %}
+            <a href="{% url 'componentes_lista' %}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </form>
     </div>
     <div class="col-md-2">
         <select class="form-select" onchange="changePerPage(this.value)">
@@ -36,6 +46,7 @@
                     <thead>
                         <tr>
                             <th>Nome</th>
+                            <th>Tipo</th>
                             <th>Descrição</th>
                             <th>Ações</th>
                         </tr>
@@ -44,6 +55,23 @@
                         {% for componente in componentes %}
                         <tr>
                             <td><strong>{{ componente.nome }}</strong></td>
+                            <td>
+                                {% if componente.tipo == 'TATICO' %}
+                                    <span class="badge bg-primary">Tático</span>
+                                {% elif componente.tipo == 'SORTE' %}
+                                    <span class="badge bg-warning">Sorte</span>
+                                {% elif componente.tipo == 'LUDICO' %}
+                                    <span class="badge bg-success">Lúdico</span>
+                                {% elif componente.tipo == 'HABILIDADE' %}
+                                    <span class="badge bg-info">Habilidade</span>
+                                {% elif componente.tipo == 'GERENCIAMENTO' %}
+                                    <span class="badge bg-dark">Gerenciamento</span>
+                                {% elif componente.tipo == 'NEUTRO' %}
+                                    <span class="badge bg-secondary">Neutro</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Tático</span>
+                                {% endif %}
+                            </td>
                             <td>{{ componente.descricao|default:"Sem descrição" }}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary" onclick="editarComponente({{ componente.id }})">Editar</button>
