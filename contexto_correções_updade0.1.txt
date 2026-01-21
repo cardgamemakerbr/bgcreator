@@ -1,0 +1,15 @@
+- Sugestão de campos
+    - ajustar pesquisa
+    - adicionar tipo sorte / tatico / ludico / gerenciamento de componente
+    - mais temas e abstrato
+Sugestão de campos
+Adicionar um captulo de setup
+    - Adicionar um campo Imagem [Descrição] [+] em baixo do setup e do campo de fase
+
+#bug arrunar o upload das imagens
+Adicionar iconografia nos campos tempo, jogadores,  idade,
+Calculadora de sorte / tatico / habilidade
+Adicionar no campo fase tipo neutro/ sorte / tatico /  habilidade
+Adicionar um modulo de  backup de banco e midias alem da função de restauração .zip
+Pipeline para gerar a imagem do docker
+Pipeline para gerar a imagem do docker
