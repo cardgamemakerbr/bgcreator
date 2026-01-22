@@ -23,5 +23,9 @@ urlpatterns = [
     path('mecanicas/excluir/<int:item_id>/', views.mecanica_excluir, name='mecanica_excluir'),
     path('componentes/excluir/<int:item_id>/', views.componente_excluir, name='componente_excluir'),
     path('temas/excluir/<int:item_id>/', views.tema_excluir, name='tema_excluir'),
+    path('usuarios/', views.usuarios_lista, name='usuarios_lista'),
+    path('usuarios/novo/', views.usuario_novo, name='usuario_novo'),
+    path('usuarios/editar/<int:user_id>/', views.usuario_editar, name='usuario_editar'),
+    path('usuarios/excluir/<int:user_id>/', views.usuario_excluir, name='usuario_excluir'),
     path('api/<path:path>', views.api_proxy, name='api_proxy'),
 ]

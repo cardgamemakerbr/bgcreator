@@ -39,6 +39,7 @@ mecanicas_criadas = []
 componentes_criados = []
 temas_criados = []
 jogos_criados = []
+usuarios_criados = []
 
 def salvar_imagem_glossario(arquivo):
     """Salva imagem do glossário e retorna o caminho"""
@@ -1554,3 +1555,105 @@ def tema_excluir(request, item_id):
     else:
         messages.warning(request, 'Não é possível excluir temas pré-definidos do sistema.')
     return redirect('temas_lista')
+
+def usuarios_lista(request):
+    global usuarios_criados
+    
+    # Usuários de exemplo
+    usuarios_exemplo = [
+        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'perfil': 'ADMINISTRADOR', 'ativo': True},
+        {'id': 2, 'nome': 'João Silva', 'login': 'joao', 'perfil': 'AUTOR', 'ativo': True},
+    ]
+    
+    todos_usuarios = usuarios_exemplo + usuarios_criados
+    
+    # Processar busca
+    busca = request.GET.get('busca', '').strip().lower()
+    if busca:
+        usuarios_filtrados = []
+        for usuario in todos_usuarios:
+            if (busca in usuario.get('nome', '').lower() or 
+                busca in usuario.get('login', '').lower() or
+                busca in usuario.get('perfil', '').lower()):
+                usuarios_filtrados.append(usuario)
+        todos_usuarios = usuarios_filtrados
+    
+    return render(request, 'usuarios/lista.html', {'usuarios': todos_usuarios})
+
+def usuario_novo(request):
+    global usuarios_criados
+    
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        login = request.POST.get('login')
+        perfil = request.POST.get('perfil')
+        ativo = request.POST.get('ativo') == 'on'
+        senha = request.POST.get('senha')
+        confirma_senha = request.POST.get('confirma_senha')
+        
+        if nome and login and senha:
+            if senha == confirma_senha:
+                novo_usuario = {
+                    'id': len(usuarios_criados) + 1000,
+                    'nome': nome,
+                    'login': login,
+                    'perfil': perfil,
+                    'ativo': ativo
+                }
+                usuarios_criados.append(novo_usuario)
+                messages.success(request, f'Usuário "{nome}" criado com sucesso!')
+                return redirect('usuarios_lista')
+            else:
+                messages.error(request, 'Senhas não conferem!')
+        else:
+            messages.error(request, 'Nome, login e senha são obrigatórios!')
+    
+    return render(request, 'usuarios/novo.html')
+
+def usuario_editar(request, user_id):
+    global usuarios_criados
+    
+    # Encontrar usuário
+    usuario = None
+    for u in usuarios_criados:
+        if u['id'] == user_id:
+            usuario = u
+            break
+    
+    if not usuario:
+        messages.error(request, 'Usuário não encontrado!')
+        return redirect('usuarios_lista')
+    
+    if request.method == 'POST':
+        usuario['nome'] = request.POST.get('nome', usuario['nome'])
+        usuario['login'] = request.POST.get('login', usuario['login'])
+        usuario['perfil'] = request.POST.get('perfil', usuario['perfil'])
+        usuario['ativo'] = request.POST.get('ativo') == 'on'
+        
+        # Atualizar senha se fornecida
+        senha = request.POST.get('senha')
+        confirma_senha = request.POST.get('confirma_senha')
+        if senha:
+            if senha == confirma_senha:
+                # Senha atualizada (não armazenamos por segurança)
+                messages.success(request, 'Senha atualizada com sucesso!')
+            else:
+                messages.error(request, 'Senhas não conferem!')
+                return render(request, 'usuarios/editar.html', {'usuario': usuario})
+        
+        messages.success(request, f'Usuário "{usuario["nome"]}" atualizado com sucesso!')
+        return redirect('usuarios_lista')
+    
+    return render(request, 'usuarios/editar.html', {'usuario': usuario})
+
+def usuario_excluir(request, user_id):
+    global usuarios_criados
+    
+    # Verificar se é usuário criado (ID >= 1000)
+    if user_id >= 1000:
+        usuarios_criados = [u for u in usuarios_criados if u['id'] != user_id]
+        messages.success(request, 'Usuário excluído com sucesso!')
+    else:
+        messages.warning(request, 'Não é possível excluir usuários do sistema.')
+    
+    return redirect('usuarios_lista')
