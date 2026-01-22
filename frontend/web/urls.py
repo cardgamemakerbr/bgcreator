@@ -31,5 +31,6 @@ urlpatterns = [
     path('usuarios/editar/<int:user_id>/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/excluir/<int:user_id>/', views.usuario_excluir, name='usuario_excluir'),
     path('usuarios/bloquear/<int:user_id>/', views.usuario_bloquear, name='usuario_bloquear'),
+    path('dicionario/', views.dicionario, name='dicionario'),
     path('api/<path:path>', views.api_proxy, name='api_proxy'),
 ]

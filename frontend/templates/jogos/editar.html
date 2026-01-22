@@ -748,6 +748,49 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Gerencia do Dicionário -->
+            <div class="mb-4">
+                <h5><i class="fas fa-spell-check"></i> Gerencia do Dicionário</h5>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="pesquisar-palavra" placeholder="Digite uma palavra para pesquisar no dicionário...">
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-primary" onclick="pesquisarPalavra()">
+                                    <i class="fas fa-search"></i> Pesquisar Palavras Existentes
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-primary" onclick="verificarPalavrasErradas()">
+                                    <i class="fas fa-sync"></i> Verificar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="palavras-erradas" class="mt-3" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Você deseja adicionar estas novas palavras no dicionário:</h6>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-success me-2" onclick="salvarTodasPalavras()">
+                                        <i class="fas fa-save"></i> Salvar Todas
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="limparPalavrasErradas()">
+                                        <i class="fas fa-trash"></i> Limpar
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="lista-palavras-erradas"></div>
+                        </div>
+                        <div id="resultado-pesquisa" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                <strong>Resultado:</strong> <span id="texto-resultado"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="text-end">
                 <input type="hidden" name="versao_manual" id="versao-manual-hidden" value="{{ jogo.versao_manual|default:'1.0.0' }}">
@@ -847,11 +890,13 @@ function marcarErros(elemento) {
     
     let textoMarcado = texto;
     let temErros = false;
+    const palavrasErradas = [];
     palavras.forEach(palavra => {
         if (palavra.length > 2 && !palavrasCorretas.includes(palavra)) {
             const regex = new RegExp(`\\b${palavra}\\b`, 'gi');
             textoMarcado = textoMarcado.replace(regex, `<span style="background:#ffcccc;text-decoration:underline wavy red;">${palavra}</span>`);
             temErros = true;
+            if (!palavrasErradas.includes(palavra)) palavrasErradas.push(palavra);
         }
     });
     
@@ -861,6 +906,8 @@ function marcarErros(elemento) {
     } else {
         preview.style.display = 'none';
     }
+    
+    atualizarPalavrasErradas(palavrasErradas);
 }
 
 // Função para mostrar ajuda do Markdown
@@ -961,6 +1008,17 @@ function decrementVersion(type) {
 
 // Aguardar carregamento da página
 document.addEventListener('DOMContentLoaded', function() {
+    // Carregar palavras personalizadas do localStorage
+    const palavrasSalvas = localStorage.getItem('palavrasPersonalizadas');
+    if (palavrasSalvas) {
+        const palavrasArray = JSON.parse(palavrasSalvas);
+        palavrasArray.forEach(palavra => {
+            if (!palavrasCorretas.includes(palavra)) {
+                palavrasCorretas.push(palavra);
+            }
+        });
+    }
+    
     // Inicializar corretor ortográfico
     document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
         let timeout;
@@ -1473,6 +1531,105 @@ function calcularClassificacoes() {
     document.getElementById('habilidade-percent').value = porcentagens.HABILIDADE + '%';
     document.getElementById('ludico-percent').value = porcentagens.LUDICO + '%';
     document.getElementById('gerenciamento-percent').value = porcentagens.GERENCIAMENTO + '%';
+}
+
+// Função para pesquisar palavras no dicionário
+function pesquisarPalavra() {
+    const palavra = document.getElementById('pesquisar-palavra').value.toLowerCase().trim();
+    const resultado = document.getElementById('resultado-pesquisa');
+    const textoResultado = document.getElementById('texto-resultado');
+    
+    if (!palavra) {
+        alert('Digite uma palavra para pesquisar.');
+        return;
+    }
+    
+    if (palavrasCorretas.includes(palavra)) {
+        textoResultado.innerHTML = `A palavra "<strong>${palavra}</strong>" está no dicionário.`;
+        resultado.className = 'mt-3 alert alert-success';
+    } else {
+        textoResultado.innerHTML = `A palavra "<strong>${palavra}</strong>" NÃO está no dicionário.`;
+        resultado.className = 'mt-3 alert alert-warning';
+    }
+    
+    resultado.style.display = 'block';
+}
+
+let palavrasErradasGlobal = [];
+
+// Função para atualizar lista de palavras erradas
+function atualizarPalavrasErradas(novasPalavras) {
+    novasPalavras.forEach(palavra => {
+        if (!palavrasErradasGlobal.includes(palavra)) {
+            palavrasErradasGlobal.push(palavra);
+        }
+    });
+    
+    const container = document.getElementById('palavras-erradas');
+    const lista = document.getElementById('lista-palavras-erradas');
+    
+    if (palavrasErradasGlobal.length > 0) {
+        lista.innerHTML = palavrasErradasGlobal.map(palavra => 
+            `<span class="badge bg-warning me-2 mb-2">
+                "${palavra}" 
+                <button type="button" class="btn btn-sm btn-success ms-1" onclick="adicionarPalavraRapida('${palavra}')" style="padding:0 4px;font-size:10px;">+</button>
+            </span>`
+        ).join('');
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// Função para adicionar palavra rapidamente
+function adicionarPalavraRapida(palavra) {
+    palavrasCorretas.push(palavra);
+    palavrasErradasGlobal = palavrasErradasGlobal.filter(p => p !== palavra);
+    
+    // Salvar no localStorage
+    localStorage.setItem('palavrasPersonalizadas', JSON.stringify(palavrasCorretas));
+    
+    // Atualizar todos os campos
+    document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
+        if (campo.value.trim()) marcarErros(campo);
+    });
+    
+    atualizarPalavrasErradas([]);
+}
+
+// Função para limpar lista de palavras erradas
+function limparPalavrasErradas() {
+    palavrasErradasGlobal = [];
+    document.getElementById('palavras-erradas').style.display = 'none';
+}
+
+// Função para verificar palavras erradas em todos os campos
+function verificarPalavrasErradas() {
+    palavrasErradasGlobal = [];
+    document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
+        if (campo.value.trim()) marcarErros(campo);
+    });
+}
+
+// Função para salvar todas as palavras de uma vez
+function salvarTodasPalavras() {
+    palavrasErradasGlobal.forEach(palavra => {
+        if (!palavrasCorretas.includes(palavra)) {
+            palavrasCorretas.push(palavra);
+        }
+    });
+    
+    // Salvar no localStorage
+    localStorage.setItem('palavrasPersonalizadas', JSON.stringify(palavrasCorretas));
+    
+    // Limpar lista e atualizar campos
+    palavrasErradasGlobal = [];
+    document.getElementById('palavras-erradas').style.display = 'none';
+    
+    // Atualizar todos os campos
+    document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
+        if (campo.value.trim()) marcarErros(campo);
+    });
 }
 
 // Adicionar eventos para recalcular peso e versão

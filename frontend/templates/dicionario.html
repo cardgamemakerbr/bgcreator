@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Dicionário Personalizado - BGCreator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-spell-check"></i> Dicionário Personalizado</h2>
+            <button class="btn btn-danger" onclick="clearAllWords()">
+                <i class="fas fa-trash"></i> Limpar Tudo
+            </button>
+        </div>
+        
+        <!-- Filtro de busca -->
+        <div class="mb-3">
+            <input type="text" id="searchFilter" class="form-control" placeholder="Buscar palavra..." onkeyup="filterWords()">
+        </div>
+        
+        <!-- Contador -->
+        <div class="alert alert-info">
+            <strong id="wordCount">0</strong> palavras no dicionário
+        </div>
+        
+        <!-- Seções alfabéticas -->
+        <div id="alphabetSections"></div>
+    </div>
+</div>
+
+<script>
+let customWords = JSON.parse(localStorage.getItem('palavrasPersonalizadas') || '[]');
+
+function loadAlphabetSections() {
+    const container = document.getElementById('alphabetSections');
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    
+    updateWordCount();
+    
+    if (customWords.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-book-open fa-3x mb-3"></i>
+                <h4>Nenhuma palavra no dicionário</h4>
+                <p>Adicione palavras usando o corretor ortográfico nos formulários de jogos.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Organizar palavras por letra
+    const wordsByLetter = {};
+    alphabet.forEach(letter => {
+        wordsByLetter[letter] = customWords.filter(word => 
+            word.toUpperCase().startsWith(letter)
+        ).sort();
+    });
+    
+    container.innerHTML = '';
+    
+    alphabet.forEach(letter => {
+        const words = wordsByLetter[letter];
+        if (words.length === 0) return;
+        
+        const sectionHtml = `
+            <div class="card mb-2">
+                <div class="card-header" id="heading${letter}">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse${letter}" aria-expanded="false" 
+                                aria-controls="collapse${letter}">
+                            <strong>${letter}</strong> (${words.length} palavras)
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapse${letter}" class="collapse" aria-labelledby="heading${letter}">
+                    <div class="card-body">
+                        <div class="row">
+                            ${words.map(word => `
+                                <div class="col-md-4 mb-2 word-item" data-word="${word}">
+                                    <div class="d-flex align-items-center">
+                                        <span class="word-display flex-grow-1">${word}</span>
+                                        <input type="text" class="form-control word-edit d-none" value="${word}">
+                                        <button class="btn btn-sm btn-outline-primary ms-2 edit-btn" onclick="editWord('${word}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-success ms-1 save-btn d-none" onclick="saveWord('${word}')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary ms-1 cancel-btn d-none" onclick="cancelEdit('${word}')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteWord('${word}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML += sectionHtml;
+    });
+}
+
+function editWord(word) {
+    const wordItem = document.querySelector(`[data-word="${word}"]`);
+    const display = wordItem.querySelector('.word-display');
+    const input = wordItem.querySelector('.word-edit');
+    const editBtn = wordItem.querySelector('.edit-btn');
+    const saveBtn = wordItem.querySelector('.save-btn');
+    const cancelBtn = wordItem.querySelector('.cancel-btn');
+    
+    display.classList.add('d-none');
+    input.classList.remove('d-none');
+    editBtn.classList.add('d-none');
+    saveBtn.classList.remove('d-none');
+    cancelBtn.classList.remove('d-none');
+    
+    input.focus();
+    input.select();
+}
+
+function saveWord(oldWord) {
+    const wordItem = document.querySelector(`[data-word="${oldWord}"]`);
+    const input = wordItem.querySelector('.word-edit');
+    const newWord = input.value.trim();
+    
+    if (!newWord) {
+        alert('Palavra não pode estar vazia!');
+        return;
+    }
+    
+    if (newWord !== oldWord && customWords.includes(newWord)) {
+        alert('Esta palavra já existe no dicionário!');
+        return;
+    }
+    
+    // Atualizar palavra no array
+    const index = customWords.indexOf(oldWord);
+    if (index !== -1) {
+        customWords[index] = newWord;
+        localStorage.setItem('palavrasPersonalizadas', JSON.stringify(customWords));
+        loadAlphabetSections();
+    }
+}
+
+function cancelEdit(word) {
+    const wordItem = document.querySelector(`[data-word="${word}"]`);
+    const display = wordItem.querySelector('.word-display');
+    const input = wordItem.querySelector('.word-edit');
+    const editBtn = wordItem.querySelector('.edit-btn');
+    const saveBtn = wordItem.querySelector('.save-btn');
+    const cancelBtn = wordItem.querySelector('.cancel-btn');
+    
+    display.classList.remove('d-none');
+    input.classList.add('d-none');
+    editBtn.classList.remove('d-none');
+    saveBtn.classList.add('d-none');
+    cancelBtn.classList.add('d-none');
+    
+    input.value = word; // Restaurar valor original
+}
+
+function deleteWord(word) {
+    if (confirm(`Tem certeza que deseja excluir a palavra "${word}"?`)) {
+        customWords = customWords.filter(w => w !== word);
+        localStorage.setItem('palavrasPersonalizadas', JSON.stringify(customWords));
+        loadAlphabetSections();
+    }
+}
+
+function clearAllWords() {
+    if (confirm('Tem certeza que deseja limpar todo o dicionário? Esta ação não pode ser desfeita.')) {
+        customWords = [];
+        localStorage.removeItem('palavrasPersonalizadas');
+        loadAlphabetSections();
+    }
+}
+
+function filterWords() {
+    const filter = document.getElementById('searchFilter').value.toLowerCase();
+    const wordItems = document.querySelectorAll('.word-item');
+    
+    wordItems.forEach(item => {
+        const word = item.dataset.word.toLowerCase();
+        if (word.includes(filter)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function updateWordCount() {
+    document.getElementById('wordCount').textContent = customWords.length;
+}
+
+// Carregar seções ao inicializar
+document.addEventListener('DOMContentLoaded', loadAlphabetSections);
+</script>
+{% endblock %}

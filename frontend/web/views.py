@@ -58,6 +58,19 @@ def editor_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
+def admin_or_reviewer_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        global usuario_logado
+        if usuario_logado is None:
+            messages.warning(request, 'Você precisa fazer login para acessar esta página.')
+            return redirect('login')
+        if usuario_logado['perfil'] not in ['ADMINISTRADOR', 'REVISOR']:
+            messages.error(request, 'Acesso negado. Apenas administradores e revisores podem acessar esta página.')
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 def processar_markdown(texto):
     """Processa texto markdown básico"""
     if not texto:
@@ -2052,3 +2065,7 @@ def usuario_bloquear(request, user_id):
         messages.warning(request, 'Não é possível bloquear usuários do sistema.')
     
     return redirect('usuarios_lista')
+
+@admin_or_reviewer_required
+def dicionario(request):
+    return render(request, 'dicionario.html', {'usuario_logado': usuario_logado})
