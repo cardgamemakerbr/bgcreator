@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Novo Jogo - BGCreator{% endblock %}
 
@@ -34,7 +35,12 @@
                                 <i class="fas fa-question-circle"></i> Markdown
                             </button>
                         </div>
-                        <textarea class="form-control" name="descricao_curta" rows="3" placeholder="Ex: Um jogo cooperativo onde os jogadores exploram uma floresta encantada, coletam recursos mágicos e enfrentam criaturas místicas para salvar o reino." required></textarea>
+                        <textarea class="form-control" name="descricao_curta" rows="3" 
+                                  placeholder="Ex: Um jogo cooperativo onde os jogadores exploram uma floresta encantada, coletam recursos mágicos e enfrentam criaturas místicas para salvar o reino." 
+                                  required spellcheck="true" lang="pt"></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-spell-check text-primary"></i> Verificação ortográfica ativada (clique com botão direito para ver sugestões)
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">História do Jogo</label>
@@ -44,7 +50,12 @@
                                 <i class="fas fa-question-circle"></i> Markdown
                             </button>
                         </div>
-                        <textarea class="form-control" name="historia" rows="4" placeholder="Ex: Há muito tempo, a Floresta Mágica era protegida por guardiões ancestrais. Quando uma força sombria ameaça destruir o equilíbrio natural, heróis corajosos devem se unir para restaurar a harmonia..."></textarea>
+                        <textarea class="form-control" name="historia" rows="4" 
+                                  placeholder="Ex: Há muito tempo, a Floresta Mágica era protegida por guardiões ancestrais. Quando uma força sombria ameaça destruir o equilíbrio natural, heróis corajosos devem se unir para restaurar a harmonia..." 
+                                  spellcheck="true" lang="pt"></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-spell-check text-primary"></i> Verificação ortográfica ativada (clique com botão direito para ver sugestões)
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Autor</label>
@@ -526,6 +537,38 @@
 
 {% block scripts %}
 <script>
+const palavrasCorretas = ['jogo','jogos','jogador','jogadores','carta','cartas','dado','dados','tabuleiro','peça','peças','turno','turnos','rodada','rodadas','ponto','pontos','vitória','derrota','estratégia','tático','sorte','habilidade','mecânica','mecânicas','componente','componentes','fase','fases','ação','ações','condição','condições','regra','regras','manual','setup','preparação','início','fim','final','objetivo','meta','recurso','recursos','moeda','moedas','energia','vida','ataque','defesa','movimento','posição','território','área','cooperativo','competitivo','individual','equipe','time','grupo','aventura','fantasia','ficção','realidade','história','tema','ambientação','cenário','personagem','herói','vilão','criatura','monstro','tesouro','item','equipamento','arma','escudo','magia','feitiço','poder','especial','bônus','penalidade','vantagem','desvantagem','chance','probabilidade','risco','decisão','escolha','opção','alternativa','caminho','direção','norte','sul','leste','oeste','centro','canto','lado','primeiro','segundo','terceiro','último','próximo','anterior','novo','antigo','grande','pequeno','médio','alto','baixo','rápido','lento','fácil','difícil','simples','complexo','divertido','interessante','emocionante','desafiador','cada','todo','todos','algumas','muitas','poucas','várias','uma','duas','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','catorze','quinze','minuto','minutos','hora','horas','tempo','duração','idade','anos','criança','adulto','família','amigo','amigos','para','com','por','sem','sobre','entre','durante','através','dentro','fora','antes','depois','quando','onde','como','porque','então','mas','porém','também','ainda','já','sempre','nunca','muito','pouco','mais','menos','bem','mal','aqui','ali','lá','este','esta','esse','essa','aquele','aquela','que','quem','qual','quanto','onde','quando','como','porque','começa','parte','nova','jornada','rumo','desconhecido','história','herói','aventura','mundo','lugar','terra','casa','cidade','vila','reino','império','floresta','montanha','rio','mar','oceano','ilha','vale','campo','estrada','caminho','ponte','porta','janela','parede','teto','chão','mesa','cadeira','cama','livro','papel','caneta','lápis','cor','azul','verde','vermelho','amarelo','branco','preto','cinza','rosa','roxo','laranja','marrom','claro','escuro','brilhante','opaco','quente','frio','gelado','morno','seco','molhado','limpo','sujo','novo','velho','jovem','idoso','bonito','feio','forte','fraco','alto','baixo','gordo','magro','feliz','triste','alegre','nervoso','calmo','bravo','doce','amargo','salgado','azedo','bom','ruim','certo','errado','verdade','mentira','sim','não','talvez','pode','deve','vai','vem','fica','sai','entra','sobe','desce','corre','anda','voa','nada','dorme','acorda','come','bebe','fala','ouve','vê','sente','pensa','sabe','aprende','ensina','trabalha','brinca','descansa','viaja','volta','chega','sai','quer','gosta','ama','odeia','precisa','tem','dá','pega','coloca','tira','abre','fecha','liga','desliga','compra','vende','paga','ganha','perde','encontra','procura','acha','esconde','mostra','conta','pergunta','responde','ajuda','machuca','cura','quebra','conserta','constrói','destrói','cria','faz','acontece','termina','continua','para','espera','lembra','esquece','sonha','acredita','duvida','confia','teme','coragem','medo','amor','raiva','alegria','tristeza','surpresa','nojo','vergonha','orgulho','inveja','ciúme','esperança','desespero','paz','guerra','luta','batalha','vitória','derrota','sucesso','fracasso','sorte','azar','destino','futuro','passado','presente','ontem','hoje','amanhã','semana','mês','ano','século','manhã','tarde','noite','madrugada','primavera','verão','outono','inverno','sol','lua','estrela','nuvem','chuva','vento','neve','gelo','fogo','água','ar','terra','pedra','areia','barro','metal','ouro','prata','ferro','madeira','planta','árvore','flor','fruta','semente','raiz','folha','galho','tronco','animal','pássaro','peixe','inseto','cachorro','gato','cavalo','vaca','porco','galinha','rato','cobra','leão','tigre','elefante','macaco','urso','lobo','raposa','coelho','veado','pato','ganso','águia','coruja','papagaio','borboleta','abelha','formiga','aranha','mosca','mosquito','barata','lagarto','sapo','tartaruga','tubarão','baleia','golfinho','polvo','caranguejo','camarão','pessoa','homem','mulher','menino','menina','bebê','pai','mãe','filho','filha','irmão','irmã','avô','avó','tio','tia','primo','prima','marido','esposa','namorado','namorada','amigo','inimigo','vizinho','estranho','médico','professor','aluno','estudante','trabalhador','chefe','empregado','vendedor','comprador','cliente','dono','rei','rainha','príncipe','princesa','soldado','policial','bombeiro','piloto','motorista','cozinheiro','garçom','artista','músico','cantor','dançarino','ator','escritor','poeta','pintor','escultor','fotógrafo','jornalista','advogado','juiz','político','presidente','ministro','deputado','senador','prefeito','vereador','cientista','pesquisador','inventor','engenheiro','arquiteto','construtor','fazendeiro','pescador','caçador','comerciante','banqueiro','contador','secretário','recepcionista','faxineiro','jardineiro','barbeiro','cabeleireiro','dentista','enfermeiro','farmacêutico','veterinário','psicólogo','terapeuta','massagista','personal','trainer','técnico','mecânico','eletricista','encanador','pedreiro','carpinteiro','pintor','vidraceiro','chaveiro','sapateiro','costureira','padeiro','açougueiro','fruteiro','verdureiro','florista','livreiro','bibliotecário','museólogo','guia','turístico','recepcionista','porteiro','segurança','vigilante','bombeiro','salva','vidas','socorrista','paramédico','ambulância','hospital','clínica','posto','saúde','farmácia','laboratório','exame','remédio','vacina','injeção','curativo','bandagem','gesso','muleta','cadeira','rodas','óculos','lente','contato','aparelho','auditivo','marca','passo','prótese','implante','cirurgia','operação','anestesia','dor','ferida','machucado','corte','arranhão','hematoma','inchaço','febre','gripe','resfriado','tosse','espirro','dor','cabeça','dor','barriga','dor','dente','dor','costas','dor','perna','dor','braço','dor','pescoço','dor','garganta','náusea','vômito','diarreia','prisão','ventre','alergia','asma','diabetes','pressão','alta','pressão','baixa','colesterol','triglicérides','anemia','câncer','tumor','cisto','pedra','vesícula','pedra','rim','infecção','inflamação','vírus','bactéria','fungo','parasita','verme','piolho','pulga','carrapato','mosquito','picada','mordida','queimadura','insolação','desidratação','intoxicação','envenenamento','overdose','abstinência','dependência','vício','alcoolismo','tabagismo','drogas','cigarro','bebida','álcool','cerveja','vinho','cachaça','whisky','vodka','gin','rum','tequila','licor','champagne','espumante','refrigerante','suco','água','leite','café','chá','chocolate','sorvete','doce','bolo','torta','biscoito','bolacha','pão','sanduíche','hambúrguer','pizza','macarrão','arroz','feijão','carne','frango','peixe','ovo','queijo','manteiga','margarina','óleo','azeite','vinagre','sal','açúcar','mel','tempero','pimenta','alho','cebola','tomate','batata','cenoura','beterraba','abobrinha','pepino','alface','couve','espinafre','brócolis','couve','flor','repolho','milho','ervilha','vagem','quiabo','berinjela','pimentão','chuchu','abóbora','moranga','mandioca','inhame','cará','banana','maçã','laranja','limão','uva','pêra','pêssego','ameixa','morango','abacaxi','melão','melancia','mamão','manga','caju','goiaba','jabuticaba','pitanga','acerola','caqui','figo','tâmara','ameixa','seca','uva','passa','castanha','amendoim','noz','avelã','pistache','amêndoa','coco','açaí','cupuaçu','bacuri','buriti','pequi','mangaba','cagaita','araticum','fruta','conde','pinha','graviola','jaca','fruta','pão','carambola','pitaya','lichia','physalis','kiwi','maracujá','caju','cajá','umbu','siriguela','seriguela','ciriguela','tamarindo','jenipapo','murici','araçá','cambuci','jamelão','pitomba','sapoti','abiu','caimito','canistel','lucuma','cherimólia','atemóia','biribá','condessa','marolo','araticum','mirim','pindaíba','xixá','bacupari','abricó','umari','patauá','tucumã','inajá','babaçu','macaúba','licuri','ouricuri','carnaúba','buriti','miriti','açaí','juçara','palmito','dendê','coco','babaçu','macaúba','licuri','ouricuri','carnaúba','buriti','miriti','açaí','juçara','palmito','dendê'];
+
+function marcarErros(elemento) {
+    const texto = elemento.value;
+    const palavras = texto.toLowerCase().match(/[a-záàâãéêíóôõúç]+/g) || [];
+    
+    let preview = elemento.parentElement.querySelector('.spell-preview');
+    if (!preview) {
+        preview = document.createElement('div');
+        preview.className = 'spell-preview';
+        preview.style.cssText = 'border:1px solid #ddd;padding:8px;margin-top:5px;background:#f8f9fa;border-radius:4px;min-height:60px;';
+        elemento.parentElement.appendChild(preview);
+    }
+    
+    let textoMarcado = texto;
+    let temErros = false;
+    palavras.forEach(palavra => {
+        if (palavra.length > 2 && !palavrasCorretas.includes(palavra)) {
+            const regex = new RegExp(`\\b${palavra}\\b`, 'gi');
+            textoMarcado = textoMarcado.replace(regex, `<span style="background:#ffcccc;text-decoration:underline wavy red;">${palavra}</span>`);
+            temErros = true;
+        }
+    });
+    
+    if (temErros && texto.trim()) {
+        preview.innerHTML = textoMarcado;
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
 // Função para mostrar ajuda do Markdown
 function showMarkdownHelp() {
     const modal = new bootstrap.Modal(document.getElementById('markdownHelpModal'));
@@ -1180,6 +1223,16 @@ function calcularClassificacoes() {
 
 // Adicionar eventos para recalcular peso e versão
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar corretor ortográfico
+    document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
+        let timeout;
+        campo.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => marcarErros(this), 500);
+        });
+        if (campo.value.trim()) marcarErros(campo);
+    });
+    
     // Calcular peso inicial
     calcularPesoTempo();
     
