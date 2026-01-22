@@ -307,55 +307,55 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
     ]
     
     componentes_completos = [
-        ('Meeple de Madeira', 'Boneco humanoide que representa trabalhadores.'),
-        ('Dados D6', 'O clássico dado de 6 faces para sorteios.'),
-        ('Dados Poliédricos', 'Dados de 4, 8, 10, 12 ou 20 faces.'),
-        ('Cartas Standard', 'Cartas de tamanho padrão de baralho.'),
-        ('Cartas Mini', 'Versões reduzidas para economizar espaço na mesa.'),
-        ('Tabuleiro Principal', 'A base onde o jogo central acontece.'),
-        ('Tabuleiros Individuais', 'Área de controle particular de cada jogador.'),
-        ('Moedas de Metal', 'Dinheiro físico durável e temático.'),
-        ('Moedas de Papel/Cartão', 'Dinheiro econômico em cartão rígido.'),
-        ('Cubos de Madeira', 'Representação genérica de recursos variados.'),
-        ('Miniaturas de Plástico', 'Esculturas detalhadas de personagens.'),
-        ('Marcadores de Pontuação', 'Pinos ou fichas para a trilha de pontos.'),
-        ('Ampulheta', 'Medidor físico de tempo para turnos rápidos.'),
-        ('Escudo de Jogador', 'Divisória para ocultar cartas e recursos.'),
-        ('Fichas de Poker', 'Tokens pesados usados como moedas ou apostas.'),
-        ('Tiles Hexagonais', 'Peças de 6 lados para montar mapas modulares.'),
-        ('Tiles Quadrados', 'Peças quadradas para construção de cenário.'),
-        ('Marcador de Primeiro Jogador', 'Item que identifica quem inicia a rodada.'),
-        ('Saco de Pano (Bag)', 'Para sorteio cego de peças (Bag building).'),
-        ('Gemas de Plástico/Acrílico', 'Pedras coloridas para representar joias.'),
-        ('Peões de Plástico', 'Marcadores simples em formato de "pino".'),
-        ('Discos de Madeira', 'Marcadores circulares achatados.'),
-        ('Cartas de Referência', 'Resumo de regras para consulta rápida.'),
-        ('Manual de Regras', 'O livro de instruções oficial do jogo.'),
-        ('Livro de Cenários', 'Guia com missões e montagens específicas.'),
-        ('Divisórias de Caixa (Insert)', 'Organizador interno para os componentes.'),
-        ('Adesivos', 'Para modificar o tabuleiro permanentemente (Legacy).'),
-        ('Canetas Dry-Erase', 'Para escrever e apagar em tabuleiros plastificados.'),
-        ('Lápis', 'Para preencher blocos de papel.'),
-        ('Blocos de Pontuação', 'Folhas descartáveis para calcular o fim do jogo.'),
-        ('Clip de Plástico', 'Para encaixar na borda de cartas e indicar valores.'),
-        ('Suporte de Cartas', 'Acessório para manter as cartas em pé na mesa.'),
-        ('Torre de Dados', 'Estrutura para rolar dados sem que eles voem longe.'),
-        ('Bandeja de Dados', 'Superfície forrada para silenciar e conter os dados.'),
-        ('Marcadores de Dano', 'Tokens de coração ou sangue para vida.'),
-        ('Peças de Encaixe', 'Componentes que se conectam mecanicamente.'),
-        ('Engrenagens de Papelão', 'Discos que giram afetando o jogo.'),
-        ('Bússola de Papelão', 'Para indicar direção de vento ou movimento.'),
-        ('Luva de Cartas (Sleeves)', 'Plásticos para proteger as cartas.'),
-        ('Meeples de Animais', 'Figuras de madeira em formato de bicho.'),
-        ('Recipientes de Armazenamento', 'Potes plásticos para separar recursos.'),
-        ('Cartas Transparentes', 'Para sobrepor informações a outras cartas.'),
-        ('Espelho', 'Componente reflexivo para jogos de laser ou ótica.'),
-        ('Peças de Resina Especiais', 'Componentes premium com textura realística.'),
-        ('Playmat de Neoprene', 'Tapete de borracha para organizar a mesa.'),
-        ('Marcadores de Nível', 'Tokens que indicam a evolução de um item.'),
-        ('Relógio de Xadrez', 'Dispositivo para controle rigoroso de tempo.'),
-        ('Cartas de Evento', 'Baralho que altera o jogo a cada rodada.'),
-        ('Tiles de Terreno', 'Peças que representam montanhas, florestas, etc.')
+        ('Meeple de Madeira', 'Boneco humanoide que representa trabalhadores.', 'NEUTRO'),
+        ('Dados D6', 'O clássico dado de 6 faces para sorteios.', 'SORTE'),
+        ('Dados Poliédricos', 'Dados de 4, 8, 10, 12 ou 20 faces.', 'SORTE'),
+        ('Cartas Standard', 'Cartas de tamanho padrão de baralho.', 'TATICO'),
+        ('Cartas Mini', 'Versões reduzidas para economizar espaço na mesa.', 'TATICO'),
+        ('Tabuleiro Principal', 'A base onde o jogo central acontece.', 'NEUTRO'),
+        ('Tabuleiros Individuais', 'Área de controle particular de cada jogador.', 'GERENCIAMENTO'),
+        ('Moedas de Metal', 'Dinheiro físico durável e temático.', 'GERENCIAMENTO'),
+        ('Moedas de Papel/Cartão', 'Dinheiro econômico em cartão rígido.', 'GERENCIAMENTO'),
+        ('Cubos de Madeira', 'Representação genérica de recursos variados.', 'GERENCIAMENTO'),
+        ('Miniaturas de Plástico', 'Esculturas detalhadas de personagens.', 'LUDICO'),
+        ('Marcadores de Pontuação', 'Pinos ou fichas para a trilha de pontos.', 'GERENCIAMENTO'),
+        ('Ampulheta', 'Medidor físico de tempo para turnos rápidos.', 'HABILIDADE'),
+        ('Escudo de Jogador', 'Divisória para ocultar cartas e recursos.', 'TATICO'),
+        ('Fichas de Poker', 'Tokens pesados usados como moedas ou apostas.', 'GERENCIAMENTO'),
+        ('Tiles Hexagonais', 'Peças de 6 lados para montar mapas modulares.', 'TATICO'),
+        ('Tiles Quadrados', 'Peças quadradas para construção de cenário.', 'TATICO'),
+        ('Marcador de Primeiro Jogador', 'Item que identifica quem inicia a rodada.', 'NEUTRO'),
+        ('Saco de Pano (Bag)', 'Para sorteio cego de peças (Bag building).', 'SORTE'),
+        ('Gemas de Plástico/Acrílico', 'Pedras coloridas para representar joias.', 'LUDICO'),
+        ('Peões de Plástico', 'Marcadores simples em formato de "pino".', 'NEUTRO'),
+        ('Discos de Madeira', 'Marcadores circulares achatados.', 'NEUTRO'),
+        ('Cartas de Referência', 'Resumo de regras para consulta rápida.', 'NEUTRO'),
+        ('Manual de Regras', 'O livro de instruções oficial do jogo.', 'NEUTRO'),
+        ('Livro de Cenários', 'Guia com missões e montagens específicas.', 'LUDICO'),
+        ('Divisórias de Caixa (Insert)', 'Organizador interno para os componentes.', 'GERENCIAMENTO'),
+        ('Adesivos', 'Para modificar o tabuleiro permanentemente (Legacy).', 'LUDICO'),
+        ('Canetas Dry-Erase', 'Para escrever e apagar em tabuleiros plastificados.', 'HABILIDADE'),
+        ('Lápis', 'Para preencher blocos de papel.', 'HABILIDADE'),
+        ('Blocos de Pontuação', 'Folhas descartáveis para calcular o fim do jogo.', 'GERENCIAMENTO'),
+        ('Clip de Plástico', 'Para encaixar na borda de cartas e indicar valores.', 'GERENCIAMENTO'),
+        ('Suporte de Cartas', 'Acessório para manter as cartas em pé na mesa.', 'NEUTRO'),
+        ('Torre de Dados', 'Estrutura para rolar dados sem que eles voem longe.', 'SORTE'),
+        ('Bandeja de Dados', 'Superfície forrada para silenciar e conter os dados.', 'SORTE'),
+        ('Marcadores de Dano', 'Tokens de coração ou sangue para vida.', 'GERENCIAMENTO'),
+        ('Peças de Encaixe', 'Componentes que se conectam mecanicamente.', 'HABILIDADE'),
+        ('Engrenagens de Papelão', 'Discos que giram afetando o jogo.', 'TATICO'),
+        ('Bússola de Papelão', 'Para indicar direção de vento ou movimento.', 'TATICO'),
+        ('Luva de Cartas (Sleeves)', 'Plásticos para proteger as cartas.', 'NEUTRO'),
+        ('Meeples de Animais', 'Figuras de madeira em formato de bicho.', 'LUDICO'),
+        ('Recipientes de Armazenamento', 'Potes plásticos para separar recursos.', 'GERENCIAMENTO'),
+        ('Cartas Transparentes', 'Para sobrepor informações a outras cartas.', 'TATICO'),
+        ('Espelho', 'Componente reflexivo para jogos de laser ou ótica.', 'HABILIDADE'),
+        ('Peças de Resina Especiais', 'Componentes premium com textura realística.', 'LUDICO'),
+        ('Playmat de Neoprene', 'Tapete de borracha para organizar a mesa.', 'NEUTRO'),
+        ('Marcadores de Nível', 'Tokens que indicam a evolução de um item.', 'GERENCIAMENTO'),
+        ('Relógio de Xadrez', 'Dispositivo para controle rigoroso de tempo.', 'HABILIDADE'),
+        ('Cartas de Evento', 'Baralho que altera o jogo a cada rodada.', 'SORTE'),
+        ('Tiles de Terreno', 'Peças que representam montanhas, florestas, etc.', 'TATICO')
     ]
     
     if endpoint == 'mecanicas':
@@ -365,7 +365,7 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(temas_completos)]
         dados.extend(temas_criados)
     elif endpoint == 'componentes':
-        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': 'TATICO'} for i, (nome, descricao) in enumerate(componentes_completos)]
+        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': tipo} for i, (nome, descricao, tipo) in enumerate(componentes_completos)]
         dados.extend(componentes_criados)
     else:
         dados = []
@@ -558,6 +558,7 @@ def jogo_novo(request):
             # Processar estruturas
             estruturas_nomes = request.POST.getlist('estruturas_nome[]')
             estruturas_tipos = request.POST.getlist('estruturas_tipo[]')
+            estruturas_classificacoes = request.POST.getlist('estruturas_classificacao[]')
             estruturas_desc = request.POST.getlist('estruturas_descricao[]')
             
             for i, nome_est in enumerate(estruturas_nomes):
@@ -565,6 +566,7 @@ def jogo_novo(request):
                     estrutura = {
                         'nome': nome_est,
                         'tipo': estruturas_tipos[i] if i < len(estruturas_tipos) else 'FASE',
+                        'classificacao': estruturas_classificacoes[i] if i < len(estruturas_classificacoes) else 'NEUTRO',
                         'descricao': estruturas_desc[i] if i < len(estruturas_desc) else '',
                         'condicoes_especiais': []
                     }
@@ -572,16 +574,19 @@ def jogo_novo(request):
                     # Processar condições especiais desta estrutura
                     cond_nomes_key = f'condicoes_especiais_nome[{i}][]'
                     cond_desc_key = f'condicoes_especiais_desc[{i}][]'
+                    cond_tipo_key = f'condicoes_especiais_tipo[{i}][]'
                     
                     if cond_nomes_key in request.POST:
                         cond_nomes = request.POST.getlist(cond_nomes_key)
                         cond_desc = request.POST.getlist(cond_desc_key)
+                        cond_tipos = request.POST.getlist(cond_tipo_key)
                         
                         for j, cond_nome in enumerate(cond_nomes):
                             if cond_nome.strip():
                                 estrutura['condicoes_especiais'].append({
                                     'nome': cond_nome,
-                                    'descricao': cond_desc[j] if j < len(cond_desc) else ''
+                                    'descricao': cond_desc[j] if j < len(cond_desc) else '',
+                                    'tipo': cond_tipos[j] if j < len(cond_tipos) else 'NEUTRO'
                                 })
                     
                     novo_jogo['estruturas'].append(estrutura)
@@ -854,6 +859,7 @@ def jogo_editar(request, jogo_id):
         jogo['estruturas'] = []
         estruturas_nomes = request.POST.getlist('estruturas_nome[]')
         estruturas_tipos = request.POST.getlist('estruturas_tipo[]')
+        estruturas_classificacoes = request.POST.getlist('estruturas_classificacao[]')
         estruturas_desc = request.POST.getlist('estruturas_descricao[]')
         
         for i, nome_est in enumerate(estruturas_nomes):
@@ -861,6 +867,7 @@ def jogo_editar(request, jogo_id):
                 estrutura = {
                     'nome': nome_est,
                     'tipo': estruturas_tipos[i] if i < len(estruturas_tipos) else 'FASE',
+                    'classificacao': estruturas_classificacoes[i] if i < len(estruturas_classificacoes) else 'NEUTRO',
                     'descricao': estruturas_desc[i] if i < len(estruturas_desc) else '',
                     'condicoes_especiais': []
                 }
@@ -868,16 +875,19 @@ def jogo_editar(request, jogo_id):
                 # Processar condições especiais
                 cond_nomes_key = f'condicoes_especiais_nome[{i}][]'
                 cond_desc_key = f'condicoes_especiais_desc[{i}][]'
+                cond_tipo_key = f'condicoes_especiais_tipo[{i}][]'
                 
                 if cond_nomes_key in request.POST:
                     cond_nomes = request.POST.getlist(cond_nomes_key)
                     cond_desc = request.POST.getlist(cond_desc_key)
+                    cond_tipos = request.POST.getlist(cond_tipo_key)
                     
                     for j, cond_nome in enumerate(cond_nomes):
                         if cond_nome.strip():
                             estrutura['condicoes_especiais'].append({
                                 'nome': cond_nome,
-                                'descricao': cond_desc[j] if j < len(cond_desc) else ''
+                                'descricao': cond_desc[j] if j < len(cond_desc) else '',
+                                'tipo': cond_tipos[j] if j < len(cond_tipos) else 'NEUTRO'
                             })
                 
                 jogo['estruturas'].append(estrutura)
@@ -1058,7 +1068,10 @@ def jogo_detalhes(request, jogo_id):
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
     
-    return render(request, 'jogos/detalhes.html', {'jogo': jogo})
+    # Calcular classificações
+    classificacoes = calcular_classificacao_jogo(jogo)
+    
+    return render(request, 'jogos/detalhes.html', {'jogo': jogo, 'classificacoes': classificacoes})
 
 def jogo_imprimir(request, jogo_id):
     global jogos_criados
@@ -1074,7 +1087,10 @@ def jogo_imprimir(request, jogo_id):
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
     
-    return render(request, 'jogos/imprimir.html', {'jogo': jogo})
+    # Calcular classificações
+    classificacoes = calcular_classificacao_jogo(jogo)
+    
+    return render(request, 'jogos/imprimir.html', {'jogo': jogo, 'classificacoes': classificacoes})
 
 def calcular_peso_jogo(jogo_data):
     """Calcula o peso do jogo baseado nas regras de negócio"""
@@ -1117,6 +1133,70 @@ def calcular_peso_jogo(jogo_data):
     peso_especiais = min(total_condicoes_especiais * 0.1, 1.0)
     peso += peso_especiais
     return round(peso, 1)
+
+def calcular_classificacao_jogo(jogo_data):
+    """Calcula as classificações do jogo baseado em componentes, estruturas e condições especiais"""
+    classificacoes = {
+        'NEUTRO': 0,
+        'SORTE': 0,
+        'TATICO': 0,
+        'HABILIDADE': 0,
+        'LUDICO': 0,
+        'GERENCIAMENTO': 0
+    }
+    
+    # Mapeamento de componentes para classificações
+    componentes_classificacao = {
+        'Meeple de Madeira': 'NEUTRO', 'Dados D6': 'SORTE', 'Dados Poliédricos': 'SORTE',
+        'Cartas Standard': 'TATICO', 'Cartas Mini': 'TATICO', 'Tabuleiro Principal': 'NEUTRO',
+        'Tabuleiros Individuais': 'GERENCIAMENTO', 'Moedas de Metal': 'GERENCIAMENTO',
+        'Moedas de Papel/Cartão': 'GERENCIAMENTO', 'Cubos de Madeira': 'GERENCIAMENTO',
+        'Miniaturas de Plástico': 'LUDICO', 'Marcadores de Pontuação': 'GERENCIAMENTO',
+        'Ampulheta': 'HABILIDADE', 'Escudo de Jogador': 'TATICO', 'Fichas de Poker': 'GERENCIAMENTO',
+        'Tiles Hexagonais': 'TATICO', 'Tiles Quadrados': 'TATICO', 'Marcador de Primeiro Jogador': 'NEUTRO',
+        'Saco de Pano (Bag)': 'SORTE', 'Gemas de Plástico/Acrílico': 'LUDICO', 'Peões de Plástico': 'NEUTRO',
+        'Discos de Madeira': 'NEUTRO', 'Cartas de Referência': 'NEUTRO', 'Manual de Regras': 'NEUTRO',
+        'Livro de Cenários': 'LUDICO', 'Divisórias de Caixa (Insert)': 'GERENCIAMENTO',
+        'Adesivos': 'LUDICO', 'Canetas Dry-Erase': 'HABILIDADE', 'Lápis': 'HABILIDADE',
+        'Blocos de Pontuação': 'GERENCIAMENTO', 'Clip de Plástico': 'GERENCIAMENTO',
+        'Suporte de Cartas': 'NEUTRO', 'Torre de Dados': 'SORTE', 'Bandeja de Dados': 'SORTE',
+        'Marcadores de Dano': 'GERENCIAMENTO', 'Peças de Encaixe': 'HABILIDADE',
+        'Engrenagens de Papelão': 'TATICO', 'Bússola de Papelão': 'TATICO',
+        'Luva de Cartas (Sleeves)': 'NEUTRO', 'Meeples de Animais': 'LUDICO',
+        'Recipientes de Armazenamento': 'GERENCIAMENTO', 'Cartas Transparentes': 'TATICO',
+        'Espelho': 'HABILIDADE', 'Peças de Resina Especiais': 'LUDICO', 'Playmat de Neoprene': 'NEUTRO',
+        'Marcadores de Nível': 'GERENCIAMENTO', 'Relógio de Xadrez': 'HABILIDADE',
+        'Cartas de Evento': 'SORTE', 'Tiles de Terreno': 'TATICO'
+    }
+    
+    # Contar componentes
+    for componente in jogo_data.get('componentes', []):
+        nome_comp = componente.split(' (x')[0].strip()  # Remove quantidade
+        if nome_comp in componentes_classificacao:
+            classificacoes[componentes_classificacao[nome_comp]] += 1
+    
+    # Contar estruturas
+    for estrutura in jogo_data.get('estruturas', []):
+        classificacao = estrutura.get('classificacao', 'NEUTRO')
+        if classificacao in classificacoes:
+            classificacoes[classificacao] += 1
+        
+        # Contar condições especiais
+        for condicao in estrutura.get('condicoes_especiais', []):
+            tipo_condicao = condicao.get('tipo', 'NEUTRO')
+            if tipo_condicao in classificacoes:
+                classificacoes[tipo_condicao] += 1
+    
+    # Calcular percentuais
+    total = sum(classificacoes.values())
+    if total == 0:
+        return {'NEUTRO': 100, 'SORTE': 0, 'TATICO': 0, 'HABILIDADE': 0, 'LUDICO': 0, 'GERENCIAMENTO': 0}
+    
+    percentuais = {}
+    for tipo, count in classificacoes.items():
+        percentuais[tipo] = round((count / total) * 100, 1)
+    
+    return percentuais
 
 def mecanica_editar(request, item_id):
     global mecanicas_criadas

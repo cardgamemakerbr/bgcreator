@@ -124,19 +124,33 @@
                     <p><strong>Tempo de Jogo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
                     <p><strong>Idade Recomendada:</strong> {{ jogo.idade_recomendada }}+ anos</p>
                     <p><strong>Complexidade:</strong> {{ jogo.peso }}/5</p>
+                    
+                    <h5>1.2 Classificação do Jogo</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Neutro:</strong> {{ classificacoes.NEUTRO }}%</p>
+                            <p><strong>Sorte:</strong> {{ classificacoes.SORTE }}%</p>
+                            <p><strong>Tático:</strong> {{ classificacoes.TATICO }}%</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Habilidade:</strong> {{ classificacoes.HABILIDADE }}%</p>
+                            <p><strong>Lúdico:</strong> {{ classificacoes.LUDICO }}%</p>
+                            <p><strong>Gerenciamento:</strong> {{ classificacoes.GERENCIAMENTO }}%</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <h4>1.2 Descrição</h4>
+                    <h4>1.3 Descrição</h4>
                     <p>{{ jogo.descricao_curta }}</p>
                     {% if jogo.historia %}
-                    <h4>1.3 História</h4>
+                    <h4>1.4 História</h4>
                     <p>{{ jogo.historia }}</p>
                     {% endif %}
                 </div>
             </div>
 
             {% if jogo.mecanicas or jogo.temas %}
-            <h4>1.4 Características</h4>
+            <h4>1.5 Características</h4>
             {% if jogo.mecanicas %}
             <p><strong>Mecânicas:</strong>
                 {% for mecanica in jogo.mecanicas %}

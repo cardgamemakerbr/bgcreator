@@ -45,6 +45,36 @@
                         <input type="text" class="form-control" id="peso-calculado" value="0.1" readonly>
                         <small class="text-muted">Calculado automaticamente</small>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Classificação do Jogo</label>
+                        <div class="row g-1">
+                            <div class="col-6">
+                                <small class="text-muted">Neutro:</small>
+                                <input type="text" class="form-control form-control-sm" id="neutro-percent" value="100%" readonly>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Sorte:</small>
+                                <input type="text" class="form-control form-control-sm" id="sorte-percent" value="0%" readonly>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Tático:</small>
+                                <input type="text" class="form-control form-control-sm" id="tatico-percent" value="0%" readonly>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Habilidade:</small>
+                                <input type="text" class="form-control form-control-sm" id="habilidade-percent" value="0%" readonly>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Lúdico:</small>
+                                <input type="text" class="form-control form-control-sm" id="ludico-percent" value="0%" readonly>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Gerenciamento:</small>
+                                <input type="text" class="form-control form-control-sm" id="gerenciamento-percent" value="0%" readonly>
+                            </div>
+                        </div>
+                        <small class="text-muted">Baseado em estruturas, condições e componentes</small>
+                    </div>
                 </div>
             </div>
             
@@ -252,14 +282,24 @@
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <input type="text" class="form-control mb-2" name="estruturas_nome[]" placeholder="Nome da Fase/Ação/Rodada">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <select class="form-select mb-2" name="estruturas_tipo[]">
                                         <option value="FASE">Fase</option>
                                         <option value="ACAO">Ação</option>
                                         <option value="RODADA">Rodada</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select mb-2" name="estruturas_classificacao[]">
+                                        <option value="NEUTRO">Neutro</option>
+                                        <option value="SORTE">Sorte</option>
+                                        <option value="TATICO">Tático</option>
+                                        <option value="HABILIDADE">Habilidade</option>
+                                        <option value="LUDICO">Lúdico</option>
+                                        <option value="GERENCIAMENTO">Gerenciamento</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
@@ -273,8 +313,18 @@
                                 <label class="form-label">Condições Especiais:</label>
                                 <div class="condicoes-especiais">
                                     <div class="row mb-1">
-                                        <div class="col-md-5">
+                                        <div class="col-md-3">
                                             <input type="text" class="form-control" name="condicoes_especiais_nome[0][]" placeholder="Nome da condição">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <select class="form-select" name="condicoes_especiais_tipo[0][]">
+                                                <option value="NEUTRO">Neutro</option>
+                                                <option value="SORTE">Sorte</option>
+                                                <option value="TATICO">Tático</option>
+                                                <option value="HABILIDADE">Habilidade</option>
+                                                <option value="LUDICO">Lúdico</option>
+                                                <option value="GERENCIAMENTO">Gerenciamento</option>
+                                            </select>
                                         </div>
                                         <div class="col-md-6">
                                             <textarea class="form-control" name="condicoes_especiais_desc[0][]" placeholder="Descrição da condição" rows="2"></textarea>
@@ -474,14 +524,24 @@ function addEstrutura() {
     div.innerHTML = `
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <input type="text" class="form-control mb-2" name="estruturas_nome[]" placeholder="Nome da Fase/Ação/Rodada">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select mb-2" name="estruturas_tipo[]">
                         <option value="FASE">Fase</option>
                         <option value="ACAO">Ação</option>
                         <option value="RODADA">Rodada</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select mb-2" name="estruturas_classificacao[]">
+                        <option value="NEUTRO">Neutro</option>
+                        <option value="SORTE">Sorte</option>
+                        <option value="TATICO">Tático</option>
+                        <option value="HABILIDADE">Habilidade</option>
+                        <option value="LUDICO">Lúdico</option>
+                        <option value="GERENCIAMENTO">Gerenciamento</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -518,8 +578,18 @@ function addCondicaoEspecial(button) {
     const div = document.createElement('div');
     div.className = 'row mb-1';
     div.innerHTML = `
-        <div class="col-md-5">
+        <div class="col-md-3">
             <input type="text" class="form-control" name="condicoes_especiais_nome[${estruturaIndex}][]" placeholder="Nome da condição">
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="condicoes_especiais_tipo[${estruturaIndex}][]">
+                <option value="NEUTRO">Neutro</option>
+                <option value="SORTE">Sorte</option>
+                <option value="TATICO">Tático</option>
+                <option value="HABILIDADE">Habilidade</option>
+                <option value="LUDICO">Lúdico</option>
+                <option value="GERENCIAMENTO">Gerenciamento</option>
+            </select>
         </div>
         <div class="col-md-6">
             <textarea class="form-control" name="condicoes_especiais_desc[${estruturaIndex}][]" placeholder="Descrição da condição" rows="2"></textarea>
@@ -688,6 +758,128 @@ function calcularPesoTempo() {
     if (campoPeso) {
         campoPeso.value = peso.toFixed(1);
     }
+    
+    // Calcular classificações
+    calcularClassificacoes();
+}
+
+// Função para obter classificação do componente
+function getComponenteClassificacao(nomeComponente) {
+    const classificacaoComponentes = {
+        'Meeple de Madeira': 'NEUTRO',
+        'Dados D6': 'SORTE',
+        'Dados Poliédricos': 'SORTE',
+        'Cartas Standard': 'TATICO',
+        'Cartas Mini': 'TATICO',
+        'Tabuleiro Principal': 'NEUTRO',
+        'Tabuleiros Individuais': 'GERENCIAMENTO',
+        'Moedas de Metal': 'GERENCIAMENTO',
+        'Moedas de Papel/Cartão': 'GERENCIAMENTO',
+        'Cubos de Madeira': 'GERENCIAMENTO',
+        'Miniaturas de Plástico': 'LUDICO',
+        'Marcadores de Pontuação': 'GERENCIAMENTO',
+        'Ampulheta': 'HABILIDADE',
+        'Escudo de Jogador': 'TATICO',
+        'Fichas de Poker': 'GERENCIAMENTO',
+        'Tiles Hexagonais': 'TATICO',
+        'Tiles Quadrados': 'TATICO',
+        'Marcador de Primeiro Jogador': 'NEUTRO',
+        'Saco de Pano (Bag)': 'SORTE',
+        'Gemas de Plástico/Acrílico': 'LUDICO',
+        'Peões de Plástico': 'NEUTRO',
+        'Discos de Madeira': 'NEUTRO',
+        'Cartas de Referência': 'NEUTRO',
+        'Manual de Regras': 'NEUTRO',
+        'Livro de Cenários': 'LUDICO',
+        'Divisórias de Caixa (Insert)': 'GERENCIAMENTO',
+        'Adesivos': 'LUDICO',
+        'Canetas Dry-Erase': 'HABILIDADE',
+        'Lápis': 'HABILIDADE',
+        'Blocos de Pontuação': 'GERENCIAMENTO',
+        'Clip de Plástico': 'GERENCIAMENTO',
+        'Suporte de Cartas': 'NEUTRO',
+        'Torre de Dados': 'SORTE',
+        'Bandeja de Dados': 'SORTE',
+        'Marcadores de Dano': 'GERENCIAMENTO',
+        'Peças de Encaixe': 'HABILIDADE',
+        'Engrenagens de Papelão': 'TATICO',
+        'Bússola de Papelão': 'TATICO',
+        'Luva de Cartas (Sleeves)': 'NEUTRO',
+        'Meeples de Animais': 'LUDICO',
+        'Recipientes de Armazenamento': 'GERENCIAMENTO',
+        'Cartas Transparentes': 'TATICO',
+        'Espelho': 'HABILIDADE',
+        'Peças de Resina Especiais': 'LUDICO',
+        'Playmat de Neoprene': 'NEUTRO',
+        'Marcadores de Nível': 'GERENCIAMENTO',
+        'Relógio de Xadrez': 'HABILIDADE',
+        'Cartas de Evento': 'SORTE',
+        'Tiles de Terreno': 'TATICO'
+    };
+    
+    return classificacaoComponentes[nomeComponente] || 'NEUTRO';
+}
+function calcularClassificacoes() {
+    const classificacoes = {
+        NEUTRO: 0,
+        SORTE: 0,
+        TATICO: 0,
+        HABILIDADE: 0,
+        LUDICO: 0,
+        GERENCIAMENTO: 0
+    };
+    
+    let totalItens = 0;
+    
+    // Contar estruturas
+    const estruturasClassif = document.querySelectorAll('select[name="estruturas_classificacao[]"]');
+    estruturasClassif.forEach(select => {
+        if (select.value) {
+            classificacoes[select.value]++;
+            totalItens++;
+        }
+    });
+    
+    // Contar condições especiais
+    const condicoesClassif = document.querySelectorAll('select[name*="condicoes_especiais_tipo"]');
+    condicoesClassif.forEach(select => {
+        if (select.value) {
+            classificacoes[select.value]++;
+            totalItens++;
+        }
+    });
+    
+    // Contar componentes com suas classificações reais
+    const componentesInputs = document.querySelectorAll('input[name="componentes[]"]');
+    componentesInputs.forEach(input => {
+        if (input.value.trim()) {
+            // Buscar classificação do componente via API ou usar padrão
+            const nomeComponente = input.value.trim();
+            const tipoComponente = getComponenteClassificacao(nomeComponente);
+            classificacoes[tipoComponente]++;
+            totalItens++;
+        }
+    });
+    
+    // Se não há itens, neutro é 100%
+    if (totalItens === 0) {
+        classificacoes.NEUTRO = 1;
+        totalItens = 1;
+    }
+    
+    // Calcular porcentagens
+    const porcentagens = {};
+    Object.keys(classificacoes).forEach(tipo => {
+        porcentagens[tipo] = Math.round((classificacoes[tipo] / totalItens) * 100);
+    });
+    
+    // Atualizar campos
+    document.getElementById('neutro-percent').value = porcentagens.NEUTRO + '%';
+    document.getElementById('sorte-percent').value = porcentagens.SORTE + '%';
+    document.getElementById('tatico-percent').value = porcentagens.TATICO + '%';
+    document.getElementById('habilidade-percent').value = porcentagens.HABILIDADE + '%';
+    document.getElementById('ludico-percent').value = porcentagens.LUDICO + '%';
+    document.getElementById('gerenciamento-percent').value = porcentagens.GERENCIAMENTO + '%';
 }
 
 // Adicionar eventos para recalcular peso

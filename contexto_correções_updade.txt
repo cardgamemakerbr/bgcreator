@@ -8,34 +8,39 @@ Add versão do manual automatico
         - com o modelo :  1.0.0 
             - (1.X.X Versão do jogo) 
             - (X.0.X toda vez que adiciona campos novos) 
-Add calculo tatico ou sorte ou habilidade
+
 
 Add markdown nas descrições
 
 
 Calculadora de sorte / tatico / habilidade
-Adicionar no campo fase tipo neutro/ sorte / tatico /  habilidade
 Adicionar um modulo de  backup de banco e midias alem da função de restauração .zip
 
-## Novos adições
-ok - adicionar um botão <copiar> com a função, criar uma nova copia deste manual
 
 
 ------------------------------------------------------------------------
 Executando
 ------------------------------------------------------------------------
-## Correção de bug
-Ajustar as imagens do glossario
+## Novos adições
+- Adicionar ao lado do marcador de peso, novos de Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento, o marcador Neutro fica marcando 100% e os outros marca 0, preciso de um calculo que verifica quantos porcento o jogo esta baseado depedendo das fase, condições especiais e compontentes adicionados
+ok - Adicionar no campo fase tipo Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento
+X - Pipeline para gerar a imagem do docker
 
-------
+## Correção de bug
+ok - corrigido salvamento das imagens
+ok - Ajustar as imagens do glossario
+
+------------------------------------------------------------------------
+Concluidos
+------------------------------------------------------------------------
 
 ## Novos adições
+ok - adicionar um botão <copiar> com a função, criar uma nova copia deste manual
 ok - Adicionar um captulo de setup
 ok - Adicionar um campo Imagem [Descrição] [+] em baixo do setup e do campo de fase
 ok - Adicionar iconografia nos campos tempo, jogadores,  idade,
 ok - adicionar tipo sorte / tatico / ludico / gerenciamento de componente
-X - Pipeline para gerar a imagem do docker
 
 ## Correção de bug
 ok - # bug arrunar o upload das imagens
-# bug ajustar pesquisa
+ok - bug ajustar pesquisa

@@ -37,6 +37,36 @@
                 <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
                 <p><strong>Idade:</strong> {{ jogo.idade_recomendada }}+</p>
                 <p><strong>Peso:</strong> <span class="badge bg-secondary">{{ jogo.peso }}</span></p>
+                
+                <div class="mt-3">
+                    <strong>Classificação do Jogo:</strong>
+                    <div class="row mt-2">
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-light text-dark me-1">Neutro</span>
+                            <span class="text-muted">{{ classificacoes.NEUTRO }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-warning text-dark me-1">Sorte</span>
+                            <span class="text-muted">{{ classificacoes.SORTE }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-primary me-1">Tático</span>
+                            <span class="text-muted">{{ classificacoes.TATICO }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-success me-1">Habilidade</span>
+                            <span class="text-muted">{{ classificacoes.HABILIDADE }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-info me-1">Lúdico</span>
+                            <span class="text-muted">{{ classificacoes.LUDICO }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-dark me-1">Gerenciamento</span>
+                            <span class="text-muted">{{ classificacoes.GERENCIAMENTO }}%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
