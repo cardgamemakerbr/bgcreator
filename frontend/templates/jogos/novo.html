@@ -293,6 +293,10 @@
             <!-- Glossário -->
             <div class="mb-4">
                 <h5><i class="fas fa-book"></i> Glossário</h5>
+                <small class="text-muted mb-3 d-block">
+                    <i class="fas fa-info-circle"></i> 
+                    As imagens do glossário são exibidas como pequenos ícones (40x40px). Use imagens simples e com boa visibilidade.
+                </small>
                 <div id="glossario-container">
                     <div class="card mb-2">
                         <div class="card-body">
@@ -300,10 +304,10 @@
                                 <div class="col-md-3">
                                     <input type="text" class="form-control" name="glossario_palavra[]" placeholder="Palavra">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-5">
                                     <input type="text" class="form-control" name="glossario_definicao[]" placeholder="Definição">
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
                                 </div>
                                 <div class="col-md-1">
@@ -537,10 +541,10 @@ function addGlossario() {
                 <div class="col-md-3">
                     <input type="text" class="form-control" name="glossario_palavra[]" placeholder="Palavra">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <input type="text" class="form-control" name="glossario_definicao[]" placeholder="Definição">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
                 </div>
                 <div class="col-md-1">

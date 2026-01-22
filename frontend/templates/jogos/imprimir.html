@@ -265,9 +265,18 @@
             <h2><span class="section-number">{% if jogo.setup %}6{% else %}5{% endif %}.</span> Glossário</h2>
             <div class="mt-4">
                 {% for termo in jogo.glossario %}
-                <div class="mb-3">
-                    <h5>{{ termo.palavra }}</h5>
-                    <p>{{ termo.definicao }}</p>
+                <div class="mb-3 d-flex align-items-start">
+                    {% if termo.imagem %}
+                    <img src="{{ termo.imagem }}" class="rounded me-3" alt="{{ termo.palavra }}" style="width: 30px; height: 30px; object-fit: cover; flex-shrink: 0;">
+                    {% else %}
+                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; flex-shrink: 0;">
+                        <i class="fas fa-image text-muted" style="font-size: 12px;"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-1">{{ termo.palavra }}</h6>
+                        <p class="mb-0">{{ termo.definicao }}</p>
+                    </div>
                 </div>
                 {% endfor %}
             </div>

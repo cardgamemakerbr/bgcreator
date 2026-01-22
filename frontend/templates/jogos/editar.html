@@ -39,6 +39,10 @@
                     <div class="mb-3">
                         <label class="form-label">Capa (JPG/PNG)</label>
                         <input type="file" class="form-control" name="capa" accept="image/jpeg,image/png">
+                        {% if jogo.capa %}
+                        <input type="hidden" name="capa_existente" value="{{ jogo.capa }}">
+                        <small class="text-muted">Capa atual: <a href="{{ jogo.capa }}" target="_blank">Ver</a></small>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Peso</label>
@@ -314,6 +318,12 @@
                                         </div>
                                         <div class="col-md-6">
                                             <input type="file" class="form-control" name="setup_img_file[{{ forloop.parentloop.counter0 }}][]" accept="image/*">
+                                            {% if imagem.imagem %}
+                                            <input type="hidden" name="setup_img_existente[{{ forloop.parentloop.counter0 }}][]" value="{{ imagem.imagem }}">
+                                            <small class="text-muted">Imagem atual: <a href="{{ imagem.imagem }}" target="_blank">Ver</a></small>
+                                            {% else %}
+                                            <input type="hidden" name="setup_img_existente[{{ forloop.parentloop.counter0 }}][]" value="">
+                                            {% endif %}
                                         </div>
                                         <div class="col-md-1">
                                             <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.row').remove()">-</button>
@@ -513,6 +523,10 @@
             <!-- Glossário -->
             <div class="mb-4">
                 <h5><i class="fas fa-book"></i> Glossário</h5>
+                <small class="text-muted mb-3 d-block">
+                    <i class="fas fa-info-circle"></i> 
+                    As imagens do glossário são exibidas como pequenos ícones (40x40px). Use imagens simples e com boa visibilidade.
+                </small>
                 <div id="glossario-container">
                     {% for termo in jogo.glossario %}
                     <div class="card mb-2">
@@ -521,11 +535,17 @@
                                 <div class="col-md-3">
                                     <input type="text" class="form-control" name="glossario_palavra[]" value="{{ termo.palavra }}">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-5">
                                     <input type="text" class="form-control" name="glossario_definicao[]" value="{{ termo.definicao }}">
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <input type="file" class="form-control" name="glossario_imagem[]" accept="image/*">
+                                    {% if termo.imagem %}
+                                    <input type="hidden" name="glossario_imagem_existente[]" value="{{ termo.imagem }}">
+                                    <small class="text-muted">Imagem atual: <a href="{{ termo.imagem }}" target="_blank">Ver</a></small>
+                                    {% else %}
+                                    <input type="hidden" name="glossario_imagem_existente[]" value="">
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-1">
                                     <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>

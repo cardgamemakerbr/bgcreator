@@ -1,0 +1,41 @@
+- Sugestão de campos
+    - mais temas e abstrato
+Sugestão de campos
+
+
+Add versão do manual automatico
+    - Colocar um marcado automatio que identifique a versão que o manual esta no momento
+        - com o modelo :  1.0.0 
+            - (1.X.X Versão do jogo) 
+            - (X.0.X toda vez que adiciona campos novos) 
+Add calculo tatico ou sorte ou habilidade
+
+Add markdown nas descrições
+
+
+Calculadora de sorte / tatico / habilidade
+Adicionar no campo fase tipo neutro/ sorte / tatico /  habilidade
+Adicionar um modulo de  backup de banco e midias alem da função de restauração .zip
+
+## Novos adições
+ok - adicionar um botão <copiar> com a função, criar uma nova copia deste manual
+
+
+------------------------------------------------------------------------
+Executando
+------------------------------------------------------------------------
+## Correção de bug
+Ajustar as imagens do glossario
+
+------
+
+## Novos adições
+ok - Adicionar um captulo de setup
+ok - Adicionar um campo Imagem [Descrição] [+] em baixo do setup e do campo de fase
+ok - Adicionar iconografia nos campos tempo, jogadores,  idade,
+ok - adicionar tipo sorte / tatico / ludico / gerenciamento de componente
+X - Pipeline para gerar a imagem do docker
+
+## Correção de bug
+ok - # bug arrunar o upload das imagens
+# bug ajustar pesquisa

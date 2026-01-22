@@ -12,6 +12,29 @@ componentes_criados = []
 temas_criados = []
 jogos_criados = []
 
+def salvar_imagem_glossario(arquivo):
+    """Salva imagem do glossário e retorna o caminho"""
+    if arquivo:
+        try:
+            # Criar diretório se não existir
+            glossario_dir = 'media/glossario'
+            if not os.path.exists(glossario_dir):
+                os.makedirs(glossario_dir)
+            
+            # Salvar arquivo
+            filename = f"glossario_{arquivo.name}"
+            filepath = os.path.join(glossario_dir, filename)
+            
+            with open(filepath, 'wb+') as destination:
+                for chunk in arquivo.chunks():
+                    destination.write(chunk)
+            
+            return f'/media/glossario/{filename}'
+        except Exception as e:
+            print(f"Erro ao salvar imagem do glossário: {e}")
+            return None
+    return None
+
 def salvar_imagem_capa(arquivo):
     """Salva imagem da capa e retorna o caminho"""
     if arquivo:
@@ -614,9 +637,17 @@ def jogo_novo(request):
             
             for i, palavra in enumerate(glossario_palavras):
                 if palavra.strip():
+                    # Processar imagem do glossário
+                    imagem_path = None
+                    if 'glossario_imagem[]' in request.FILES:
+                        imagens = request.FILES.getlist('glossario_imagem[]')
+                        if i < len(imagens) and imagens[i]:
+                            imagem_path = salvar_imagem_glossario(imagens[i])
+                    
                     novo_jogo['glossario'].append({
                         'palavra': palavra,
-                        'definicao': glossario_definicoes[i] if i < len(glossario_definicoes) else ''
+                        'definicao': glossario_definicoes[i] if i < len(glossario_definicoes) else '',
+                        'imagem': imagem_path
                     })
             
             # Calcular peso automaticamente
@@ -788,6 +819,9 @@ def jogo_editar(request, jogo_id):
             capa_path = salvar_imagem_capa(request.FILES['capa'])
             if capa_path:
                 jogo['capa'] = capa_path
+        elif request.POST.get('capa_existente'):
+            # Preservar capa existente se não há nova imagem
+            jogo['capa'] = request.POST.get('capa_existente')
         
         # Atualizar campos básicos
         jogo['nome'] = request.POST.get('nome', jogo['nome'])
@@ -869,27 +903,29 @@ def jogo_editar(request, jogo_id):
                     
                     for j, desc in enumerate(img_desc):
                         if desc.strip():
+                            # Preservar imagem existente ou usar nova
+                            imagem_path = None
+                            
                             # Verificar se há arquivo de imagem correspondente
                             img_file_key = f'setup_img_file[{i}][]'
                             if img_file_key in request.FILES:
                                 files = request.FILES.getlist(img_file_key)
                                 if j < len(files) and files[j]:
-                                    # Salvar imagem no sistema de arquivos
-                                    caminho_imagem = salvar_imagem_setup(files[j])
-                                    setup['imagens'].append({
-                                        'descricao': desc,
-                                        'imagem': caminho_imagem
-                                    })
-                                else:
-                                    setup['imagens'].append({
-                                        'descricao': desc,
-                                        'imagem': None
-                                    })
-                            else:
-                                setup['imagens'].append({
-                                    'descricao': desc,
-                                    'imagem': None
-                                })
+                                    # Salvar nova imagem
+                                    imagem_path = salvar_imagem_setup(files[j])
+                            
+                            # Se não há nova imagem, tentar preservar a existente
+                            if not imagem_path:
+                                img_existente_key = f'setup_img_existente[{i}][]'
+                                if img_existente_key in request.POST:
+                                    imagens_existentes = request.POST.getlist(img_existente_key)
+                                    if j < len(imagens_existentes) and imagens_existentes[j]:
+                                        imagem_path = imagens_existentes[j]
+                            
+                            setup['imagens'].append({
+                                'descricao': desc,
+                                'imagem': imagem_path
+                            })
                 
                 jogo['setup'].append(setup)
         
@@ -897,12 +933,27 @@ def jogo_editar(request, jogo_id):
         jogo['glossario'] = []
         glossario_palavras = request.POST.getlist('glossario_palavra[]')
         glossario_definicoes = request.POST.getlist('glossario_definicao[]')
+        imagens_existentes = request.POST.getlist('glossario_imagem_existente[]')
         
         for i, palavra in enumerate(glossario_palavras):
             if palavra.strip():
+                # Preservar imagem existente ou usar nova
+                imagem_path = None
+                
+                # Verificar se há nova imagem sendo enviada
+                if 'glossario_imagem[]' in request.FILES:
+                    imagens = request.FILES.getlist('glossario_imagem[]')
+                    if i < len(imagens) and imagens[i]:
+                        imagem_path = salvar_imagem_glossario(imagens[i])
+                
+                # Se não há nova imagem, usar a existente
+                if not imagem_path and i < len(imagens_existentes) and imagens_existentes[i]:
+                    imagem_path = imagens_existentes[i]
+                
                 jogo['glossario'].append({
                     'palavra': palavra,
-                    'definicao': glossario_definicoes[i] if i < len(glossario_definicoes) else ''
+                    'definicao': glossario_definicoes[i] if i < len(glossario_definicoes) else '',
+                    'imagem': imagem_path
                 })
         
         # Recalcular peso automaticamente
@@ -912,6 +963,86 @@ def jogo_editar(request, jogo_id):
         return redirect('jogos_lista')
     
     return render(request, 'jogos/editar.html', {'jogo': jogo})
+
+def jogo_copiar(request, jogo_id):
+    global jogos_criados
+    
+    # Encontrar o jogo original
+    jogo_original = None
+    
+    # Buscar nos jogos criados
+    for j in jogos_criados:
+        if j['id'] == int(jogo_id):
+            jogo_original = j
+            break
+    
+    # Buscar nos jogos de exemplo se não encontrou
+    if not jogo_original:
+        jogos_exemplo = [
+            {
+                'id': 1,
+                'nome': 'Catan',
+                'subtitulo': 'Colonizadores de Catan',
+                'descricao_curta': 'Jogo de estratégia sobre colonização',
+                'jogadores_min': 3,
+                'jogadores_max': 4,
+                'tempo_min': 60,
+                'tempo_max': 90,
+                'idade_recomendada': 10,
+                'peso': 2.3,
+                'setup': [],
+                'mecanicas': ['Construção', 'Negociação'],
+                'temas': ['Medieval', 'Colonização'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            },
+            {
+                'id': 2,
+                'nome': 'Ticket to Ride',
+                'subtitulo': 'Aventura Ferroviária',
+                'descricao_curta': 'Construa rotas de trem pelo mundo',
+                'jogadores_min': 2,
+                'jogadores_max': 5,
+                'tempo_min': 30,
+                'tempo_max': 60,
+                'idade_recomendada': 8,
+                'peso': 1.8,
+                'setup': [],
+                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
+                'temas': ['Transporte', 'Viagem'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            }
+        ]
+        
+        for j in jogos_exemplo:
+            if j['id'] == int(jogo_id):
+                jogo_original = j
+                break
+    
+    if not jogo_original:
+        messages.error(request, 'Jogo não encontrado!')
+        return redirect('jogos_lista')
+    
+    # Criar cópia do jogo
+    import copy
+    jogo_copia = copy.deepcopy(jogo_original)
+    
+    # Atualizar dados da cópia
+    jogo_copia['id'] = len(jogos_criados) + 100  # Novo ID único
+    jogo_copia['nome'] = f"{jogo_original['nome']} - Cópia"
+    
+    # Adicionar à lista de jogos criados
+    jogos_criados.append(jogo_copia)
+    
+    messages.success(request, f'Cópia do jogo "{jogo_original["nome"]}" criada com sucesso!')
+    return redirect('jogo_detalhes', jogo_id=jogo_copia['id'])
 
 def jogo_detalhes(request, jogo_id):
     global jogos_criados
