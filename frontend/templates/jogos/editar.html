@@ -28,10 +28,16 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Descrição Curta *</label>
+                        <button type="button" class="btn btn-sm btn-outline-info float-end" onclick="showMarkdownHelp()">
+                            <i class="fas fa-question-circle"></i> Markdown
+                        </button>
                         <textarea class="form-control" name="descricao_curta" rows="3" required>{{ jogo.descricao_curta }}</textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">História do Jogo</label>
+                        <button type="button" class="btn btn-sm btn-outline-info float-end" onclick="showMarkdownHelp()">
+                            <i class="fas fa-question-circle"></i> Markdown
+                        </button>
                         <textarea class="form-control" name="historia" rows="4" placeholder="Conte a história e ambientação do jogo...">{{ jogo.historia }}</textarea>
                     </div>
                 </div>
@@ -690,10 +696,85 @@
         </form>
     </div>
 </div>
+
+<!-- Modal de Ajuda do Markdown -->
+<div class="modal fade" id="markdownHelpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fab fa-markdown"></i> Guia Rápido do Markdown</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Formatação de Texto</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><code>**negrito**</code></td>
+                                <td><strong>negrito</strong></td>
+                            </tr>
+                            <tr>
+                                <td><code>*itálico*</code></td>
+                                <td><em>itálico</em></td>
+                            </tr>
+                        </table>
+                        
+                        <h6>Quebras de Linha</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Uma quebra</td>
+                                <td>Nova linha</td>
+                            </tr>
+                            <tr>
+                                <td>Duas quebras</td>
+                                <td>Novo parágrafo</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Exemplo Prático</h6>
+                        <div class="bg-light p-3 rounded">
+                            <strong>Código:</strong><br>
+                            <code>
+                                Este jogo é **muito divertido**!<br><br>
+                                Você pode usar *itálico* para<br>
+                                dar ênfase em palavras.<br><br>
+                                Duas quebras criam novos parágrafos.
+                            </code>
+                        </div>
+                        <div class="mt-3">
+                            <strong>Resultado:</strong><br>
+                            <div class="border p-2 rounded">
+                                Este jogo é <strong>muito divertido</strong>!<br><br>
+                                Você pode usar <em>itálico</em> para<br>
+                                dar ênfase em palavras.<br><br>
+                                Duas quebras criam novos parágrafos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Dica:</strong> O Markdown funciona nos campos de Descrição, História, Setup e Estruturas.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+// Função para mostrar ajuda do Markdown
+function showMarkdownHelp() {
+    const modal = new bootstrap.Modal(document.getElementById('markdownHelpModal'));
+    modal.show();
+}
+
 // Aguardar carregamento da página
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar busca nos campos existentes

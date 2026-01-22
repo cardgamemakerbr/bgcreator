@@ -5,6 +5,34 @@ from django.conf import settings
 import os
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.utils.safestring import mark_safe
+import re
+
+def processar_markdown(texto):
+    """Processa texto markdown básico"""
+    if not texto:
+        return ""
+    
+    # Negrito **texto**
+    texto = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', texto)
+    
+    # Itálico *texto*
+    texto = re.sub(r'\*(.*?)\*', r'<em>\1</em>', texto)
+    
+    # Quebras de linha duplas para parágrafos
+    texto = texto.replace('\r\n\r\n', '</p><p>')
+    texto = texto.replace('\n\n', '</p><p>')
+    
+    # Quebras de linha simples para <br>
+    texto = texto.replace('\r\n', '<br>')
+    texto = texto.replace('\n', '<br>')
+    
+    # Envolver em parágrafo se não estiver vazio
+    if texto.strip():
+        if not texto.startswith('<p>'):
+            texto = f'<p>{texto}</p>'
+    
+    return mark_safe(texto)
 
 # Lista para armazenar dados criados
 mecanicas_criadas = []
@@ -1068,10 +1096,64 @@ def jogo_detalhes(request, jogo_id):
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
     
+    # Processar markdown nos campos de texto
+    jogo_processado = jogo.copy()
+    if jogo.get('descricao_curta'):
+        jogo_processado['descricao_curta_html'] = processar_markdown(jogo['descricao_curta'])
+    if jogo.get('historia'):
+        jogo_processado['historia_html'] = processar_markdown(jogo['historia'])
+    
+    # Processar condições de vitória e derrota
+    if jogo.get('condicoes_vitoria'):
+        jogo_processado['condicoes_vitoria_html'] = [processar_markdown(c) for c in jogo['condicoes_vitoria']]
+    if jogo.get('condicoes_derrota'):
+        jogo_processado['condicoes_derrota_html'] = [processar_markdown(c) for c in jogo['condicoes_derrota']]
+    
+    # Processar setup
+    if jogo.get('setup'):
+        setup_processado = []
+        for setup in jogo['setup']:
+            setup_copy = setup.copy()
+            if setup.get('descricao'):
+                setup_copy['descricao_html'] = processar_markdown(setup['descricao'])
+            setup_processado.append(setup_copy)
+        jogo_processado['setup_processado'] = setup_processado
+    
+    # Processar estruturas
+    if jogo.get('estruturas'):
+        estruturas_processadas = []
+        for estrutura in jogo['estruturas']:
+            estrutura_copy = estrutura.copy()
+            if estrutura.get('descricao'):
+                estrutura_copy['descricao_html'] = processar_markdown(estrutura['descricao'])
+            
+            # Processar condições especiais
+            if estrutura.get('condicoes_especiais'):
+                condicoes_processadas = []
+                for condicao in estrutura['condicoes_especiais']:
+                    condicao_copy = condicao.copy()
+                    if condicao.get('descricao'):
+                        condicao_copy['descricao_html'] = processar_markdown(condicao['descricao'])
+                    condicoes_processadas.append(condicao_copy)
+                estrutura_copy['condicoes_especiais_processadas'] = condicoes_processadas
+            
+            estruturas_processadas.append(estrutura_copy)
+        jogo_processado['estruturas_processadas'] = estruturas_processadas
+    
+    # Processar glossário
+    if jogo.get('glossario'):
+        glossario_processado = []
+        for termo in jogo['glossario']:
+            termo_copy = termo.copy()
+            if termo.get('definicao'):
+                termo_copy['definicao_html'] = processar_markdown(termo['definicao'])
+            glossario_processado.append(termo_copy)
+        jogo_processado['glossario_processado'] = glossario_processado
+    
     # Calcular classificações
     classificacoes = calcular_classificacao_jogo(jogo)
     
-    return render(request, 'jogos/detalhes.html', {'jogo': jogo, 'classificacoes': classificacoes})
+    return render(request, 'jogos/detalhes.html', {'jogo': jogo_processado, 'classificacoes': classificacoes})
 
 def jogo_imprimir(request, jogo_id):
     global jogos_criados
@@ -1087,10 +1169,64 @@ def jogo_imprimir(request, jogo_id):
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
     
+    # Processar markdown nos campos de texto
+    jogo_processado = jogo.copy()
+    if jogo.get('descricao_curta'):
+        jogo_processado['descricao_curta_html'] = processar_markdown(jogo['descricao_curta'])
+    if jogo.get('historia'):
+        jogo_processado['historia_html'] = processar_markdown(jogo['historia'])
+    
+    # Processar condições de vitória e derrota
+    if jogo.get('condicoes_vitoria'):
+        jogo_processado['condicoes_vitoria_html'] = [processar_markdown(c) for c in jogo['condicoes_vitoria']]
+    if jogo.get('condicoes_derrota'):
+        jogo_processado['condicoes_derrota_html'] = [processar_markdown(c) for c in jogo['condicoes_derrota']]
+    
+    # Processar setup
+    if jogo.get('setup'):
+        setup_processado = []
+        for setup in jogo['setup']:
+            setup_copy = setup.copy()
+            if setup.get('descricao'):
+                setup_copy['descricao_html'] = processar_markdown(setup['descricao'])
+            setup_processado.append(setup_copy)
+        jogo_processado['setup_processado'] = setup_processado
+    
+    # Processar estruturas
+    if jogo.get('estruturas'):
+        estruturas_processadas = []
+        for estrutura in jogo['estruturas']:
+            estrutura_copy = estrutura.copy()
+            if estrutura.get('descricao'):
+                estrutura_copy['descricao_html'] = processar_markdown(estrutura['descricao'])
+            
+            # Processar condições especiais
+            if estrutura.get('condicoes_especiais'):
+                condicoes_processadas = []
+                for condicao in estrutura['condicoes_especiais']:
+                    condicao_copy = condicao.copy()
+                    if condicao.get('descricao'):
+                        condicao_copy['descricao_html'] = processar_markdown(condicao['descricao'])
+                    condicoes_processadas.append(condicao_copy)
+                estrutura_copy['condicoes_especiais_processadas'] = condicoes_processadas
+            
+            estruturas_processadas.append(estrutura_copy)
+        jogo_processado['estruturas_processadas'] = estruturas_processadas
+    
+    # Processar glossário
+    if jogo.get('glossario'):
+        glossario_processado = []
+        for termo in jogo['glossario']:
+            termo_copy = termo.copy()
+            if termo.get('definicao'):
+                termo_copy['definicao_html'] = processar_markdown(termo['definicao'])
+            glossario_processado.append(termo_copy)
+        jogo_processado['glossario_processado'] = glossario_processado
+    
     # Calcular classificações
     classificacoes = calcular_classificacao_jogo(jogo)
     
-    return render(request, 'jogos/imprimir.html', {'jogo': jogo, 'classificacoes': classificacoes})
+    return render(request, 'jogos/imprimir.html', {'jogo': jogo_processado, 'classificacoes': classificacoes})
 
 def calcular_peso_jogo(jogo_data):
     """Calcula o peso do jogo baseado nas regras de negócio"""

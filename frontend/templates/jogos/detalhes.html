@@ -29,9 +29,9 @@
             </div>
             <div class="card-body">
                 <p><strong>Subtítulo:</strong> {{ jogo.subtitulo|default:"Não informado" }}</p>
-                <p><strong>Descrição:</strong> {{ jogo.descricao_curta }}</p>
+                <div><strong>Descrição:</strong> {{ jogo.descricao_curta_html|default:jogo.descricao_curta }}</div>
                 {% if jogo.historia %}
-                <p><strong>História:</strong> {{ jogo.historia }}</p>
+                <div><strong>História:</strong> {{ jogo.historia_html|default:jogo.historia }}</div>
                 {% endif %}
                 <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
                 <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
@@ -135,8 +135,8 @@
             </div>
             <div class="card-body">
                 <ul class="list-unstyled">
-                    {% for condicao in jogo.condicoes_vitoria %}
-                        <li><i class="fas fa-check text-success"></i> {{ condicao }}</li>
+                    {% for condicao in jogo.condicoes_vitoria_html|default:jogo.condicoes_vitoria %}
+                        <li><i class="fas fa-check text-success"></i> {{ condicao|default:condicao }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -150,8 +150,8 @@
             </div>
             <div class="card-body">
                 <ul class="list-unstyled">
-                    {% for condicao in jogo.condicoes_derrota %}
-                        <li><i class="fas fa-times text-danger"></i> {{ condicao }}</li>
+                    {% for condicao in jogo.condicoes_derrota_html|default:jogo.condicoes_derrota %}
+                        <li><i class="fas fa-times text-danger"></i> {{ condicao|default:condicao }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -166,11 +166,11 @@
         <h5><i class="fas fa-cog"></i> Setup do Jogo</h5>
     </div>
     <div class="card-body">
-        {% for setup in jogo.setup %}
+        {% for setup in jogo.setup_processado|default:jogo.setup %}
         <div class="border rounded p-3 mb-3">
             <h6>{{ setup.nome }}</h6>
             {% if setup.descricao %}
-            <p class="text-muted">{{ setup.descricao }}</p>
+            <div class="text-muted">{{ setup.descricao_html|default:setup.descricao }}</div>
             {% endif %}
             {% if setup.imagens %}
             <div class="row mt-2">
@@ -203,17 +203,17 @@
         <h5><i class="fas fa-list-ol"></i> Estruturas do Jogo</h5>
     </div>
     <div class="card-body">
-        {% for estrutura in jogo.estruturas %}
+        {% for estrutura in jogo.estruturas_processadas|default:jogo.estruturas %}
         <div class="border rounded p-3 mb-3">
             <h6>{{ estrutura.nome }} <span class="badge bg-info">{{ estrutura.tipo }}</span></h6>
             {% if estrutura.descricao %}
-            <p class="text-muted">{{ estrutura.descricao }}</p>
+            <div class="text-muted">{{ estrutura.descricao_html|default:estrutura.descricao }}</div>
             {% endif %}
             {% if estrutura.condicoes_especiais %}
             <strong>Condições Especiais:</strong>
             <ul class="mt-2">
-                {% for condicao in estrutura.condicoes_especiais %}
-                <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao }}</li>
+                {% for condicao in estrutura.condicoes_especiais_processadas|default:estrutura.condicoes_especiais %}
+                <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao_html|default:condicao.descricao }}</li>
                 {% endfor %}
             </ul>
             {% endif %}
@@ -230,7 +230,7 @@
     </div>
     <div class="card-body">
         <div class="row">
-            {% for termo in jogo.glossario %}
+            {% for termo in jogo.glossario_processado|default:jogo.glossario %}
             <div class="col-md-6 mb-3">
                 <div class="border rounded p-3 d-flex align-items-start">
                     {% if termo.imagem %}
@@ -242,7 +242,7 @@
                     {% endif %}
                     <div>
                         <strong>{{ termo.palavra }}</strong>
-                        <p class="mb-0 text-muted">{{ termo.definicao }}</p>
+                        <div class="text-muted">{{ termo.definicao_html|default:termo.definicao }}</div>
                     </div>
                 </div>
             </div>

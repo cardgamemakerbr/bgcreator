@@ -141,10 +141,10 @@
                 </div>
                 <div class="col-md-6">
                     <h4>1.3 Descrição</h4>
-                    <p>{{ jogo.descricao_curta }}</p>
+                    <div>{{ jogo.descricao_curta_html|default:jogo.descricao_curta }}</div>
                     {% if jogo.historia %}
                     <h4>1.4 História</h4>
-                    <p>{{ jogo.historia }}</p>
+                    <div>{{ jogo.historia_html|default:jogo.historia }}</div>
                     {% endif %}
                 </div>
             </div>
@@ -173,11 +173,11 @@
         <div class="page-break">
             <h2><span class="section-number">2.</span> Setup do Jogo</h2>
             
-            {% for setup in jogo.setup %}
+            {% for setup in jogo.setup_processado|default:jogo.setup %}
             <div class="mt-4">
                 <h4>2.{{ forloop.counter }} {{ setup.nome }}</h4>
                 {% if setup.descricao %}
-                <p>{{ setup.descricao }}</p>
+                <div>{{ setup.descricao_html|default:setup.descricao }}</div>
                 {% endif %}
                 
                 {% if setup.imagens %}
@@ -229,8 +229,8 @@
             {% if jogo.condicoes_vitoria %}
             <h4>{% if jogo.setup %}4{% else %}3{% endif %}.1 Condições de Vitória</h4>
             <ul>
-                {% for condicao in jogo.condicoes_vitoria %}
-                <li>{{ condicao }}</li>
+                {% for condicao in jogo.condicoes_vitoria_html|default:jogo.condicoes_vitoria %}
+                <li>{{ condicao|default:condicao }}</li>
                 {% endfor %}
             </ul>
             {% endif %}
@@ -238,8 +238,8 @@
             {% if jogo.condicoes_derrota %}
             <h4>{% if jogo.setup %}4{% else %}3{% endif %}.2 Condições de Derrota</h4>
             <ul>
-                {% for condicao in jogo.condicoes_derrota %}
-                <li>{{ condicao }}</li>
+                {% for condicao in jogo.condicoes_derrota_html|default:jogo.condicoes_derrota %}
+                <li>{{ condicao|default:condicao }}</li>
                 {% endfor %}
             </ul>
             {% endif %}
@@ -251,20 +251,20 @@
         <div class="page-break">
             <h2><span class="section-number">{% if jogo.setup %}5{% else %}4{% endif %}.</span> Como Jogar</h2>
             
-            {% for estrutura in jogo.estruturas %}
+            {% for estrutura in jogo.estruturas_processadas|default:jogo.estruturas %}
             <div class="mt-4">
                 <h4>{% if jogo.setup %}5{% else %}4{% endif %}.{{ forloop.counter }} {{ estrutura.nome }} 
                     <span class="badge bg-info">{{ estrutura.tipo }}</span>
                 </h4>
                 {% if estrutura.descricao %}
-                <p>{{ estrutura.descricao }}</p>
+                <div>{{ estrutura.descricao_html|default:estrutura.descricao }}</div>
                 {% endif %}
                 
                 {% if estrutura.condicoes_especiais %}
                 <h5>{% if jogo.setup %}5{% else %}4{% endif %}.{{ forloop.counter }}.1 Condições Especiais</h5>
                 <ul>
-                    {% for condicao in estrutura.condicoes_especiais %}
-                    <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao }}</li>
+                    {% for condicao in estrutura.condicoes_especiais_processadas|default:estrutura.condicoes_especiais %}
+                    <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao_html|default:condicao.descricao }}</li>
                     {% endfor %}
                 </ul>
                 {% endif %}
@@ -278,7 +278,7 @@
         <div class="page-break">
             <h2><span class="section-number">{% if jogo.setup %}6{% else %}5{% endif %}.</span> Glossário</h2>
             <div class="mt-4">
-                {% for termo in jogo.glossario %}
+                {% for termo in jogo.glossario_processado|default:jogo.glossario %}
                 <div class="mb-3 d-flex align-items-start">
                     {% if termo.imagem %}
                     <img src="{{ termo.imagem }}" class="rounded me-3" alt="{{ termo.palavra }}" style="width: 30px; height: 30px; object-fit: cover; flex-shrink: 0;">
@@ -289,7 +289,7 @@
                     {% endif %}
                     <div>
                         <h6 class="mb-1">{{ termo.palavra }}</h6>
-                        <p class="mb-0">{{ termo.definicao }}</p>
+                        <div>{{ termo.definicao_html|default:termo.definicao }}</div>
                     </div>
                 </div>
                 {% endfor %}

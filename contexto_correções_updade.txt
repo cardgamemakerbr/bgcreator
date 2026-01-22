@@ -13,7 +13,7 @@ Add versão do manual automatico
 Add markdown nas descrições
 
 
-Calculadora de sorte / tatico / habilidade
+
 Adicionar um modulo de  backup de banco e midias alem da função de restauração .zip
 
 
@@ -22,25 +22,27 @@ Adicionar um modulo de  backup de banco e midias alem da função de restauraç�
 Executando
 ------------------------------------------------------------------------
 ## Novos adições
-- Adicionar ao lado do marcador de peso, novos de Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento, o marcador Neutro fica marcando 100% e os outros marca 0, preciso de um calculo que verifica quantos porcento o jogo esta baseado depedendo das fase, condições especiais e compontentes adicionados
-ok - Adicionar no campo fase tipo Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento
-X - Pipeline para gerar a imagem do docker
+
+X  - Pipeline para gerar a imagem do docker
 
 ## Correção de bug
-ok - corrigido salvamento das imagens
-ok - Ajustar as imagens do glossario
+
 
 ------------------------------------------------------------------------
 Concluidos
 ------------------------------------------------------------------------
 
 ## Novos adições
+ok - Adicionar ao lado do marcador de peso, novos de Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento, o marcador Neutro fica marcando 100% e os outros marca 0, preciso de um calculo que verifica quantos porcento o jogo esta baseado depedendo das fase, condições especiais e compontentes adicionados
+ok - Adicionar no campo fase tipo Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento
 ok - adicionar um botão <copiar> com a função, criar uma nova copia deste manual
 ok - Adicionar um captulo de setup
 ok - Adicionar um campo Imagem [Descrição] [+] em baixo do setup e do campo de fase
 ok - Adicionar iconografia nos campos tempo, jogadores,  idade,
-ok - adicionar tipo sorte / tatico / ludico / gerenciamento de componente
+ok - adicionar tipo neutro Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento
 
 ## Correção de bug
+ok - corrigido salvamento das imagens
+ok - Ajustar as imagens do glossario
 ok - # bug arrunar o upload das imagens
 ok - bug ajustar pesquisa
