@@ -19,6 +19,45 @@ def login_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        global usuario_logado
+        if usuario_logado is None:
+            messages.warning(request, 'Você precisa fazer login para acessar esta página.')
+            return redirect('login')
+        if usuario_logado['perfil'] != 'ADMINISTRADOR':
+            messages.error(request, 'Acesso negado. Apenas administradores podem acessar esta página.')
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def autor_or_admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        global usuario_logado
+        if usuario_logado is None:
+            messages.warning(request, 'Você precisa fazer login para acessar esta página.')
+            return redirect('login')
+        if usuario_logado['perfil'] not in ['AUTOR', 'ADMINISTRADOR']:
+            messages.error(request, 'Acesso negado. Apenas autores e administradores podem acessar esta página.')
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def editor_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        global usuario_logado
+        if usuario_logado is None:
+            messages.warning(request, 'Você precisa fazer login para acessar esta página.')
+            return redirect('login')
+        if usuario_logado['perfil'] not in ['AUTOR', 'REVISOR', 'ADMINISTRADOR']:
+            messages.error(request, 'Acesso negado. Apenas autores, revisores e administradores podem editar jogos.')
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 def processar_markdown(texto):
     """Processa texto markdown básico"""
     if not texto:
@@ -553,7 +592,7 @@ def jogos_lista(request):
     
     return render(request, 'jogos/lista.html', {'jogos': {'results': todos_jogos}})
 
-@login_required
+@autor_or_admin_required
 def jogo_novo(request):
     global jogos_criados, usuarios_criados, usuario_logado
     
@@ -753,7 +792,7 @@ def jogo_novo(request):
         'usuario_logado': usuario_logado
     })
 
-@login_required
+@autor_or_admin_required
 def mecanicas_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
@@ -766,7 +805,7 @@ def mecanicas_lista(request):
         'pagination': data
     })
 
-@login_required
+@autor_or_admin_required
 def mecanica_novo(request):
     global mecanicas_criadas
     if request.method == 'POST':
@@ -785,7 +824,7 @@ def mecanica_novo(request):
         return redirect('mecanicas_lista')
     return render(request, 'mecanicas/novo.html')
 
-@login_required
+@autor_or_admin_required
 def componentes_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
@@ -798,7 +837,7 @@ def componentes_lista(request):
         'pagination': data
     })
 
-@login_required
+@autor_or_admin_required
 def componente_novo(request):
     global componentes_criados
     if request.method == 'POST':
@@ -819,7 +858,7 @@ def componente_novo(request):
         return redirect('componentes_lista')
     return render(request, 'componentes/novo.html')
 
-@login_required
+@autor_or_admin_required
 def temas_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
@@ -832,7 +871,7 @@ def temas_lista(request):
         'pagination': data
     })
 
-@login_required
+@autor_or_admin_required
 def tema_novo(request):
     global temas_criados
     if request.method == 'POST':
@@ -885,6 +924,7 @@ def api_proxy(request, path):
     
     return JsonResponse(data)
 
+@admin_required
 def jogo_excluir(request, jogo_id):
     global jogos_criados
     
@@ -894,7 +934,7 @@ def jogo_excluir(request, jogo_id):
     messages.success(request, 'Jogo excluído com sucesso!')
     return redirect('jogos_lista')
 
-@login_required
+@editor_required
 def jogo_editar(request, jogo_id):
     global jogos_criados, usuarios_criados
     
@@ -1114,6 +1154,7 @@ def jogo_editar(request, jogo_id):
         'usuario_logado': usuario_logado
     })
 
+@admin_required
 def jogo_copiar(request, jogo_id):
     global jogos_criados
     
@@ -1624,6 +1665,7 @@ def calcular_classificacao_jogo(jogo_data):
     
     return percentuais
 
+@autor_or_admin_required
 def mecanica_editar(request, item_id):
     global mecanicas_criadas
     # Buscar dados da mecânica dos dados locais
@@ -1657,6 +1699,7 @@ def mecanica_editar(request, item_id):
     
     return render(request, 'mecanicas/editar.html', {'item': item})
 
+@autor_or_admin_required
 def componente_editar(request, item_id):
     global componentes_criados
     # Buscar dados do componente dos dados locais
@@ -1691,6 +1734,7 @@ def componente_editar(request, item_id):
         return redirect('componentes_lista')
     
     return render(request, 'componentes/editar.html', {'item': item})
+@autor_or_admin_required
 def tema_editar(request, item_id):
     global temas_criados
     # Buscar dados do tema dos dados locais
@@ -1724,6 +1768,7 @@ def tema_editar(request, item_id):
     
     return render(request, 'temas/editar.html', {'item': item})
 
+@admin_required
 def mecanica_excluir(request, item_id):
     global mecanicas_criadas
     # Verificar se é um item criado pelo usuário (ID >= 1000)
@@ -1734,6 +1779,7 @@ def mecanica_excluir(request, item_id):
         messages.warning(request, 'Não é possível excluir mecânicas pré-definidas do sistema.')
     return redirect('mecanicas_lista')
 
+@admin_required
 def componente_excluir(request, item_id):
     global componentes_criados
     # Verificar se é um item criado pelo usuário (ID >= 2000)
@@ -1744,6 +1790,7 @@ def componente_excluir(request, item_id):
         messages.warning(request, 'Não é possível excluir componentes pré-definidos do sistema.')
     return redirect('componentes_lista')
 
+@admin_required
 def tema_excluir(request, item_id):
     global temas_criados
     # Verificar se é um item criado pelo usuário (ID >= 3000)
@@ -1776,11 +1823,13 @@ def login_view(request):
                 if usuario.get('id', 0) <= 10:  # Usuários do sistema
                     if (login == 'admin' and senha == 'admin') or (login == 'joao' and senha == '123'):
                         usuario_logado = usuario
+                        request.session['usuario_perfil'] = usuario['perfil']
                         messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
                         return redirect('home')
                 else:  # Usuários criados - verificar senha armazenada
                     if usuario.get('senha') == senha:
                         usuario_logado = usuario
+                        request.session['usuario_perfil'] = usuario['perfil']
                         messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
                         return redirect('home')
         
@@ -1791,10 +1840,11 @@ def login_view(request):
 def logout_view(request):
     global usuario_logado
     usuario_logado = None
+    request.session.pop('usuario_perfil', None)
     messages.success(request, 'Logout realizado com sucesso!')
     return redirect('login')
 
-@login_required
+@admin_required
 def usuarios_lista(request):
     global usuarios_criados
     
@@ -1819,7 +1869,7 @@ def usuarios_lista(request):
     
     return render(request, 'usuarios/lista.html', {'usuarios': todos_usuarios})
 
-@login_required
+@admin_required
 def usuario_novo(request):
     global usuarios_criados
     
@@ -1870,6 +1920,7 @@ def usuario_novo(request):
     
     return render(request, 'usuarios/novo.html')
 
+@admin_required
 def usuario_editar(request, user_id):
     global usuarios_criados
     
@@ -1928,6 +1979,7 @@ def usuario_editar(request, user_id):
     
     return render(request, 'usuarios/editar.html', {'usuario': usuario})
 
+@admin_required
 def usuario_excluir(request, user_id):
     global usuarios_criados
     

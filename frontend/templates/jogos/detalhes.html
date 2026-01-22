@@ -6,15 +6,19 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-gamepad"></i> {{ jogo.nome }}</h2>
     <div>
+        {% if request.session.usuario_perfil == 'ADMINISTRADOR' %}
         <a href="{% url 'jogo_copiar' jogo.id %}" class="btn btn-success me-2" onclick="return confirm('Tem certeza que deseja criar uma cópia deste jogo?')">
             <i class="fas fa-copy"></i> Copiar
         </a>
+        {% endif %}
         <a href="{% url 'jogo_imprimir' jogo.id %}" class="btn btn-info me-2">
             <i class="fas fa-print"></i> Imprimir
         </a>
+        {% if request.session.usuario_perfil in 'AUTOR,REVISOR,ADMINISTRADOR' %}
         <a href="{% url 'jogo_editar' jogo.id %}" class="btn btn-primary me-2">
             <i class="fas fa-edit"></i> Editar
         </a>
+        {% endif %}
         <a href="{% url 'jogos_lista' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
