@@ -87,6 +87,11 @@
                                 <a href="{% url 'jogo_detalhes' jogo.id %}" class="btn btn-sm btn-outline-info me-1">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                {% if request.session.usuario_perfil in 'REVISOR,ADMINISTRADOR' %}
+                                <a href="{% url 'jogo_revisao' jogo.id %}" class="btn btn-sm btn-outline-warning me-1" title="Revisar">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </a>
+                                {% endif %}
                                 {% if request.session.usuario_perfil == 'ADMINISTRADOR' %}
                                 <a href="{% url 'jogo_copiar' jogo.id %}" class="btn btn-sm btn-outline-success me-1" onclick="return confirm('Criar cópia deste jogo?')">
                                     <i class="fas fa-copy"></i>

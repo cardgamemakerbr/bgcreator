@@ -2069,3 +2069,81 @@ def usuario_bloquear(request, user_id):
 @admin_or_reviewer_required
 def dicionario(request):
     return render(request, 'dicionario.html', {'usuario_logado': usuario_logado})
+
+@admin_or_reviewer_required
+def jogo_revisao(request, jogo_id):
+    global jogos_criados
+    
+    # Encontrar o jogo
+    jogo = None
+    for j in jogos_criados:
+        if j['id'] == int(jogo_id):
+            jogo = j
+            break
+    
+    # Buscar nos jogos de exemplo se não encontrou
+    if not jogo:
+        jogos_exemplo = [
+            {
+                'id': 1,
+                'nome': 'Catan',
+                'subtitulo': 'Colonizadores de Catan',
+                'descricao_curta': 'Jogo de estratégia sobre colonização',
+                'jogadores_min': 3,
+                'jogadores_max': 4,
+                'tempo_min': 60,
+                'tempo_max': 90,
+                'idade_recomendada': 10,
+                'peso': 2.3,
+                'versao_manual': '1.0.0',
+                'autor': 'Klaus Teuber',
+                'revisor': 'João Silva',
+                'setup': [],
+                'mecanicas': ['Construção', 'Negociação'],
+                'temas': ['Medieval', 'Colonização'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            },
+            {
+                'id': 2,
+                'nome': 'Ticket to Ride',
+                'subtitulo': 'Aventura Ferroviária',
+                'descricao_curta': 'Construa rotas de trem pelo mundo',
+                'jogadores_min': 2,
+                'jogadores_max': 5,
+                'tempo_min': 30,
+                'tempo_max': 60,
+                'idade_recomendada': 8,
+                'peso': 1.8,
+                'versao_manual': '1.0.0',
+                'autor': 'Alan R. Moon',
+                'revisor': 'Admin Sistema',
+                'setup': [],
+                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
+                'temas': ['Transporte', 'Viagem'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            }
+        ]
+        
+        for j in jogos_exemplo:
+            if j['id'] == int(jogo_id):
+                jogo = j
+                break
+    
+    if not jogo:
+        messages.error(request, 'Jogo não encontrado!')
+        return redirect('jogos_lista')
+    
+    if request.method == 'POST':
+        # Processar dados da revisão
+        messages.success(request, f'Revisão do jogo "{jogo["nome"]}" salva com sucesso!')
+        return redirect('jogos_lista')
+    
+    return render(request, 'jogos/revisao.html', {'jogo': jogo})
