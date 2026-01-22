@@ -31,6 +31,19 @@
                 <a class="nav-link" href="{% url 'usuarios_lista' %}">
                     <i class="fas fa-users"></i> USUÁRIOS
                 </a>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> Usuário
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a></li>
+                    </ul>
+                </div>
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> LOGOUT
+                </a>
             </div>
         </div>
     </nav>

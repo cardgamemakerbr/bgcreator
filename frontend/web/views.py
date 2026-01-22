@@ -7,6 +7,17 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 import re
+from functools import wraps
+
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        global usuario_logado
+        if usuario_logado is None:
+            messages.warning(request, 'Você precisa fazer login para acessar esta página.')
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 def processar_markdown(texto):
     """Processa texto markdown básico"""
@@ -40,6 +51,7 @@ componentes_criados = []
 temas_criados = []
 jogos_criados = []
 usuarios_criados = []
+usuario_logado = None
 
 def salvar_imagem_glossario(arquivo):
     """Salva imagem do glossário e retorna o caminho"""
@@ -433,6 +445,7 @@ def debug(request):
         'componentes': componentes,
     })
 
+@login_required
 def home(request):
     global jogos_criados
     
@@ -460,6 +473,7 @@ def home(request):
         'jogos_recentes': jogos_recentes,
     })
 
+@login_required
 def jogos_lista(request):
     global jogos_criados
     
@@ -539,8 +553,18 @@ def jogos_lista(request):
     
     return render(request, 'jogos/lista.html', {'jogos': {'results': todos_jogos}})
 
+@login_required
 def jogo_novo(request):
-    global jogos_criados
+    global jogos_criados, usuarios_criados, usuario_logado
+    
+    # Buscar usuários para dropdowns
+    usuarios_sistema = [
+        {'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR'},
+        {'nome': 'João Silva', 'perfil': 'AUTOR'},
+    ]
+    todos_usuarios = usuarios_sistema + usuarios_criados
+    autores = [u for u in todos_usuarios if u['perfil'] in ['AUTOR', 'ADMINISTRADOR']]
+    revisores = [u for u in todos_usuarios if u['perfil'] in ['REVISOR', 'ADMINISTRADOR']]
     
     if request.method == 'POST':
         print("Dados recebidos:", request.POST)  # Debug
@@ -559,6 +583,8 @@ def jogo_novo(request):
                 'subtitulo': request.POST.get('subtitulo', ''),
                 'descricao_curta': request.POST.get('descricao_curta', ''),
                 'historia': request.POST.get('historia', ''),
+                'autor': request.POST.get('autor', ''),
+                'revisor': request.POST.get('revisor', ''),
                 'capa': capa_path,
                 'jogadores_min': int(request.POST.get('jogadores_min', 1)),
                 'jogadores_max': int(request.POST.get('jogadores_max', 4)),
@@ -707,8 +733,9 @@ def jogo_novo(request):
         else:
             messages.error(request, 'Nome do jogo é obrigatório.')
     
-    return render(request, 'jogos/novo.html')
+    return render(request, 'jogos/novo.html', {'autores': autores, 'revisores': revisores})
 
+@login_required
 def mecanicas_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
@@ -721,6 +748,7 @@ def mecanicas_lista(request):
         'pagination': data
     })
 
+@login_required
 def mecanica_novo(request):
     global mecanicas_criadas
     if request.method == 'POST':
@@ -739,6 +767,7 @@ def mecanica_novo(request):
         return redirect('mecanicas_lista')
     return render(request, 'mecanicas/novo.html')
 
+@login_required
 def componentes_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
@@ -751,6 +780,7 @@ def componentes_lista(request):
         'pagination': data
     })
 
+@login_required
 def componente_novo(request):
     global componentes_criados
     if request.method == 'POST':
@@ -771,6 +801,7 @@ def componente_novo(request):
         return redirect('componentes_lista')
     return render(request, 'componentes/novo.html')
 
+@login_required
 def temas_lista(request):
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
@@ -783,6 +814,7 @@ def temas_lista(request):
         'pagination': data
     })
 
+@login_required
 def tema_novo(request):
     global temas_criados
     if request.method == 'POST':
@@ -844,8 +876,18 @@ def jogo_excluir(request, jogo_id):
     messages.success(request, 'Jogo excluído com sucesso!')
     return redirect('jogos_lista')
 
+@login_required
 def jogo_editar(request, jogo_id):
-    global jogos_criados
+    global jogos_criados, usuarios_criados
+    
+    # Buscar usuários para dropdowns
+    usuarios_sistema = [
+        {'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR'},
+        {'nome': 'João Silva', 'perfil': 'AUTOR'},
+    ]
+    todos_usuarios = usuarios_sistema + usuarios_criados
+    autores = [u for u in todos_usuarios if u['perfil'] in ['AUTOR', 'ADMINISTRADOR']]
+    revisores = [u for u in todos_usuarios if u['perfil'] in ['REVISOR', 'ADMINISTRADOR']]
     
     # Encontrar o jogo
     jogo = None
@@ -873,6 +915,8 @@ def jogo_editar(request, jogo_id):
         jogo['subtitulo'] = request.POST.get('subtitulo', jogo['subtitulo'])
         jogo['descricao_curta'] = request.POST.get('descricao_curta', jogo['descricao_curta'])
         jogo['historia'] = request.POST.get('historia', jogo.get('historia', ''))
+        jogo['autor'] = request.POST.get('autor', jogo.get('autor', ''))
+        jogo['revisor'] = request.POST.get('revisor', jogo.get('revisor', ''))
         jogo['jogadores_min'] = int(request.POST.get('jogadores_min', jogo['jogadores_min']))
         jogo['jogadores_max'] = int(request.POST.get('jogadores_max', jogo['jogadores_max']))
         jogo['tempo_min'] = int(request.POST.get('tempo_min', jogo['tempo_min']))
@@ -1027,7 +1071,7 @@ def jogo_editar(request, jogo_id):
         messages.success(request, f'Jogo "{jogo["nome"]}" atualizado com sucesso!')
         return redirect('jogos_lista')
     
-    return render(request, 'jogos/editar.html', {'jogo': jogo})
+    return render(request, 'jogos/editar.html', {'jogo': jogo, 'autores': autores, 'revisores': revisores})
 
 def jogo_copiar(request, jogo_id):
     global jogos_criados
@@ -1119,6 +1163,7 @@ def jogo_copiar(request, jogo_id):
     messages.success(request, f'Cópia do jogo "{jogo_original["nome"]}" criada com sucesso!')
     return redirect('jogo_detalhes', jogo_id=jogo_copia['id'])
 
+@login_required
 def jogo_detalhes(request, jogo_id):
     global jogos_criados
     
@@ -1556,13 +1601,48 @@ def tema_excluir(request, item_id):
         messages.warning(request, 'Não é possível excluir temas pré-definidos do sistema.')
     return redirect('temas_lista')
 
+def login_view(request):
+    global usuario_logado, usuarios_criados
+    
+    if request.method == 'POST':
+        login = request.POST.get('login')
+        senha = request.POST.get('senha')
+        
+        # Usuários do sistema
+        usuarios_sistema = [
+            {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': True},
+            {'login': 'joao', 'senha': '123', 'nome': 'João Silva', 'perfil': 'AUTOR', 'ativo': True},
+        ]
+        
+        # Verificar usuários do sistema + criados
+        todos_usuarios = usuarios_sistema + usuarios_criados
+        
+        for usuario in todos_usuarios:
+            if usuario['login'] == login and usuario.get('ativo', True):
+                # Simular verificação de senha (em produção usar hash)
+                if senha == 'admin' or senha == '123':  # Senhas de exemplo
+                    usuario_logado = usuario
+                    messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
+                    return redirect('home')
+        
+        messages.error(request, 'Login ou senha inválidos!')
+    
+    return render(request, 'login.html')
+
+def logout_view(request):
+    global usuario_logado
+    usuario_logado = None
+    messages.success(request, 'Logout realizado com sucesso!')
+    return redirect('login')
+
+@login_required
 def usuarios_lista(request):
     global usuarios_criados
     
     # Usuários de exemplo
     usuarios_exemplo = [
-        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'perfil': 'ADMINISTRADOR', 'ativo': True},
-        {'id': 2, 'nome': 'João Silva', 'login': 'joao', 'perfil': 'AUTOR', 'ativo': True},
+        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': True},
+        {'id': 2, 'nome': 'João Silva', 'login': 'joao', 'email': 'joao@bgcreator.com', 'perfil': 'AUTOR', 'ativo': True},
     ]
     
     todos_usuarios = usuarios_exemplo + usuarios_criados
@@ -1580,23 +1660,43 @@ def usuarios_lista(request):
     
     return render(request, 'usuarios/lista.html', {'usuarios': todos_usuarios})
 
+@login_required
 def usuario_novo(request):
     global usuarios_criados
     
     if request.method == 'POST':
         nome = request.POST.get('nome')
         login = request.POST.get('login')
+        email = request.POST.get('email')
         perfil = request.POST.get('perfil')
         ativo = request.POST.get('ativo') == 'on'
         senha = request.POST.get('senha')
         confirma_senha = request.POST.get('confirma_senha')
         
-        if nome and login and senha:
+        if nome and login and email and senha:
+            # Verificar se login já existe
+            usuarios_sistema = [
+                {'login': 'admin', 'email': 'admin@bgcreator.com'},
+                {'login': 'joao', 'email': 'joao@bgcreator.com'},
+            ]
+            
+            todos_usuarios = usuarios_sistema + usuarios_criados
+            
+            # Verificar login duplicado
+            for usuario in todos_usuarios:
+                if usuario['login'].lower() == login.lower():
+                    messages.error(request, f'Login "{login}" já está em uso!')
+                    return render(request, 'usuarios/novo.html')
+                if usuario.get('email', '').lower() == email.lower():
+                    messages.error(request, f'E-mail "{email}" já está em uso!')
+                    return render(request, 'usuarios/novo.html')
+            
             if senha == confirma_senha:
                 novo_usuario = {
                     'id': len(usuarios_criados) + 1000,
                     'nome': nome,
                     'login': login,
+                    'email': email,
                     'perfil': perfil,
                     'ativo': ativo
                 }
@@ -1606,7 +1706,7 @@ def usuario_novo(request):
             else:
                 messages.error(request, 'Senhas não conferem!')
         else:
-            messages.error(request, 'Nome, login e senha são obrigatórios!')
+            messages.error(request, 'Nome, login, e-mail e senha são obrigatórios!')
     
     return render(request, 'usuarios/novo.html')
 
@@ -1625,8 +1725,30 @@ def usuario_editar(request, user_id):
         return redirect('usuarios_lista')
     
     if request.method == 'POST':
-        usuario['nome'] = request.POST.get('nome', usuario['nome'])
-        usuario['login'] = request.POST.get('login', usuario['login'])
+        nome_novo = request.POST.get('nome', usuario['nome'])
+        login_novo = request.POST.get('login', usuario['login'])
+        email_novo = request.POST.get('email', usuario.get('email', ''))
+        
+        # Verificar duplicatas apenas se mudou login ou email
+        if login_novo.lower() != usuario['login'].lower() or email_novo.lower() != usuario.get('email', '').lower():
+            usuarios_sistema = [
+                {'id': 1, 'login': 'admin', 'email': 'admin@bgcreator.com'},
+                {'id': 2, 'login': 'joao', 'email': 'joao@bgcreator.com'},
+            ]
+            
+            todos_usuarios = usuarios_sistema + [u for u in usuarios_criados if u['id'] != user_id]
+            
+            for u in todos_usuarios:
+                if u['login'].lower() == login_novo.lower():
+                    messages.error(request, f'Login "{login_novo}" já está em uso!')
+                    return render(request, 'usuarios/editar.html', {'usuario': usuario})
+                if u.get('email', '').lower() == email_novo.lower():
+                    messages.error(request, f'E-mail "{email_novo}" já está em uso!')
+                    return render(request, 'usuarios/editar.html', {'usuario': usuario})
+        
+        usuario['nome'] = nome_novo
+        usuario['login'] = login_novo
+        usuario['email'] = email_novo
         usuario['perfil'] = request.POST.get('perfil', usuario['perfil'])
         usuario['ativo'] = request.POST.get('ativo') == 'on'
         

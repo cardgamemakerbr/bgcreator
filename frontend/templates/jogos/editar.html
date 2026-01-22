@@ -40,6 +40,24 @@
                         </button>
                         <textarea class="form-control" name="historia" rows="4" placeholder="Conte a história e ambientação do jogo...">{{ jogo.historia }}</textarea>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Autor</label>
+                        <select class="form-select" name="autor">
+                            <option value="">Selecione um autor</option>
+                            {% for autor in autores %}
+                            <option value="{{ autor.nome }}" {% if jogo.autor == autor.nome %}selected{% endif %}>{{ autor.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Revisor</label>
+                        <select class="form-select" name="revisor">
+                            <option value="">Selecione um revisor</option>
+                            {% for revisor in revisores %}
+                            <option value="{{ revisor.nome }}" {% if jogo.revisor == revisor.nome %}selected{% endif %}>{{ revisor.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="col-md-4">
                     <div class="mb-3">
