@@ -1811,7 +1811,6 @@ def login_view(request):
         # Usuários do sistema
         usuarios_sistema = [
             {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': True},
-            {'login': 'joao', 'senha': '123', 'nome': 'João Silva', 'perfil': 'AUTOR', 'ativo': True},
         ]
         
         # Verificar usuários do sistema + criados
@@ -1821,7 +1820,7 @@ def login_view(request):
             if usuario['login'] == login and usuario.get('ativo', True):
                 # Para usuários do sistema, usar senhas fixas
                 if usuario.get('id', 0) <= 10:  # Usuários do sistema
-                    if (login == 'admin' and senha == 'admin') or (login == 'joao' and senha == '123'):
+                    if login == 'admin' and senha == 'admin':
                         usuario_logado = usuario
                         request.session['usuario_perfil'] = usuario['perfil']
                         messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
@@ -1844,6 +1843,52 @@ def logout_view(request):
     messages.success(request, 'Logout realizado com sucesso!')
     return redirect('login')
 
+@login_required
+def perfil(request):
+    global usuario_logado
+    
+    if request.method == 'POST':
+        nome = request.POST.get('nome', usuario_logado['nome'])
+        email = request.POST.get('email', usuario_logado.get('email', ''))
+        senha_atual = request.POST.get('senha_atual')
+        nova_senha = request.POST.get('nova_senha')
+        confirma_senha = request.POST.get('confirma_senha')
+        
+        # Atualizar nome e email
+        usuario_logado['nome'] = nome
+        usuario_logado['email'] = email
+        
+        # Atualizar senha se fornecida
+        if nova_senha:
+            if nova_senha == confirma_senha:
+                # Para usuários do sistema, verificar senha atual
+                if usuario_logado.get('id', 0) <= 10:
+                    if usuario_logado['login'] == 'admin' and senha_atual == 'admin':
+                        # Não podemos alterar senhas de usuários do sistema
+                        messages.warning(request, 'Não é possível alterar a senha de usuários do sistema.')
+                    else:
+                        messages.error(request, 'Senha atual incorreta.')
+                else:
+                    # Usuário criado - verificar senha atual
+                    if usuario_logado.get('senha') == senha_atual:
+                        usuario_logado['senha'] = nova_senha
+                        # Atualizar também na lista de usuários criados
+                        for i, u in enumerate(usuarios_criados):
+                            if u['id'] == usuario_logado['id']:
+                                usuarios_criados[i]['senha'] = nova_senha
+                                break
+                        messages.success(request, 'Senha alterada com sucesso!')
+                    else:
+                        messages.error(request, 'Senha atual incorreta.')
+            else:
+                messages.error(request, 'Nova senha e confirmação não conferem!')
+        else:
+            messages.success(request, 'Perfil atualizado com sucesso!')
+        
+        return redirect('perfil')
+    
+    return render(request, 'perfil.html', {'usuario': usuario_logado})
+
 @admin_required
 def usuarios_lista(request):
     global usuarios_criados
@@ -1851,7 +1896,6 @@ def usuarios_lista(request):
     # Usuários de exemplo
     usuarios_exemplo = [
         {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': True},
-        {'id': 2, 'nome': 'João Silva', 'login': 'joao', 'email': 'joao@bgcreator.com', 'perfil': 'AUTOR', 'ativo': True},
     ]
     
     todos_usuarios = usuarios_exemplo + usuarios_criados
@@ -1989,5 +2033,22 @@ def usuario_excluir(request, user_id):
         messages.success(request, 'Usuário excluído com sucesso!')
     else:
         messages.warning(request, 'Não é possível excluir usuários do sistema.')
+    
+    return redirect('usuarios_lista')
+
+@admin_required
+def usuario_bloquear(request, user_id):
+    global usuarios_criados
+    
+    # Verificar se é usuário criado (ID >= 1000)
+    if user_id >= 1000:
+        for i, u in enumerate(usuarios_criados):
+            if u['id'] == user_id:
+                usuarios_criados[i]['ativo'] = not usuarios_criados[i]['ativo']
+                status = 'desbloqueado' if usuarios_criados[i]['ativo'] else 'bloqueado'
+                messages.success(request, f'Usuário {status} com sucesso!')
+                break
+    else:
+        messages.warning(request, 'Não é possível bloquear usuários do sistema.')
     
     return redirect('usuarios_lista')

@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('perfil/', views.perfil, name='perfil'),
     path('', views.home, name='home'),
     path('debug/', views.debug, name='debug'),
     path('jogos/', views.jogos_lista, name='jogos_lista'),
@@ -29,5 +30,6 @@ urlpatterns = [
     path('usuarios/novo/', views.usuario_novo, name='usuario_novo'),
     path('usuarios/editar/<int:user_id>/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/excluir/<int:user_id>/', views.usuario_excluir, name='usuario_excluir'),
+    path('usuarios/bloquear/<int:user_id>/', views.usuario_bloquear, name='usuario_bloquear'),
     path('api/<path:path>', views.api_proxy, name='api_proxy'),
 ]

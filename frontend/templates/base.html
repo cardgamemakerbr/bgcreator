@@ -37,9 +37,13 @@
                 {% endif %}
                 <div class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> Usuário
+                        <i class="fas fa-user"></i> USUÁRIO
                     </a>
                     <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'perfil' %}">
+                            <i class="fas fa-user-cog"></i> Perfil
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'logout' %}">
                             <i class="fas fa-sign-out-alt"></i> Sair
                         </a></li>
