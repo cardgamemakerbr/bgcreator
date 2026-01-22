@@ -576,6 +576,20 @@ def jogo_novo(request):
             if 'capa' in request.FILES:
                 capa_path = salvar_imagem_capa(request.FILES['capa'])
             
+            # Preencher autor/revisor automaticamente baseado no usuário logado
+            autor_automatico = ''
+            revisor_automatico = ''
+            
+            if usuario_logado:
+                if usuario_logado['perfil'] == 'AUTOR':
+                    autor_automatico = usuario_logado['nome']
+                elif usuario_logado['perfil'] == 'REVISOR':
+                    revisor_automatico = usuario_logado['nome']
+                elif usuario_logado['perfil'] == 'ADMINISTRADOR':
+                    # Administrador pode ser tanto autor quanto revisor
+                    autor_automatico = usuario_logado['nome']
+                    revisor_automatico = usuario_logado['nome']
+            
             # Criar novo jogo
             novo_jogo = {
                 'id': len(jogos_criados) + 100,  # ID único
@@ -583,8 +597,8 @@ def jogo_novo(request):
                 'subtitulo': request.POST.get('subtitulo', ''),
                 'descricao_curta': request.POST.get('descricao_curta', ''),
                 'historia': request.POST.get('historia', ''),
-                'autor': request.POST.get('autor', ''),
-                'revisor': request.POST.get('revisor', ''),
+                'autor': autor_automatico,
+                'revisor': revisor_automatico,
                 'capa': capa_path,
                 'jogadores_min': int(request.POST.get('jogadores_min', 1)),
                 'jogadores_max': int(request.POST.get('jogadores_max', 4)),
@@ -733,7 +747,11 @@ def jogo_novo(request):
         else:
             messages.error(request, 'Nome do jogo é obrigatório.')
     
-    return render(request, 'jogos/novo.html', {'autores': autores, 'revisores': revisores})
+    return render(request, 'jogos/novo.html', {
+        'autores': autores, 
+        'revisores': revisores,
+        'usuario_logado': usuario_logado
+    })
 
 @login_required
 def mecanicas_lista(request):
@@ -915,8 +933,26 @@ def jogo_editar(request, jogo_id):
         jogo['subtitulo'] = request.POST.get('subtitulo', jogo['subtitulo'])
         jogo['descricao_curta'] = request.POST.get('descricao_curta', jogo['descricao_curta'])
         jogo['historia'] = request.POST.get('historia', jogo.get('historia', ''))
-        jogo['autor'] = request.POST.get('autor', jogo.get('autor', ''))
-        jogo['revisor'] = request.POST.get('revisor', jogo.get('revisor', ''))
+        # Atualizar autor/revisor com proteção (adicionar co-autor/co-revisor se já existir)
+        if usuario_logado:
+            if usuario_logado['perfil'] == 'AUTOR':
+                if jogo.get('autor') and jogo['autor'] != usuario_logado['nome']:
+                    # Já existe autor diferente, adicionar como co-autor
+                    jogo['co_autor'] = usuario_logado['nome']
+                else:
+                    # Não existe autor ou é o mesmo usuário
+                    jogo['autor'] = usuario_logado['nome']
+            elif usuario_logado['perfil'] == 'REVISOR':
+                if jogo.get('revisor') and jogo['revisor'] != usuario_logado['nome']:
+                    # Já existe revisor diferente, adicionar como co-revisor
+                    jogo['co_revisor'] = usuario_logado['nome']
+                else:
+                    # Não existe revisor ou é o mesmo usuário
+                    jogo['revisor'] = usuario_logado['nome']
+            elif usuario_logado['perfil'] == 'ADMINISTRADOR':
+                # Administrador pode atualizar ambos sem proteção
+                jogo['autor'] = usuario_logado['nome']
+                jogo['revisor'] = usuario_logado['nome']
         jogo['jogadores_min'] = int(request.POST.get('jogadores_min', jogo['jogadores_min']))
         jogo['jogadores_max'] = int(request.POST.get('jogadores_max', jogo['jogadores_max']))
         jogo['tempo_min'] = int(request.POST.get('tempo_min', jogo['tempo_min']))
@@ -1071,7 +1107,12 @@ def jogo_editar(request, jogo_id):
         messages.success(request, f'Jogo "{jogo["nome"]}" atualizado com sucesso!')
         return redirect('jogos_lista')
     
-    return render(request, 'jogos/editar.html', {'jogo': jogo, 'autores': autores, 'revisores': revisores})
+    return render(request, 'jogos/editar.html', {
+        'jogo': jogo, 
+        'autores': autores, 
+        'revisores': revisores,
+        'usuario_logado': usuario_logado
+    })
 
 def jogo_copiar(request, jogo_id):
     global jogos_criados
@@ -1174,6 +1215,62 @@ def jogo_detalhes(request, jogo_id):
             jogo = j
             break
     
+    # Buscar nos jogos de exemplo se não encontrou
+    if not jogo:
+        jogos_exemplo = [
+            {
+                'id': 1,
+                'nome': 'Catan',
+                'subtitulo': 'Colonizadores de Catan',
+                'descricao_curta': 'Jogo de estratégia sobre colonização',
+                'jogadores_min': 3,
+                'jogadores_max': 4,
+                'tempo_min': 60,
+                'tempo_max': 90,
+                'idade_recomendada': 10,
+                'peso': 2.3,
+                'versao_manual': '1.0.0',
+                'autor': 'Klaus Teuber',
+                'revisor': 'João Silva',
+                'setup': [],
+                'mecanicas': ['Construção', 'Negociação'],
+                'temas': ['Medieval', 'Colonização'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            },
+            {
+                'id': 2,
+                'nome': 'Ticket to Ride',
+                'subtitulo': 'Aventura Ferroviária',
+                'descricao_curta': 'Construa rotas de trem pelo mundo',
+                'jogadores_min': 2,
+                'jogadores_max': 5,
+                'tempo_min': 30,
+                'tempo_max': 60,
+                'idade_recomendada': 8,
+                'peso': 1.8,
+                'versao_manual': '1.0.0',
+                'autor': 'Alan R. Moon',
+                'revisor': 'Admin Sistema',
+                'setup': [],
+                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
+                'temas': ['Transporte', 'Viagem'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            }
+        ]
+        
+        for j in jogos_exemplo:
+            if j['id'] == int(jogo_id):
+                jogo = j
+                break
+    
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
@@ -1246,6 +1343,62 @@ def jogo_imprimir(request, jogo_id):
         if j['id'] == int(jogo_id):
             jogo = j
             break
+    
+    # Buscar nos jogos de exemplo se não encontrou
+    if not jogo:
+        jogos_exemplo = [
+            {
+                'id': 1,
+                'nome': 'Catan',
+                'subtitulo': 'Colonizadores de Catan',
+                'descricao_curta': 'Jogo de estratégia sobre colonização',
+                'jogadores_min': 3,
+                'jogadores_max': 4,
+                'tempo_min': 60,
+                'tempo_max': 90,
+                'idade_recomendada': 10,
+                'peso': 2.3,
+                'versao_manual': '1.0.0',
+                'autor': 'Klaus Teuber',
+                'revisor': 'João Silva',
+                'setup': [],
+                'mecanicas': ['Construção', 'Negociação'],
+                'temas': ['Medieval', 'Colonização'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            },
+            {
+                'id': 2,
+                'nome': 'Ticket to Ride',
+                'subtitulo': 'Aventura Ferroviária',
+                'descricao_curta': 'Construa rotas de trem pelo mundo',
+                'jogadores_min': 2,
+                'jogadores_max': 5,
+                'tempo_min': 30,
+                'tempo_max': 60,
+                'idade_recomendada': 8,
+                'peso': 1.8,
+                'versao_manual': '1.0.0',
+                'autor': 'Alan R. Moon',
+                'revisor': 'Admin Sistema',
+                'setup': [],
+                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
+                'temas': ['Transporte', 'Viagem'],
+                'componentes': [],
+                'condicoes_vitoria': [],
+                'condicoes_derrota': [],
+                'estruturas': [],
+                'glossario': []
+            }
+        ]
+        
+        for j in jogos_exemplo:
+            if j['id'] == int(jogo_id):
+                jogo = j
+                break
     
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
@@ -1619,11 +1772,17 @@ def login_view(request):
         
         for usuario in todos_usuarios:
             if usuario['login'] == login and usuario.get('ativo', True):
-                # Simular verificação de senha (em produção usar hash)
-                if senha == 'admin' or senha == '123':  # Senhas de exemplo
-                    usuario_logado = usuario
-                    messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
-                    return redirect('home')
+                # Para usuários do sistema, usar senhas fixas
+                if usuario.get('id', 0) <= 10:  # Usuários do sistema
+                    if (login == 'admin' and senha == 'admin') or (login == 'joao' and senha == '123'):
+                        usuario_logado = usuario
+                        messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
+                        return redirect('home')
+                else:  # Usuários criados - verificar senha armazenada
+                    if usuario.get('senha') == senha:
+                        usuario_logado = usuario
+                        messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
+                        return redirect('home')
         
         messages.error(request, 'Login ou senha inválidos!')
     
@@ -1698,7 +1857,8 @@ def usuario_novo(request):
                     'login': login,
                     'email': email,
                     'perfil': perfil,
-                    'ativo': ativo
+                    'ativo': ativo,
+                    'senha': senha  # Armazenar senha (em produção usar hash)
                 }
                 usuarios_criados.append(novo_usuario)
                 messages.success(request, f'Usuário "{nome}" criado com sucesso!')
@@ -1757,7 +1917,7 @@ def usuario_editar(request, user_id):
         confirma_senha = request.POST.get('confirma_senha')
         if senha:
             if senha == confirma_senha:
-                # Senha atualizada (não armazenamos por segurança)
+                usuario['senha'] = senha  # Atualizar senha
                 messages.success(request, 'Senha atualizada com sucesso!')
             else:
                 messages.error(request, 'Senhas não conferem!')

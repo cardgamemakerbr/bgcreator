@@ -36,8 +36,14 @@
                 {% if jogo.autor %}
                 <p><strong>Autor:</strong> {{ jogo.autor }}</p>
                 {% endif %}
+                {% if jogo.co_autor %}
+                <p><strong>Co-Autor:</strong> {{ jogo.co_autor }}</p>
+                {% endif %}
                 {% if jogo.revisor %}
                 <p><strong>Revisor:</strong> {{ jogo.revisor }}</p>
+                {% endif %}
+                {% if jogo.co_revisor %}
+                <p><strong>Co-Revisor:</strong> {{ jogo.co_revisor }}</p>
                 {% endif %}
                 <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
                 <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>

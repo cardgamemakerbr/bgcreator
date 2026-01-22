@@ -48,21 +48,23 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Autor</label>
-                        <select class="form-select" name="autor">
-                            <option value="">Selecione um autor</option>
-                            {% for autor in autores %}
-                            <option value="{{ autor.nome }}">{{ autor.nome }}</option>
-                            {% endfor %}
-                        </select>
+                        {% if usuario_logado.perfil == 'AUTOR' or usuario_logado.perfil == 'ADMINISTRADOR' %}
+                        <input type="text" class="form-control" value="{{ usuario_logado.nome }}" readonly>
+                        <small class="text-muted">Preenchido automaticamente com seu usuário</small>
+                        {% else %}
+                        <input type="text" class="form-control" value="-" readonly>
+                        <small class="text-muted">Apenas usuários com perfil Autor podem ser autores</small>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Revisor</label>
-                        <select class="form-select" name="revisor">
-                            <option value="">Selecione um revisor</option>
-                            {% for revisor in revisores %}
-                            <option value="{{ revisor.nome }}">{{ revisor.nome }}</option>
-                            {% endfor %}
-                        </select>
+                        {% if usuario_logado.perfil == 'REVISOR' or usuario_logado.perfil == 'ADMINISTRADOR' %}
+                        <input type="text" class="form-control" value="{{ usuario_logado.nome }}" readonly>
+                        <small class="text-muted">Preenchido automaticamente com seu usuário</small>
+                        {% else %}
+                        <input type="text" class="form-control" value="-" readonly>
+                        <small class="text-muted">Apenas usuários com perfil Revisor podem ser revisores</small>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-md-4">

@@ -69,6 +69,9 @@
             {% if jogo.subtitulo %}
             <h2 class="text-muted">{{ jogo.subtitulo }}</h2>
             {% endif %}
+            {% if jogo.autor %}
+            <p class="lead text-muted">por {{ jogo.autor }}</p>
+            {% endif %}
             <hr>
             <p class="lead">Manual do Jogo</p>
             <p class="text-muted">Gerado pelo BGCreator</p>
@@ -125,6 +128,18 @@
                     <p><strong>Idade Recomendada:</strong> {{ jogo.idade_recomendada }}+ anos</p>
                     <p><strong>Versão do Manual:</strong> {{ jogo.versao_manual|default:'1.0.0' }}</p>
                     <p><strong>Complexidade:</strong> {{ jogo.peso }}/5</p>
+                    {% if jogo.autor %}
+                    <p><strong>Autor:</strong> {{ jogo.autor }}</p>
+                    {% endif %}
+                    {% if jogo.co_autor %}
+                    <p><strong>Co-Autor:</strong> {{ jogo.co_autor }}</p>
+                    {% endif %}
+                    {% if jogo.revisor %}
+                    <p><strong>Revisor:</strong> {{ jogo.revisor }}</p>
+                    {% endif %}
+                    {% if jogo.co_revisor %}
+                    <p><strong>Co-Revisor:</strong> {{ jogo.co_revisor }}</p>
+                    {% endif %}
                     
                     <h5>1.2 Classificação do Jogo</h5>
                     <div class="row">
@@ -303,6 +318,12 @@
             <small class="text-muted">
                 Manual gerado pelo BGCreator em {{ "now"|date:"d/m/Y H:i" }}<br>
                 Versão do Manual: {{ jogo.versao_manual|default:'1.0.0' }}
+                {% if jogo.autor or jogo.co_autor or jogo.revisor or jogo.co_revisor %}<br>
+                {% if jogo.autor %}Autor: {{ jogo.autor }}{% endif %}
+                {% if jogo.co_autor %}{% if jogo.autor %} | {% endif %}Co-Autor: {{ jogo.co_autor }}{% endif %}
+                {% if jogo.revisor %}{% if jogo.autor or jogo.co_autor %} | {% endif %}Revisor: {{ jogo.revisor }}{% endif %}
+                {% if jogo.co_revisor %}{% if jogo.autor or jogo.co_autor or jogo.revisor %} | {% endif %}Co-Revisor: {{ jogo.co_revisor }}{% endif %}
+                {% endif %}
             </small>
         </div>
     </div>
