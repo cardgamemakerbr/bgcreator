@@ -448,11 +448,15 @@ def home(request):
     total_temas = temas_data['count']
     total_componentes = componentes_data['count']
     
+    # Jogos recentes (últimos 5 criados)
+    jogos_recentes = jogos_criados[-5:] if jogos_criados else []
+    
     return render(request, 'home.html', {
         'total_jogos': total_jogos,
         'total_mecanicas': total_mecanicas,
         'total_componentes': total_componentes,
         'total_temas': total_temas,
+        'jogos_recentes': jogos_recentes,
     })
 
 def jogos_lista(request):
@@ -685,6 +689,13 @@ def jogo_novo(request):
             
             # Calcular peso automaticamente
             novo_jogo['peso'] = calcular_peso_jogo(novo_jogo)
+            
+            # Usar versão manual personalizada do formulário ou calcular automaticamente
+            versao_personalizada = request.POST.get('versao_manual')
+            if versao_personalizada and versao_personalizada.strip():
+                novo_jogo['versao_manual'] = versao_personalizada.strip()
+            else:
+                novo_jogo['versao_manual'] = calcular_versao_manual(novo_jogo)
             
             # Adicionar à lista
             jogos_criados.append(novo_jogo)
@@ -997,6 +1008,21 @@ def jogo_editar(request, jogo_id):
         # Recalcular peso automaticamente
         jogo['peso'] = calcular_peso_jogo(jogo)
         
+        # Usar versão manual personalizada do formulário ou incrementar automaticamente
+        versao_personalizada = request.POST.get('versao_manual')
+        if versao_personalizada and versao_personalizada.strip():
+            jogo['versao_manual'] = versao_personalizada.strip()
+        else:
+            # Incrementar versão do manual (patch) ao editar
+            versao_atual = jogo.get('versao_manual', '1.0.0')
+            partes = versao_atual.split('.')
+            major = int(partes[0]) if len(partes) > 0 else 1
+            minor = int(partes[1]) if len(partes) > 1 else 0
+            patch = int(partes[2]) if len(partes) > 2 else 0
+            
+            # Sempre incrementar patch ao editar (alteração de campo existente)
+            jogo['versao_manual'] = f"{major}.{minor}.{patch + 1}"
+        
         messages.success(request, f'Jogo "{jogo["nome"]}" atualizado com sucesso!')
         return redirect('jogos_lista')
     
@@ -1075,6 +1101,16 @@ def jogo_copiar(request, jogo_id):
     # Atualizar dados da cópia
     jogo_copia['id'] = len(jogos_criados) + 100  # Novo ID único
     jogo_copia['nome'] = f"{jogo_original['nome']} - Cópia"
+    
+    # Incrementar versão major (1.X.X → 2.X.X) para cópias
+    versao_original = jogo_original.get('versao_manual', '1.0.0')
+    partes = versao_original.split('.')
+    major_original = int(partes[0]) if len(partes) > 0 else 1
+    minor = int(partes[1]) if len(partes) > 1 else 0
+    
+    # Nova versão com major incrementado
+    nova_versao_major = major_original + 1
+    jogo_copia['versao_manual'] = f"{nova_versao_major}.{minor}.0"
     
     # Adicionar à lista de jogos criados
     jogos_criados.append(jogo_copia)
@@ -1227,6 +1263,61 @@ def jogo_imprimir(request, jogo_id):
     classificacoes = calcular_classificacao_jogo(jogo)
     
     return render(request, 'jogos/imprimir.html', {'jogo': jogo_processado, 'classificacoes': classificacoes})
+
+def calcular_versao_manual(jogo_data):
+    """Calcula a versão do manual baseado no conteúdo do jogo"""
+    # Versão base do jogo (sempre 1)
+    versao_jogo = 1
+    
+    # Contar apenas campos preenchidos para versão minor
+    campos_preenchidos = 0
+    
+    # Campos básicos (cada um conta como 1)
+    if jogo_data.get('nome') and jogo_data['nome'].strip(): campos_preenchidos += 1
+    if jogo_data.get('subtitulo') and jogo_data['subtitulo'].strip(): campos_preenchidos += 1
+    if jogo_data.get('descricao_curta') and jogo_data['descricao_curta'].strip(): campos_preenchidos += 1
+    if jogo_data.get('historia') and jogo_data['historia'].strip(): campos_preenchidos += 1
+    
+    # Listas de itens (cada item conta como 1)
+    mecanicas = [m for m in jogo_data.get('mecanicas', []) if m and m.strip()]
+    temas = [t for t in jogo_data.get('temas', []) if t and t.strip()]
+    componentes = [c for c in jogo_data.get('componentes', []) if c and c.strip()]
+    
+    # Contar apenas se há itens
+    if mecanicas: campos_preenchidos += len(mecanicas)
+    if temas: campos_preenchidos += len(temas)
+    if componentes: campos_preenchidos += len(componentes)
+    
+    # Condições
+    vitorias = [c for c in jogo_data.get('condicoes_vitoria', []) if c and c.strip()]
+    derrotas = [c for c in jogo_data.get('condicoes_derrota', []) if c and c.strip()]
+    if vitorias: campos_preenchidos += len(vitorias)
+    if derrotas: campos_preenchidos += len(derrotas)
+    
+    # Setup
+    setup = jogo_data.get('setup', [])
+    if setup: campos_preenchidos += len(setup)
+    
+    # Estruturas
+    estruturas = jogo_data.get('estruturas', [])
+    if estruturas: 
+        campos_preenchidos += len(estruturas)
+        # Condições especiais
+        for estrutura in estruturas:
+            condicoes = estrutura.get('condicoes_especiais', [])
+            if condicoes: campos_preenchidos += len(condicoes)
+    
+    # Glossário
+    glossario = jogo_data.get('glossario', [])
+    if glossario: campos_preenchidos += len(glossario)
+    
+    # Versão minor: 0 se vazio, senão baseado em campos (máximo 20)
+    versao_minor = min(campos_preenchidos, 20) if campos_preenchidos > 0 else 0
+    
+    # Versão patch: sempre 0 para jogos novos, incrementa apenas com edições
+    versao_patch = 0
+    
+    return f"{versao_jogo}.{versao_minor}.{versao_patch}"
 
 def calcular_peso_jogo(jogo_data):
     """Calcula o peso do jogo baseado nas regras de negócio"""

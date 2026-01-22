@@ -52,6 +52,7 @@
                             <th>Jogadores</th>
                             <th>Tempo (min)</th>
                             <th>Idade</th>
+                            <th>Versão</th>
                             <th>Peso</th>
                             <th>Ações</th>
                         </tr>
@@ -74,6 +75,9 @@
                             <td>{{ jogo.jogadores_min }}-{{ jogo.jogadores_max }}</td>
                             <td>{{ jogo.tempo_min }}-{{ jogo.tempo_max }}</td>
                             <td>{{ jogo.idade_recomendada }}+</td>
+                            <td>
+                                <span class="badge bg-info">{{ jogo.versao_manual|default:'1.0.0' }}</span>
+                            </td>
                             <td>
                                 <span class="badge bg-secondary">{{ jogo.peso }}</span>
                             </td>

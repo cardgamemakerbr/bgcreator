@@ -3,14 +3,13 @@
 Sugestão de campos
 
 
-Add versão do manual automatico
+
     - Colocar um marcado automatio que identifique a versão que o manual esta no momento
         - com o modelo :  1.0.0 
             - (1.X.X Versão do jogo) 
-            - (X.0.X toda vez que adiciona campos novos) 
+            - (X.0.X todas vez que adiciona campos ou componente novo)
+            - (X.X.0 todas que alterar um campo já existente)  
 
-
-Add markdown nas descrições
 
 
 
@@ -22,6 +21,7 @@ Adicionar um modulo de  backup de banco e midias alem da função de restauraç�
 Executando
 ------------------------------------------------------------------------
 ## Novos adições
+- Adicionar versão do manual automatico
 
 X  - Pipeline para gerar a imagem do docker
 
@@ -33,6 +33,7 @@ Concluidos
 ------------------------------------------------------------------------
 
 ## Novos adições
+ok - Adicionoar o  markdown nas descrições
 ok - Adicionar ao lado do marcador de peso, novos de Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento, o marcador Neutro fica marcando 100% e os outros marca 0, preciso de um calculo que verifica quantos porcento o jogo esta baseado depedendo das fase, condições especiais e compontentes adicionados
 ok - Adicionar no campo fase tipo Neutro, Sorte, Tático, Habilidade, Lúdico, Gerenciamento
 ok - adicionar um botão <copiar> com a função, criar uma nova copia deste manual

@@ -123,6 +123,7 @@
                     <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
                     <p><strong>Tempo de Jogo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
                     <p><strong>Idade Recomendada:</strong> {{ jogo.idade_recomendada }}+ anos</p>
+                    <p><strong>Versão do Manual:</strong> {{ jogo.versao_manual|default:'1.0.0' }}</p>
                     <p><strong>Complexidade:</strong> {{ jogo.peso }}/5</p>
                     
                     <h5>1.2 Classificação do Jogo</h5>
@@ -300,7 +301,8 @@
         <!-- Rodapé -->
         <div class="text-center mt-5 pt-4 border-top">
             <small class="text-muted">
-                Manual gerado pelo BGCreator em {{ "now"|date:"d/m/Y H:i" }}
+                Manual gerado pelo BGCreator em {{ "now"|date:"d/m/Y H:i" }}<br>
+                Versão do Manual: {{ jogo.versao_manual|default:'1.0.0' }}
             </small>
         </div>
     </div>

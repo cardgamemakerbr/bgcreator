@@ -36,6 +36,7 @@
                 <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
                 <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
                 <p><strong>Idade:</strong> {{ jogo.idade_recomendada }}+</p>
+                <p><strong>Versão do Manual:</strong> <span class="badge bg-info">{{ jogo.versao_manual|default:'1.0.0' }}</span></p>
                 <p><strong>Peso:</strong> <span class="badge bg-secondary">{{ jogo.peso }}</span></p>
                 
                 <div class="mt-3">

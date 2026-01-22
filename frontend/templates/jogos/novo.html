@@ -53,6 +53,37 @@
                         <input type="file" class="form-control" name="capa" accept="image/jpeg,image/png">
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Versão do Manual</label>
+                        <div class="d-flex align-items-center">
+                            <input type="text" class="form-control me-2" id="versao-manual" value="1.0.0">
+                            <div class="btn-group-vertical me-1" style="width: 30px;">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="incrementVersion('major')" title="Incrementar versão principal">
+                                    <i class="fas fa-chevron-up" style="font-size: 10px;"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="decrementVersion('major')" title="Decrementar versão principal">
+                                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group-vertical me-1" style="width: 30px;">
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="incrementVersion('minor')" title="Incrementar versão menor">
+                                    <i class="fas fa-chevron-up" style="font-size: 10px;"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="decrementVersion('minor')" title="Decrementar versão menor">
+                                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group-vertical" style="width: 30px;">
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="incrementVersion('patch')" title="Incrementar versão patch">
+                                    <i class="fas fa-chevron-up" style="font-size: 10px;"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="decrementVersion('patch')" title="Decrementar versão patch">
+                                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">Automático ou manual - Use os botões para ajustar</small>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Peso</label>
                         <input type="text" class="form-control" id="peso-calculado" value="0.1" readonly>
                         <small class="text-muted">Calculado automaticamente</small>
@@ -394,6 +425,7 @@
             </div>
             
             <div class="text-end">
+                <input type="hidden" name="versao_manual" id="versao-manual-hidden" value="1.0.0">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-save"></i> Salvar Jogo
                 </button>
@@ -480,8 +512,131 @@ function showMarkdownHelp() {
     modal.show();
 }
 
+// Função para atualizar versão automaticamente baseada no conteúdo
+function atualizarVersaoAutomatica() {
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    
+    // Só atualizar se o campo não foi modificado manualmente pelo usuário
+    if (!versionInput.dataset.manuallyModified) {
+        // Calcular nova versão baseada no conteúdo
+        let camposPreenchidos = 0;
+        
+        // Contar campos básicos preenchidos
+        if (document.querySelector('input[name="nome"]')?.value?.trim()) camposPreenchidos++;
+        if (document.querySelector('input[name="subtitulo"]')?.value?.trim()) camposPreenchidos++;
+        if (document.querySelector('textarea[name="descricao_curta"]')?.value?.trim()) camposPreenchidos++;
+        if (document.querySelector('textarea[name="historia"]')?.value?.trim()) camposPreenchidos++;
+        
+        // Contar mecânicas, temas, componentes
+        const mecanicas = document.querySelectorAll('input[name="mecanicas[]"]');
+        camposPreenchidos += Array.from(mecanicas).filter(input => input.value.trim()).length;
+        
+        const temas = document.querySelectorAll('input[name="temas[]"]');
+        camposPreenchidos += Array.from(temas).filter(input => input.value.trim()).length;
+        
+        const componentes = document.querySelectorAll('input[name="componentes[]"]');
+        camposPreenchidos += Array.from(componentes).filter(input => input.value.trim()).length;
+        
+        // Contar condições
+        const vitorias = document.querySelectorAll('input[name="condicoes_vitoria[]"]');
+        camposPreenchidos += Array.from(vitorias).filter(input => input.value.trim()).length;
+        
+        const derrotas = document.querySelectorAll('input[name="condicoes_derrota[]"]');
+        camposPreenchidos += Array.from(derrotas).filter(input => input.value.trim()).length;
+        
+        // Contar estruturas
+        const estruturas = document.querySelectorAll('input[name="estruturas_nome[]"]');
+        camposPreenchidos += Array.from(estruturas).filter(input => input.value.trim()).length;
+        
+        // Contar condições especiais
+        const condicoesEspeciais = document.querySelectorAll('input[name*="condicoes_especiais_nome"]');
+        camposPreenchidos += Array.from(condicoesEspeciais).filter(input => input.value.trim()).length;
+        
+        // Contar setup
+        const setup = document.querySelectorAll('input[name="setup_nome[]"]');
+        camposPreenchidos += Array.from(setup).filter(input => input.value.trim()).length;
+        
+        // Contar glossário
+        const glossario = document.querySelectorAll('input[name="glossario_palavra[]"]');
+        camposPreenchidos += Array.from(glossario).filter(input => input.value.trim()).length;
+        
+        // Calcular versão
+        const versaoMinor = Math.min(camposPreenchidos, 20);
+        const novaVersao = `1.${versaoMinor}.0`;
+        
+        versionInput.value = novaVersao;
+        if (versionHidden) versionHidden.value = novaVersao;
+    }
+}
+// Funções para controlar versão manual
+function incrementVersion(type) {
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    const currentVersion = versionInput.value;
+    const parts = currentVersion.split('.');
+    let major = parseInt(parts[0]) || 1;
+    let minor = parseInt(parts[1]) || 0;
+    let patch = parseInt(parts[2]) || 0;
+    
+    switch(type) {
+        case 'major':
+            major++;
+            break;
+        case 'minor':
+            minor++;
+            break;
+        case 'patch':
+            patch++;
+            break;
+    }
+    
+    const newVersion = `${major}.${minor}.${patch}`;
+    versionInput.value = newVersion;
+    versionHidden.value = newVersion;
+    
+    // Marcar como modificado manualmente
+    versionInput.dataset.manuallyModified = 'true';
+}
+
+function decrementVersion(type) {
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    const currentVersion = versionInput.value;
+    const parts = currentVersion.split('.');
+    let major = parseInt(parts[0]) || 1;
+    let minor = parseInt(parts[1]) || 0;
+    let patch = parseInt(parts[2]) || 0;
+    
+    switch(type) {
+        case 'major':
+            if (major > 1) major--;
+            break;
+        case 'minor':
+            if (minor > 0) minor--;
+            break;
+        case 'patch':
+            if (patch > 0) patch--;
+            break;
+    }
+    
+    const newVersion = `${major}.${minor}.${patch}`;
+    versionInput.value = newVersion;
+    versionHidden.value = newVersion;
+    
+    // Marcar como modificado manualmente
+    versionInput.dataset.manuallyModified = 'true';
+}
+
 // Aguardar carregamento da página
 document.addEventListener('DOMContentLoaded', function() {
+    // Sincronizar versão manual inicial
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    if (versionInput && versionHidden) {
+        versionHidden.value = versionInput.value;
+    }
+    
     // Inicializar busca nos campos existentes
     document.querySelectorAll('.mecanica-search').forEach(input => setupSearch(input, 'mecanicas'));
     document.querySelectorAll('.tema-search').forEach(input => setupSearch(input, 'temas'));
@@ -1003,17 +1158,29 @@ function calcularClassificacoes() {
     document.getElementById('gerenciamento-percent').value = porcentagens.GERENCIAMENTO + '%';
 }
 
-// Adicionar eventos para recalcular peso
+// Adicionar eventos para recalcular peso e versão
 document.addEventListener('DOMContentLoaded', function() {
     // Calcular peso inicial
     calcularPesoTempo();
     
-    // Eventos para recalcular peso
-    document.addEventListener('change', calcularPesoTempo);
-    document.addEventListener('input', calcularPesoTempo);
+    // Atualizar versão inicial
+    atualizarVersaoAutomatica();
+    
+    // Eventos para recalcular peso e versão
+    document.addEventListener('change', function() {
+        calcularPesoTempo();
+        atualizarVersaoAutomatica();
+    });
+    document.addEventListener('input', function() {
+        calcularPesoTempo();
+        atualizarVersaoAutomatica();
+    });
     document.addEventListener('click', function(e) {
         if (e.target.matches('button[onclick*="add"], button[onclick*="remove"]')) {
-            setTimeout(calcularPesoTempo, 100);
+            setTimeout(function() {
+                calcularPesoTempo();
+                atualizarVersaoAutomatica();
+            }, 100);
         }
     });
 });

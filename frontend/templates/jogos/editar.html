@@ -51,6 +51,37 @@
                         {% endif %}
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Versão do Manual</label>
+                        <div class="d-flex align-items-center">
+                            <input type="text" class="form-control me-2" id="versao-manual" value="{{ jogo.versao_manual|default:'1.0.0' }}">
+                            <div class="btn-group-vertical me-1" style="width: 30px;">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="incrementVersion('major')" title="Incrementar versão principal">
+                                    <i class="fas fa-chevron-up" style="font-size: 10px;"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="decrementVersion('major')" title="Decrementar versão principal">
+                                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group-vertical me-1" style="width: 30px;">
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="incrementVersion('minor')" title="Incrementar versão menor">
+                                    <i class="fas fa-chevron-up" style="font-size: 10px;"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="decrementVersion('minor')" title="Decrementar versão menor">
+                                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group-vertical" style="width: 30px;">
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="incrementVersion('patch')" title="Incrementar versão patch">
+                                    <i class="fas fa-chevron-up" style="font-size: 10px;"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="decrementVersion('patch')" title="Decrementar versão patch">
+                                    <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">Automático ou manual - Use os botões para ajustar</small>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Peso</label>
                         <input type="text" class="form-control" id="peso-calculado" value="{{ jogo.peso }}" readonly>
                         <small class="text-muted">Calculado automaticamente</small>
@@ -689,6 +720,7 @@
             </div>
             
             <div class="text-end">
+                <input type="hidden" name="versao_manual" id="versao-manual-hidden" value="{{ jogo.versao_manual|default:'1.0.0' }}">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-save"></i> Salvar Alterações
                 </button>
@@ -775,8 +807,105 @@ function showMarkdownHelp() {
     modal.show();
 }
 
+// Função para atualizar versão automaticamente baseada no conteúdo
+function atualizarVersaoAutomatica() {
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    
+    // Só atualizar se o campo não foi modificado manualmente pelo usuário
+    if (!versionInput.dataset.manuallyModified) {
+        // Para edição: manter versão atual e incrementar patch quando houver mudanças
+        const versaoAtual = versionInput.value;
+        const partes = versaoAtual.split('.');
+        const major = parseInt(partes[0]) || 1;
+        const minor = parseInt(partes[1]) || 0;
+        let patch = parseInt(partes[2]) || 0;
+        
+        // Detectar se houve mudanças nos campos (simulação)
+        // Em edição, qualquer mudança incrementa patch
+        if (!versionInput.dataset.initialVersion) {
+            versionInput.dataset.initialVersion = versaoAtual;
+        }
+        
+        // Incrementar patch se houver interação do usuário
+        if (versionInput.dataset.userInteracted) {
+            patch++;
+            versionInput.dataset.userInteracted = false;
+        }
+        
+        const novaVersao = `${major}.${minor}.${patch}`;
+        versionInput.value = novaVersao;
+        if (versionHidden) versionHidden.value = novaVersao;
+    }
+}
+// Funções para controlar versão manual
+function incrementVersion(type) {
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    const currentVersion = versionInput.value;
+    const parts = currentVersion.split('.');
+    let major = parseInt(parts[0]) || 1;
+    let minor = parseInt(parts[1]) || 0;
+    let patch = parseInt(parts[2]) || 0;
+    
+    switch(type) {
+        case 'major':
+            major++;
+            break;
+        case 'minor':
+            minor++;
+            break;
+        case 'patch':
+            patch++;
+            break;
+    }
+    
+    const newVersion = `${major}.${minor}.${patch}`;
+    versionInput.value = newVersion;
+    versionHidden.value = newVersion;
+    
+    // Marcar como modificado manualmente
+    versionInput.dataset.manuallyModified = 'true';
+}
+
+function decrementVersion(type) {
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    const currentVersion = versionInput.value;
+    const parts = currentVersion.split('.');
+    let major = parseInt(parts[0]) || 1;
+    let minor = parseInt(parts[1]) || 0;
+    let patch = parseInt(parts[2]) || 0;
+    
+    switch(type) {
+        case 'major':
+            if (major > 1) major--;
+            break;
+        case 'minor':
+            if (minor > 0) minor--;
+            break;
+        case 'patch':
+            if (patch > 0) patch--;
+            break;
+    }
+    
+    const newVersion = `${major}.${minor}.${patch}`;
+    versionInput.value = newVersion;
+    versionHidden.value = newVersion;
+    
+    // Marcar como modificado manualmente
+    versionInput.dataset.manuallyModified = 'true';
+}
+
 // Aguardar carregamento da página
 document.addEventListener('DOMContentLoaded', function() {
+    // Sincronizar versão manual inicial
+    const versionInput = document.getElementById('versao-manual');
+    const versionHidden = document.getElementById('versao-manual-hidden');
+    if (versionInput && versionHidden) {
+        versionHidden.value = versionInput.value;
+    }
+    
     // Inicializar busca nos campos existentes
     document.querySelectorAll('.mecanica-search').forEach(input => setupSearch(input, 'mecanicas'));
     document.querySelectorAll('.tema-search').forEach(input => setupSearch(input, 'temas'));
@@ -1274,17 +1403,45 @@ function calcularClassificacoes() {
     document.getElementById('gerenciamento-percent').value = porcentagens.GERENCIAMENTO + '%';
 }
 
-// Adicionar eventos para recalcular peso
+// Adicionar eventos para recalcular peso e versão
 document.addEventListener('DOMContentLoaded', function() {
     // Calcular peso inicial
     setTimeout(calcularPesoTempo, 500);
     
-    // Eventos para recalcular peso
-    document.addEventListener('change', calcularPesoTempo);
-    document.addEventListener('input', calcularPesoTempo);
+    // Marcar interação do usuário para incrementar patch
+    document.addEventListener('input', function(e) {
+        calcularPesoTempo();
+        
+        // Marcar que houve interação para incrementar patch
+        const versionInput = document.getElementById('versao-manual');
+        if (versionInput && !versionInput.dataset.manuallyModified) {
+            versionInput.dataset.userInteracted = true;
+        }
+    });
+    
+    document.addEventListener('change', function(e) {
+        calcularPesoTempo();
+        
+        // Marcar que houve interação para incrementar patch
+        const versionInput = document.getElementById('versao-manual');
+        if (versionInput && !versionInput.dataset.manuallyModified) {
+            versionInput.dataset.userInteracted = true;
+            atualizarVersaoAutomatica();
+        }
+    });
+    
     document.addEventListener('click', function(e) {
         if (e.target.matches('button[onclick*="add"], button[onclick*="remove"]')) {
-            setTimeout(calcularPesoTempo, 100);
+            setTimeout(function() {
+                calcularPesoTempo();
+                
+                // Marcar interação para incrementar patch
+                const versionInput = document.getElementById('versao-manual');
+                if (versionInput && !versionInput.dataset.manuallyModified) {
+                    versionInput.dataset.userInteracted = true;
+                    atualizarVersaoAutomatica();
+                }
+            }, 100);
         }
     });
 });
