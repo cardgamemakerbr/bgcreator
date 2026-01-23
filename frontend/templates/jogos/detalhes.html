@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ jogo.nome }} - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-gamepad"></i> {{ jogo.nome }}</h2>
+    <div>
+        {% if request.session.usuario_perfil == 'ADMINISTRADOR' %}
+        <a href="{% url 'jogo_copiar' jogo.id %}" class="btn btn-success me-2" onclick="return confirm('Tem certeza que deseja criar uma cópia deste jogo?')">
+            <i class="fas fa-copy"></i> Copiar
+        </a>
+        {% endif %}
+        <a href="{% url 'jogo_imprimir' jogo.id %}" class="btn btn-info me-2">
+            <i class="fas fa-print"></i> Imprimir
+        </a>
+        {% if request.session.usuario_perfil in 'AUTOR,REVISOR,ADMINISTRADOR' %}
+        <a href="{% url 'jogo_editar' jogo.id %}" class="btn btn-primary me-2">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        {% endif %}
+        <a href="{% url 'jogos_lista' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Informações Básicas</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Subtítulo:</strong> {{ jogo.subtitulo|default:"Não informado" }}</p>
+                <div><strong>Descrição:</strong> {{ jogo.descricao_curta_html|default:jogo.descricao_curta }}</div>
+                {% if jogo.historia %}
+                <div><strong>História:</strong> {{ jogo.historia_html|default:jogo.historia }}</div>
+                {% endif %}
+                {% if jogo.autor %}
+                <p><strong>Autor:</strong> {{ jogo.autor }}</p>
+                {% endif %}
+                {% if jogo.co_autor %}
+                <p><strong>Co-Autor:</strong> {{ jogo.co_autor }}</p>
+                {% endif %}
+                {% if jogo.revisor %}
+                <p><strong>Revisor:</strong> {{ jogo.revisor }}</p>
+                {% endif %}
+                {% if jogo.co_revisor %}
+                <p><strong>Co-Revisor:</strong> {{ jogo.co_revisor }}</p>
+                {% endif %}
+                <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
+                <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
+                <p><strong>Idade:</strong> {{ jogo.idade_recomendada }}+</p>
+                <p><strong>Versão do Manual:</strong> <span class="badge bg-info">{{ jogo.versao_manual|default:'1.0.0' }}</span></p>
+                <p><strong>Peso:</strong> <span class="badge bg-secondary">{{ jogo.peso }}</span></p>
+                
+                <div class="mt-3">
+                    <strong>Classificação do Jogo:</strong>
+                    <div class="row mt-2">
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-light text-dark me-1">Neutro</span>
+                            <span class="text-muted">{{ classificacoes.NEUTRO }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-warning text-dark me-1">Sorte</span>
+                            <span class="text-muted">{{ classificacoes.SORTE }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-primary me-1">Tático</span>
+                            <span class="text-muted">{{ classificacoes.TATICO }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-success me-1">Habilidade</span>
+                            <span class="text-muted">{{ classificacoes.HABILIDADE }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-info me-1">Lúdico</span>
+                            <span class="text-muted">{{ classificacoes.LUDICO }}%</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-dark me-1">Gerenciamento</span>
+                            <span class="text-muted">{{ classificacoes.GERENCIAMENTO }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if jogo.mecanicas %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Mecânicas</h5>
+            </div>
+            <div class="card-body">
+                {% for mecanica in jogo.mecanicas %}
+                    {% if mecanica %}
+                        <span class="badge bg-primary me-1">{{ mecanica }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if jogo.temas %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-palette"></i> Temas</h5>
+            </div>
+            <div class="card-body">
+                {% for tema in jogo.temas %}
+                    {% if tema %}
+                        <span class="badge bg-success me-1">{{ tema }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if jogo.componentes %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-puzzle-piece"></i> Componentes</h5>
+            </div>
+            <div class="card-body">
+                {% for componente in jogo.componentes %}
+                    {% if componente %}
+                        <span class="badge bg-warning me-1">{{ componente }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        {% if jogo.capa %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-image"></i> Capa do Jogo</h6>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ jogo.capa }}" class="img-fluid rounded" alt="Capa de {{ jogo.nome }}" style="max-height: 300px;">
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if jogo.condicoes_vitoria %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-trophy"></i> Condições de Vitória</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for condicao in jogo.condicoes_vitoria_html|default:jogo.condicoes_vitoria %}
+                        <li><i class="fas fa-check text-success"></i> {{ condicao|default:condicao }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if jogo.condicoes_derrota %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-skull"></i> Condições de Derrota</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for condicao in jogo.condicoes_derrota_html|default:jogo.condicoes_derrota %}
+                        <li><i class="fas fa-times text-danger"></i> {{ condicao|default:condicao }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if jogo.setup %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-cog"></i> Setup do Jogo</h5>
+    </div>
+    <div class="card-body">
+        {% for setup in jogo.setup_processado|default:jogo.setup %}
+        <div class="border rounded p-3 mb-3">
+            <h6>{{ setup.nome }}</h6>
+            {% if setup.descricao %}
+            <div class="text-muted">{{ setup.descricao_html|default:setup.descricao }}</div>
+            {% endif %}
+            {% if setup.imagens %}
+            <div class="row mt-2">
+                {% for imagem in setup.imagens %}
+                <div class="col-md-4 mb-2">
+                    <div class="text-center">
+                        {% if imagem.imagem %}
+                        <img src="{{ imagem.imagem }}" class="img-fluid rounded" alt="{{ imagem.descricao }}" style="max-height: 200px;">
+                        {% else %}
+                        <div class="border rounded p-3 text-muted">
+                            <i class="fas fa-image fa-2x"></i>
+                            <br><small>Sem imagem</small>
+                        </div>
+                        {% endif %}
+                        <small class="d-block text-muted mt-1">{{ imagem.descricao }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if jogo.estruturas %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-list-ol"></i> Estruturas do Jogo</h5>
+    </div>
+    <div class="card-body">
+        {% for estrutura in jogo.estruturas_processadas|default:jogo.estruturas %}
+        <div class="border rounded p-3 mb-3">
+            <h6>{{ estrutura.nome }} <span class="badge bg-info">{{ estrutura.tipo }}</span></h6>
+            {% if estrutura.descricao %}
+            <div class="text-muted">{{ estrutura.descricao_html|default:estrutura.descricao }}</div>
+            {% endif %}
+            {% if estrutura.condicoes_especiais %}
+            <strong>Condições Especiais:</strong>
+            <ul class="mt-2">
+                {% for condicao in estrutura.condicoes_especiais_processadas|default:estrutura.condicoes_especiais %}
+                <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao_html|default:condicao.descricao }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if jogo.glossario %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-book"></i> Glossário</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for termo in jogo.glossario_processado|default:jogo.glossario %}
+            <div class="col-md-6 mb-3">
+                <div class="border rounded p-3 d-flex align-items-start">
+                    {% if termo.imagem %}
+                    <img src="{{ termo.imagem }}" class="rounded me-3" alt="{{ termo.palavra }}" style="width: 40px; height: 40px; object-fit: cover; flex-shrink: 0;">
+                    {% else %}
+                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; flex-shrink: 0;">
+                        <i class="fas fa-image text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <strong>{{ termo.palavra }}</strong>
+                        <div class="text-muted">{{ termo.definicao_html|default:termo.definicao }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

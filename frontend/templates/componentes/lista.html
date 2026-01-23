@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Componentes - BGCreator{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-puzzle-piece"></i> Gerenciar Componentes</h2>
+    <a href="{% url 'componente_novo' %}" class="btn btn-warning">
+        <i class="fas fa-plus"></i> Novo Componente
+    </a>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="get" class="d-flex">
+            <input type="text" class="form-control me-2" name="busca" value="{{ request.GET.busca }}" placeholder="Buscar componente..." onkeyup="searchItems()">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-search"></i>
+            </button>
+            {% if request.GET.busca %}
+            <a href="{% url 'componentes_lista' %}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </form>
+    </div>
+    <div class="col-md-2">
+        <select class="form-select" onchange="changePerPage(this.value)">
+            <option value="5" {% if pagination.per_page == 5 %}selected{% endif %}>5 por página</option>
+            <option value="10" {% if pagination.per_page == 10 %}selected{% endif %}>10 por página</option>
+            <option value="20" {% if pagination.per_page == 20 %}selected{% endif %}>20 por página</option>
+            <option value="30" {% if pagination.per_page == 30 %}selected{% endif %}>30 por página</option>
+        </select>
+    </div>
+    <div class="col-md-6 text-end">
+        <span class="text-muted">{{ pagination.count }} componentes encontrados</span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if componentes %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for componente in componentes %}
+                        <tr>
+                            <td><strong>{{ componente.nome }}</strong></td>
+                            <td>
+                                {% if componente.tipo == 'TATICO' %}
+                                    <span class="badge bg-primary">Tático</span>
+                                {% elif componente.tipo == 'SORTE' %}
+                                    <span class="badge bg-warning">Sorte</span>
+                                {% elif componente.tipo == 'LUDICO' %}
+                                    <span class="badge bg-success">Lúdico</span>
+                                {% elif componente.tipo == 'HABILIDADE' %}
+                                    <span class="badge bg-info">Habilidade</span>
+                                {% elif componente.tipo == 'GERENCIAMENTO' %}
+                                    <span class="badge bg-dark">Gerenciamento</span>
+                                {% elif componente.tipo == 'NEUTRO' %}
+                                    <span class="badge bg-secondary">Neutro</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Tático</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ componente.descricao|default:"Sem descrição" }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarComponente({{ componente.id }})">Editar</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="excluirComponente({{ componente.id }})">Excluir</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-puzzle-piece fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum componente cadastrado</h5>
+                <p class="text-muted">Clique em "Novo Componente" para começar</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Paginação -->
+{% if pagination.total_pages > 1 %}
+<nav aria-label="Paginação">
+    <ul class="pagination justify-content-center">
+        {% if pagination.current_page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pagination.current_page|add:-1 }}&per_page={{ pagination.per_page }}">« Anterior</a>
+            </li>
+        {% endif %}
+        
+        {% for page_num in "123456789"|make_list %}
+            {% if page_num|add:0 <= pagination.total_pages %}
+                <li class="page-item {% if page_num|add:0 == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}&per_page={{ pagination.per_page }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if pagination.current_page < pagination.total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pagination.current_page|add:1 }}&per_page={{ pagination.per_page }}">Próximo »</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function changePerPage(value) {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', 1);
+    window.location = url;
+}
+
+function searchItems() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const table = document.querySelector('table tbody');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+        const nameCell = rows[i].getElementsByTagName('td')[0];
+        const descCell = rows[i].getElementsByTagName('td')[1];
+        if (nameCell && descCell) {
+            const nameText = nameCell.textContent || nameCell.innerText;
+            const descText = descCell.textContent || descCell.innerText;
+            if (nameText.toLowerCase().indexOf(filter) > -1 || descText.toLowerCase().indexOf(filter) > -1) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+function editarComponente(id) {
+    window.location.href = `/componentes/editar/${id}/`;
+}
+
+function excluirComponente(id) {
+    if (confirm('Tem certeza que deseja excluir este componente?')) {
+        window.location.href = `/componentes/excluir/${id}/`;
+    }
+}
+</script>
+{% endblock %}

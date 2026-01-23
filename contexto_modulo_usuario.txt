@@ -1,0 +1,19 @@
+## Modulo de usuario e gerenciamento de acesso
+
+- Adicionar um novo serviço de gerenciamento em container modular
+- backend: pyton
+- usando api para backend
+- frontend: jango
+- database: mongodb
+- deploy: adicionar o novo modulo ao docker-compose.yaml do projeto
+
+Formulario principal do modulo
+- Criar uma tela de login antes de acessar a HOMEPAGE
+- [NOME DO NOVO USUARIO] [LOGIN] [SENHA] [PERFIL] <ATIVO/DESATIVADO>
+- Listar todos os usuarios do sistama igual o formularios de gerenciamento
+- Correlacionar a criação de movos documentos com o usuario logado
+- *Criar os perfis;
+    - Administrador (acesso completo)
+    - Autor (acesso limitado: só pode gerenciar (criar, alterar ou deletar) os projetos criados por ele)
+    - Leitor (acesso limitado: só pode ler os projetos)
+- Criar um usuario admin com o password admin no perfil administrador

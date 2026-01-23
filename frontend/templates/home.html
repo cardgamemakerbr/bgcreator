@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}BGCreator - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">
+                <i class="fas fa-dice-d20 text-primary"></i>
+                Bem-vindo ao BGCreator
+            </h1>
+            <p class="lead">
+                Sua ferramenta completa para criar e documentar board games de forma padronizada.
+            </p>
+            <hr class="my-4">
+            <p>
+                Gerencie jogos, mecânicas, componentes e temas. Calcule automaticamente a complexidade 
+                dos seus jogos e mantenha toda a documentação organizada.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-gamepad fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Jogos</h5>
+                <p class="card-text">Crie e gerencie seus board games com todas as informações necessárias.</p>
+                <a href="{% url 'jogos_lista' %}" class="btn btn-primary">Gerenciar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-cogs fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Mecânicas</h5>
+                <p class="card-text">Cadastre e organize as mecânicas utilizadas nos seus jogos.</p>
+                <a href="{% url 'mecanicas_lista' %}" class="btn btn-success">Gerenciar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-puzzle-piece fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Componentes</h5>
+                <p class="card-text">Mantenha um catálogo de todos os componentes dos seus jogos.</p>
+                <a href="{% url 'componentes_lista' %}" class="btn btn-warning">Gerenciar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-palette fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Temas</h5>
+                <p class="card-text">Organize os temas e ambientações dos seus board games.</p>
+                <a href="{% url 'temas_lista' %}" class="btn btn-info">Gerenciar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h3>Estatísticas Rápidas</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h4>{{ total_jogos }}</h4>
+                        <p>Jogos Cadastrados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h4>{{ total_mecanicas }}</h4>
+                        <p>Mecânicas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h4>{{ total_componentes }}</h4>
+                        <p>Componentes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h4>{{ total_temas }}</h4>
+                        <p>Temas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if jogos_recentes %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h3>Manuais Recentes</h3>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Versão</th>
+                        <th>Peso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for jogo in jogos_recentes %}
+                    <tr>
+                        <td><a href="{% url 'jogo_detalhes' jogo.id %}" class="text-decoration-none">{{ jogo.nome }}</a></td>
+                        <td><span class="badge bg-info">{{ jogo.versao_manual|default:'1.0.0' }}</span></td>
+                        <td><span class="badge bg-secondary">{{ jogo.peso }}</span></td>
+                        <td>
+                            <a href="{% url 'jogo_detalhes' jogo.id %}" class="btn btn-sm btn-outline-info me-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'jogo_imprimir' jogo.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-print"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-end">
+            <a href="{% url 'jogos_lista' %}" class="btn btn-outline-primary">
+                Ver Todos os Jogos <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

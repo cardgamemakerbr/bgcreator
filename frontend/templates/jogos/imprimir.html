@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ jogo.nome }} - Manual do Jogo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { font-size: 12pt; }
+            .page-break { page-break-before: always; }
+        }
+        
+        .print-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20mm;
+        }
+        
+        .index-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #ccc;
+            margin-bottom: 5px;
+            padding-bottom: 2px;
+        }
+        
+        .section-number {
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #333;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        
+        .badge {
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botões de Ação (não imprimem) -->
+    <div class="no-print bg-light p-3 text-center">
+        <button onclick="window.print()" class="btn btn-primary me-2">
+            <i class="fas fa-print"></i> Imprimir PDF
+        </button>
+        <button onclick="compartilhar()" class="btn btn-success me-2">
+            <i class="fas fa-share"></i> Compartilhar
+        </button>
+        <a href="{% url 'jogo_detalhes' jogo.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="print-container">
+        <!-- Capa -->
+        <div class="text-center mb-5">
+            {% if jogo.capa %}
+            <img src="{{ jogo.capa }}" class="img-fluid rounded mb-3" alt="Capa de {{ jogo.nome }}" style="max-height: 200px;">
+            {% endif %}
+            <h1 class="display-4">{{ jogo.nome }}</h1>
+            {% if jogo.subtitulo %}
+            <h2 class="text-muted">{{ jogo.subtitulo }}</h2>
+            {% endif %}
+            {% if jogo.autor %}
+            <p class="lead text-muted">por {{ jogo.autor }}</p>
+            {% endif %}
+            <hr>
+            <p class="lead">Manual do Jogo</p>
+            <p class="text-muted">Gerado pelo BGCreator</p>
+        </div>
+
+        <!-- Índice -->
+        <div class="page-break">
+            <h2 class="section-number">Índice</h2>
+            <div class="mt-4">
+                <div class="index-item">
+                    <span>1. Informações Básicas</span>
+                    <span>3</span>
+                </div>
+                {% if jogo.setup %}
+                <div class="index-item">
+                    <span>2. Setup do Jogo</span>
+                    <span>4</span>
+                </div>
+                {% endif %}
+                <div class="index-item">
+                    <span>{% if jogo.setup %}3{% else %}2{% endif %}. Componentes do Jogo</span>
+                    <span>{% if jogo.setup %}5{% else %}4{% endif %}</span>
+                </div>
+                {% if jogo.condicoes_vitoria or jogo.condicoes_derrota %}
+                <div class="index-item">
+                    <span>{% if jogo.setup %}4{% else %}3{% endif %}. Objetivo do Jogo</span>
+                    <span>{% if jogo.setup %}6{% else %}5{% endif %}</span>
+                </div>
+                {% endif %}
+                {% if jogo.estruturas %}
+                <div class="index-item">
+                    <span>{% if jogo.setup %}5{% else %}4{% endif %}. Como Jogar</span>
+                    <span>{% if jogo.setup %}7{% else %}6{% endif %}</span>
+                </div>
+                {% endif %}
+                {% if jogo.glossario %}
+                <div class="index-item">
+                    <span>{% if jogo.setup %}6{% else %}5{% endif %}. Glossário</span>
+                    <span>{{ jogo.estruturas|length|add:8 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 1. Informações Básicas -->
+        <div class="page-break">
+            <h2><span class="section-number">1.</span> Informações Básicas</h2>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>1.1 Sobre o Jogo</h4>
+                    <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
+                    <p><strong>Tempo de Jogo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
+                    <p><strong>Idade Recomendada:</strong> {{ jogo.idade_recomendada }}+ anos</p>
+                    <p><strong>Versão do Manual:</strong> {{ jogo.versao_manual|default:'1.0.0' }}</p>
+                    <p><strong>Complexidade:</strong> {{ jogo.peso }}/5</p>
+                    {% if jogo.autor %}
+                    <p><strong>Autor:</strong> {{ jogo.autor }}</p>
+                    {% endif %}
+                    {% if jogo.co_autor %}
+                    <p><strong>Co-Autor:</strong> {{ jogo.co_autor }}</p>
+                    {% endif %}
+                    {% if jogo.revisor %}
+                    <p><strong>Revisor:</strong> {{ jogo.revisor }}</p>
+                    {% endif %}
+                    {% if jogo.co_revisor %}
+                    <p><strong>Co-Revisor:</strong> {{ jogo.co_revisor }}</p>
+                    {% endif %}
+                    
+                    <h5>1.2 Classificação do Jogo</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Neutro:</strong> {{ classificacoes.NEUTRO }}%</p>
+                            <p><strong>Sorte:</strong> {{ classificacoes.SORTE }}%</p>
+                            <p><strong>Tático:</strong> {{ classificacoes.TATICO }}%</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Habilidade:</strong> {{ classificacoes.HABILIDADE }}%</p>
+                            <p><strong>Lúdico:</strong> {{ classificacoes.LUDICO }}%</p>
+                            <p><strong>Gerenciamento:</strong> {{ classificacoes.GERENCIAMENTO }}%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h4>1.3 Descrição</h4>
+                    <div>{{ jogo.descricao_curta_html|default:jogo.descricao_curta }}</div>
+                    {% if jogo.historia %}
+                    <h4>1.4 História</h4>
+                    <div>{{ jogo.historia_html|default:jogo.historia }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if jogo.mecanicas or jogo.temas %}
+            <h4>1.5 Características</h4>
+            {% if jogo.mecanicas %}
+            <p><strong>Mecânicas:</strong>
+                {% for mecanica in jogo.mecanicas %}
+                    {% if mecanica %}{{ mecanica }}{% if not forloop.last %}, {% endif %}{% endif %}
+                {% endfor %}
+            </p>
+            {% endif %}
+            {% if jogo.temas %}
+            <p><strong>Temas:</strong>
+                {% for tema in jogo.temas %}
+                    {% if tema %}{{ tema }}{% if not forloop.last %}, {% endif %}{% endif %}
+                {% endfor %}
+            </p>
+            {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- 2. Setup do Jogo -->
+        {% if jogo.setup %}
+        <div class="page-break">
+            <h2><span class="section-number">2.</span> Setup do Jogo</h2>
+            
+            {% for setup in jogo.setup_processado|default:jogo.setup %}
+            <div class="mt-4">
+                <h4>2.{{ forloop.counter }} {{ setup.nome }}</h4>
+                {% if setup.descricao %}
+                <div>{{ setup.descricao_html|default:setup.descricao }}</div>
+                {% endif %}
+                
+                {% if setup.imagens %}
+                <div class="row mt-3">
+                    {% for imagem in setup.imagens %}
+                    <div class="col-md-6 mb-3">
+                        <div class="text-center">
+                            {% if imagem.imagem %}
+                            <img src="{{ imagem.imagem }}" class="img-fluid rounded border" alt="{{ imagem.descricao }}" style="max-height: 200px;">
+                            {% else %}
+                            <div class="border rounded p-2 text-muted">
+                                <i class="fas fa-image"></i> Sem imagem
+                            </div>
+                            {% endif %}
+                            <p class="mt-2 mb-0"><small><strong>{{ imagem.descricao }}</strong></small></p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- {% if jogo.setup %}3{% else %}2{% endif %}. Componentes -->
+        {% if jogo.componentes %}
+        <div class="page-break">
+            <h2><span class="section-number">{% if jogo.setup %}3{% else %}2{% endif %}.</span> Componentes do Jogo</h2>
+            <div class="mt-4">
+                <ul class="list-group list-group-flush">
+                    {% for componente in jogo.componentes %}
+                        {% if componente %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ componente }}</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 3. Objetivo -->
+        {% if jogo.condicoes_vitoria or jogo.condicoes_derrota %}
+        <div class="page-break">
+            <h2><span class="section-number">{% if jogo.setup %}4{% else %}3{% endif %}.</span> Objetivo do Jogo</h2>
+            
+            {% if jogo.condicoes_vitoria %}
+            <h4>{% if jogo.setup %}4{% else %}3{% endif %}.1 Condições de Vitória</h4>
+            <ul>
+                {% for condicao in jogo.condicoes_vitoria_html|default:jogo.condicoes_vitoria %}
+                <li>{{ condicao|default:condicao }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if jogo.condicoes_derrota %}
+            <h4>{% if jogo.setup %}4{% else %}3{% endif %}.2 Condições de Derrota</h4>
+            <ul>
+                {% for condicao in jogo.condicoes_derrota_html|default:jogo.condicoes_derrota %}
+                <li>{{ condicao|default:condicao }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- 4. Como Jogar -->
+        {% if jogo.estruturas %}
+        <div class="page-break">
+            <h2><span class="section-number">{% if jogo.setup %}5{% else %}4{% endif %}.</span> Como Jogar</h2>
+            
+            {% for estrutura in jogo.estruturas_processadas|default:jogo.estruturas %}
+            <div class="mt-4">
+                <h4>{% if jogo.setup %}5{% else %}4{% endif %}.{{ forloop.counter }} {{ estrutura.nome }} 
+                    <span class="badge bg-info">{{ estrutura.tipo }}</span>
+                </h4>
+                {% if estrutura.descricao %}
+                <div>{{ estrutura.descricao_html|default:estrutura.descricao }}</div>
+                {% endif %}
+                
+                {% if estrutura.condicoes_especiais %}
+                <h5>{% if jogo.setup %}5{% else %}4{% endif %}.{{ forloop.counter }}.1 Condições Especiais</h5>
+                <ul>
+                    {% for condicao in estrutura.condicoes_especiais_processadas|default:estrutura.condicoes_especiais %}
+                    <li><strong>{{ condicao.nome }}:</strong> {{ condicao.descricao_html|default:condicao.descricao }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- 5. Glossário -->
+        {% if jogo.glossario %}
+        <div class="page-break">
+            <h2><span class="section-number">{% if jogo.setup %}6{% else %}5{% endif %}.</span> Glossário</h2>
+            <div class="mt-4">
+                {% for termo in jogo.glossario_processado|default:jogo.glossario %}
+                <div class="mb-3 d-flex align-items-start">
+                    {% if termo.imagem %}
+                    <img src="{{ termo.imagem }}" class="rounded me-3" alt="{{ termo.palavra }}" style="width: 30px; height: 30px; object-fit: cover; flex-shrink: 0;">
+                    {% else %}
+                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; flex-shrink: 0;">
+                        <i class="fas fa-image text-muted" style="font-size: 12px;"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-1">{{ termo.palavra }}</h6>
+                        <div>{{ termo.definicao_html|default:termo.definicao }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Rodapé -->
+        <div class="text-center mt-5 pt-4 border-top">
+            <small class="text-muted">
+                Manual gerado pelo BGCreator em {{ "now"|date:"d/m/Y H:i" }}<br>
+                Versão do Manual: {{ jogo.versao_manual|default:'1.0.0' }}
+                {% if jogo.autor or jogo.co_autor or jogo.revisor or jogo.co_revisor %}<br>
+                {% if jogo.autor %}Autor: {{ jogo.autor }}{% endif %}
+                {% if jogo.co_autor %}{% if jogo.autor %} | {% endif %}Co-Autor: {{ jogo.co_autor }}{% endif %}
+                {% if jogo.revisor %}{% if jogo.autor or jogo.co_autor %} | {% endif %}Revisor: {{ jogo.revisor }}{% endif %}
+                {% if jogo.co_revisor %}{% if jogo.autor or jogo.co_autor or jogo.revisor %} | {% endif %}Co-Revisor: {{ jogo.co_revisor }}{% endif %}
+                {% endif %}
+            </small>
+        </div>
+    </div>
+
+    <script>
+        function compartilhar() {
+            const url = window.location.href;
+            const shareData = {
+                title: '{{ jogo.nome }} - Manual do Jogo',
+                text: 'Confira o manual do jogo {{ jogo.nome }}',
+                url: url
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData);
+            } else {
+                // Fallback: copiar URL
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copiado para a área de transferência!');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
