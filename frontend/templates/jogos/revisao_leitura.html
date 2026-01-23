@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}Status de Revisão: {{ jogo.nome }} - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-eye"></i> Status de Revisão: {{ jogo.nome }}</h2>
+    <a href="{% url 'jogos_lista' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> <strong>Modo Somente Leitura:</strong> Você pode visualizar o status das revisões, mas não pode editá-las.
+</div>
+
+<!-- Seção 1: Informações Básicas -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas and jogo.revisao.secao_informacoes_basicas.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_informacoes_basicas and jogo.revisao.secao_informacoes_basicas.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-info-circle"></i> 1. Informações Básicas</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Nome:</strong> {{ jogo.nome }}</p>
+        <p><strong>Subtítulo:</strong> {{ jogo.subtitulo|default:"Não informado" }}</p>
+        <div><strong>Descrição:</strong> {{ jogo.descricao_curta }}</div>
+        {% if jogo.historia %}
+        <div><strong>História:</strong> {{ jogo.historia }}</div>
+        {% endif %}
+        <p><strong>Jogadores:</strong> {{ jogo.jogadores_min }} a {{ jogo.jogadores_max }}</p>
+        <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
+        <p><strong>Idade:</strong> {{ jogo.idade_recomendada }}+</p>
+        
+        {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas %}
+            {% if jogo.revisao.secao_informacoes_basicas.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_informacoes_basicas.revisor }}] {{ jogo.revisao.secao_informacoes_basicas.data }}</div>
+            {% elif jogo.revisao.secao_informacoes_basicas.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_informacoes_basicas.revisor }}] {{ jogo.revisao.secao_informacoes_basicas.data }}</div>
+                {% if jogo.revisao.secao_informacoes_basicas.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_informacoes_basicas.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 2: Mecânicas -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_mecanicas and jogo.revisao.secao_mecanicas.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_mecanicas and jogo.revisao.secao_mecanicas.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-cogs"></i> 2. Mecânicas</h5>
+    </div>
+    <div class="card-body">
+        {% for mecanica in jogo.mecanicas %}
+            <span class="badge bg-primary">{{ mecanica }}</span>
+        {% empty %}
+            <p>Nenhuma mecânica informada.</p>
+        {% endfor %}
+        
+        {% if jogo.revisao and jogo.revisao.secao_mecanicas %}
+            {% if jogo.revisao.secao_mecanicas.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_mecanicas.revisor }}] {{ jogo.revisao.secao_mecanicas.data }}</div>
+            {% elif jogo.revisao.secao_mecanicas.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_mecanicas.revisor }}] {{ jogo.revisao.secao_mecanicas.data }}</div>
+                {% if jogo.revisao.secao_mecanicas.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_mecanicas.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 3: Temas -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_temas and jogo.revisao.secao_temas.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_temas and jogo.revisao.secao_temas.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-palette"></i> 3. Temas</h5>
+    </div>
+    <div class="card-body">
+        {% for tema in jogo.temas %}
+            <span class="badge bg-info">{{ tema }}</span>
+        {% empty %}
+            <p>Nenhum tema informado.</p>
+        {% endfor %}
+        
+        {% if jogo.revisao and jogo.revisao.secao_temas %}
+            {% if jogo.revisao.secao_temas.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_temas.revisor }}] {{ jogo.revisao.secao_temas.data }}</div>
+            {% elif jogo.revisao.secao_temas.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_temas.revisor }}] {{ jogo.revisao.secao_temas.data }}</div>
+                {% if jogo.revisao.secao_temas.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_temas.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 4: Componentes -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_componentes and jogo.revisao.secao_componentes.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_componentes and jogo.revisao.secao_componentes.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-puzzle-piece"></i> 4. Componentes</h5>
+    </div>
+    <div class="card-body">
+        <ul>
+        {% for componente in jogo.componentes %}
+            <li>{{ componente }}</li>
+        {% empty %}
+            <p>Nenhum componente informado.</p>
+        {% endfor %}
+        </ul>
+        
+        {% if jogo.revisao and jogo.revisao.secao_componentes %}
+            {% if jogo.revisao.secao_componentes.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_componentes.revisor }}] {{ jogo.revisao.secao_componentes.data }}</div>
+            {% elif jogo.revisao.secao_componentes.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_componentes.revisor }}] {{ jogo.revisao.secao_componentes.data }}</div>
+                {% if jogo.revisao.secao_componentes.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_componentes.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 5: Condições de Vitória e Derrota -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_condicoes and jogo.revisao.secao_condicoes.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_condicoes and jogo.revisao.secao_condicoes.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-trophy"></i> 5. Condições de Vitória e Derrota</h5>
+    </div>
+    <div class="card-body">
+        <h6>Condições de Vitória</h6>
+        <ul>
+        {% for condicao in jogo.condicoes_vitoria %}
+            <li>{{ condicao }}</li>
+        {% empty %}
+            <p>Nenhuma condição de vitória informada.</p>
+        {% endfor %}
+        </ul>
+        <hr>
+        <h6>Condições de Derrota</h6>
+        <ul>
+        {% for condicao in jogo.condicoes_derrota %}
+            <li>{{ condicao }}</li>
+        {% empty %}
+            <p>Nenhuma condição de derrota informada.</p>
+        {% endfor %}
+        </ul>
+        
+        {% if jogo.revisao and jogo.revisao.secao_condicoes %}
+            {% if jogo.revisao.secao_condicoes.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_condicoes.revisor }}] {{ jogo.revisao.secao_condicoes.data }}</div>
+            {% elif jogo.revisao.secao_condicoes.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_condicoes.revisor }}] {{ jogo.revisao.secao_condicoes.data }}</div>
+                {% if jogo.revisao.secao_condicoes.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_condicoes.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 6: Setup do Jogo -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_setup and jogo.revisao.secao_setup.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_setup and jogo.revisao.secao_setup.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-cog"></i> 6. Setup do Jogo</h5>
+    </div>
+    <div class="card-body">
+        {% for setup in jogo.setup %}
+            <h6>{{ setup.nome }}</h6>
+            <p>{{ setup.descricao }}</p>
+            {% for imagem in setup.imagens %}
+                <p>
+                    {% if imagem.imagem %}
+                    <img src="{{ imagem.imagem }}" alt="{{ imagem.descricao }}" class="img-fluid" style="max-width: 200px;">
+                    {% endif %}
+                    <br><em>{{ imagem.descricao }}</em>
+                </p>
+            {% endfor %}
+        {% empty %}
+            <p>Nenhuma informação de setup.</p>
+        {% endfor %}
+        
+        {% if jogo.revisao and jogo.revisao.secao_setup %}
+            {% if jogo.revisao.secao_setup.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_setup.revisor }}] {{ jogo.revisao.secao_setup.data }}</div>
+            {% elif jogo.revisao.secao_setup.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_setup.revisor }}] {{ jogo.revisao.secao_setup.data }}</div>
+                {% if jogo.revisao.secao_setup.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_setup.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 7: Estruturas do Jogo -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_estruturas and jogo.revisao.secao_estruturas.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_estruturas and jogo.revisao.secao_estruturas.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-list-ol"></i> 7. Estruturas do Jogo</h5>
+    </div>
+    <div class="card-body">
+        {% for estrutura in jogo.estruturas %}
+            <h6>{{ estrutura.nome }} ({{ estrutura.tipo }}) - {{ estrutura.classificacao }}</h6>
+            <p>{{ estrutura.descricao }}</p>
+            {% if estrutura.condicoes_especiais %}
+                <strong>Condições Especiais:</strong>
+                <ul>
+                {% for condicao in estrutura.condicoes_especiais %}
+                    <li><strong>{{ condicao.nome }} ({{ condicao.tipo }}):</strong> {{ condicao.descricao }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% empty %}
+            <p>Nenhuma estrutura informada.</p>
+        {% endfor %}
+        
+        {% if jogo.revisao and jogo.revisao.secao_estruturas %}
+            {% if jogo.revisao.secao_estruturas.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_estruturas.revisor }}] {{ jogo.revisao.secao_estruturas.data }}</div>
+            {% elif jogo.revisao.secao_estruturas.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_estruturas.revisor }}] {{ jogo.revisao.secao_estruturas.data }}</div>
+                {% if jogo.revisao.secao_estruturas.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_estruturas.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Seção 8: Glossário -->
+<div class="card mb-4" {% if jogo.revisao and jogo.revisao.secao_glossario and jogo.revisao.secao_glossario.status == 'REVISADO' %}style="border-color: #28a745;"{% elif jogo.revisao and jogo.revisao.secao_glossario and jogo.revisao.secao_glossario.status == 'CORRIGIR' %}style="border-color: #ffc107;"{% endif %}>
+    <div class="card-header">
+        <h5><i class="fas fa-book"></i> 8. Glossário</h5>
+    </div>
+    <div class="card-body">
+        {% for termo in jogo.glossario %}
+            <p>
+                {% if termo.imagem %}
+                <img src="{{ termo.imagem }}" alt="{{ termo.palavra }}" style="width: 40px; height: 40px; margin-right: 10px;">
+                {% endif %}
+                <strong>{{ termo.palavra }}:</strong> {{ termo.definicao }}
+            </p>
+        {% empty %}
+            <p>Nenhum termo no glossário.</p>
+        {% endfor %}
+        
+        {% if jogo.revisao and jogo.revisao.secao_glossario %}
+            {% if jogo.revisao.secao_glossario.status == 'REVISADO' %}
+                <div class="alert alert-success mt-3"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_glossario.revisor }}] {{ jogo.revisao.secao_glossario.data }}</div>
+            {% elif jogo.revisao.secao_glossario.status == 'CORRIGIR' %}
+                <div class="alert alert-warning mt-3"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_glossario.revisor }}] {{ jogo.revisao.secao_glossario.data }}</div>
+                {% if jogo.revisao.secao_glossario.observacoes %}
+                    <div class="alert alert-light mt-2"><strong>Observações:</strong> {{ jogo.revisao.secao_glossario.observacoes }}</div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="alert alert-secondary mt-3"><i class="fas fa-clock"></i> AGUARDANDO REVISÃO</div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

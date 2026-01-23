@@ -33,12 +33,20 @@
             <p><strong>Tempo:</strong> {{ jogo.tempo_min }} a {{ jogo.tempo_max }} minutos</p>
             <p><strong>Idade:</strong> {{ jogo.idade_recomendada }}+</p>
             
-            <div id="status-secao_informacoes_basicas" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_informacoes_basicas" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_informacoes_basicas" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_informacoes_basicas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas %}
+                    {% if jogo.revisao.secao_informacoes_basicas.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_informacoes_basicas.revisor }}] {{ jogo.revisao.secao_informacoes_basicas.data }}</div>
+                    {% elif jogo.revisao.secao_informacoes_basicas.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_informacoes_basicas.revisor }}] {{ jogo.revisao.secao_informacoes_basicas.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_informacoes_basicas" id="secao_informacoes_basicas" value="">
+            <div id="correcao-secao_informacoes_basicas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas and jogo.revisao.secao_informacoes_basicas.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_informacoes_basicas" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_informacoes_basicas and jogo.revisao.secao_informacoes_basicas.observacoes %}{{ jogo.revisao.secao_informacoes_basicas.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_informacoes_basicas" id="secao_informacoes_basicas" value="{% if jogo.revisao and jogo.revisao.secao_informacoes_basicas %}{{ jogo.revisao.secao_informacoes_basicas.status }}{% endif %}">
         </div>
     </div>
 
@@ -57,12 +65,20 @@
             {% empty %}
                 <p>Nenhuma mecânica informada.</p>
             {% endfor %}
-            <div id="status-secao_mecanicas" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_mecanicas" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_mecanicas" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_mecanicas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_mecanicas %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_mecanicas %}
+                    {% if jogo.revisao.secao_mecanicas.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_mecanicas.revisor }}] {{ jogo.revisao.secao_mecanicas.data }}</div>
+                    {% elif jogo.revisao.secao_mecanicas.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_mecanicas.revisor }}] {{ jogo.revisao.secao_mecanicas.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_mecanicas" id="secao_mecanicas" value="">
+            <div id="correcao-secao_mecanicas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_mecanicas and jogo.revisao.secao_mecanicas.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_mecanicas" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_mecanicas and jogo.revisao.secao_mecanicas.observacoes %}{{ jogo.revisao.secao_mecanicas.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_mecanicas" id="secao_mecanicas" value="{% if jogo.revisao and jogo.revisao.secao_mecanicas %}{{ jogo.revisao.secao_mecanicas.status }}{% endif %}">
         </div>
     </div>
 
@@ -81,12 +97,20 @@
             {% empty %}
                 <p>Nenhum tema informado.</p>
             {% endfor %}
-            <div id="status-secao_temas" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_temas" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_temas" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_temas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_temas %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_temas %}
+                    {% if jogo.revisao.secao_temas.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_temas.revisor }}] {{ jogo.revisao.secao_temas.data }}</div>
+                    {% elif jogo.revisao.secao_temas.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_temas.revisor }}] {{ jogo.revisao.secao_temas.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_temas" id="secao_temas" value="">
+            <div id="correcao-secao_temas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_temas and jogo.revisao.secao_temas.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_temas" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_temas and jogo.revisao.secao_temas.observacoes %}{{ jogo.revisao.secao_temas.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_temas" id="secao_temas" value="{% if jogo.revisao and jogo.revisao.secao_temas %}{{ jogo.revisao.secao_temas.status }}{% endif %}">
         </div>
     </div>
 
@@ -107,12 +131,20 @@
                 <p>Nenhum componente informado.</p>
             {% endfor %}
             </ul>
-            <div id="status-secao_componentes" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_componentes" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_componentes" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_componentes" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_componentes %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_componentes %}
+                    {% if jogo.revisao.secao_componentes.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_componentes.revisor }}] {{ jogo.revisao.secao_componentes.data }}</div>
+                    {% elif jogo.revisao.secao_componentes.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_componentes.revisor }}] {{ jogo.revisao.secao_componentes.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_componentes" id="secao_componentes" value="">
+            <div id="correcao-secao_componentes" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_componentes and jogo.revisao.secao_componentes.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_componentes" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_componentes and jogo.revisao.secao_componentes.observacoes %}{{ jogo.revisao.secao_componentes.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_componentes" id="secao_componentes" value="{% if jogo.revisao and jogo.revisao.secao_componentes %}{{ jogo.revisao.secao_componentes.status }}{% endif %}">
         </div>
     </div>
 
@@ -143,12 +175,20 @@
                 <p>Nenhuma condição de derrota informada.</p>
             {% endfor %}
             </ul>
-            <div id="status-secao_condicoes" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_condicoes" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_condicoes" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_condicoes" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_condicoes %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_condicoes %}
+                    {% if jogo.revisao.secao_condicoes.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_condicoes.revisor }}] {{ jogo.revisao.secao_condicoes.data }}</div>
+                    {% elif jogo.revisao.secao_condicoes.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_condicoes.revisor }}] {{ jogo.revisao.secao_condicoes.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_condicoes" id="secao_condicoes" value="">
+            <div id="correcao-secao_condicoes" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_condicoes and jogo.revisao.secao_condicoes.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_condicoes" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_condicoes and jogo.revisao.secao_condicoes.observacoes %}{{ jogo.revisao.secao_condicoes.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_condicoes" id="secao_condicoes" value="{% if jogo.revisao and jogo.revisao.secao_condicoes %}{{ jogo.revisao.secao_condicoes.status }}{% endif %}">
         </div>
     </div>
 
@@ -174,12 +214,20 @@
             {% empty %}
                 <p>Nenhuma informação de setup.</p>
             {% endfor %}
-            <div id="status-secao_setup" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_setup" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_setup" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_setup" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_setup %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_setup %}
+                    {% if jogo.revisao.secao_setup.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_setup.revisor }}] {{ jogo.revisao.secao_setup.data }}</div>
+                    {% elif jogo.revisao.secao_setup.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_setup.revisor }}] {{ jogo.revisao.secao_setup.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_setup" id="secao_setup" value="">
+            <div id="correcao-secao_setup" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_setup and jogo.revisao.secao_setup.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_setup" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_setup and jogo.revisao.secao_setup.observacoes %}{{ jogo.revisao.secao_setup.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_setup" id="secao_setup" value="{% if jogo.revisao and jogo.revisao.secao_setup %}{{ jogo.revisao.secao_setup.status }}{% endif %}">
         </div>
     </div>
 
@@ -207,12 +255,20 @@
             {% empty %}
                 <p>Nenhuma estrutura informada.</p>
             {% endfor %}
-            <div id="status-secao_estruturas" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_estruturas" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_estruturas" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_estruturas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_estruturas %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_estruturas %}
+                    {% if jogo.revisao.secao_estruturas.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_estruturas.revisor }}] {{ jogo.revisao.secao_estruturas.data }}</div>
+                    {% elif jogo.revisao.secao_estruturas.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_estruturas.revisor }}] {{ jogo.revisao.secao_estruturas.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_estruturas" id="secao_estruturas" value="">
+            <div id="correcao-secao_estruturas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_estruturas and jogo.revisao.secao_estruturas.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_estruturas" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_estruturas and jogo.revisao.secao_estruturas.observacoes %}{{ jogo.revisao.secao_estruturas.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_estruturas" id="secao_estruturas" value="{% if jogo.revisao and jogo.revisao.secao_estruturas %}{{ jogo.revisao.secao_estruturas.status }}{% endif %}">
         </div>
     </div>
 
@@ -236,12 +292,20 @@
             {% empty %}
                 <p>Nenhum termo no glossário.</p>
             {% endfor %}
-            <div id="status-secao_glossario" class="mt-3" style="display: none;"></div>
-            <div id="correcao-secao_glossario" class="mt-3" style="display: none;">
-                <label class="form-label">Observações de Correção:</label>
-                <textarea class="form-control" name="correcao_secao_glossario" rows="3" placeholder="Descreva as correções necessárias..."></textarea>
+            <div id="status-secao_glossario" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_glossario %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                {% if jogo.revisao and jogo.revisao.secao_glossario %}
+                    {% if jogo.revisao.secao_glossario.status == 'REVISADO' %}
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_glossario.revisor }}] {{ jogo.revisao.secao_glossario.data }}</div>
+                    {% elif jogo.revisao.secao_glossario.status == 'CORRIGIR' %}
+                        <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_glossario.revisor }}] {{ jogo.revisao.secao_glossario.data }}</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <input type="hidden" name="secao_glossario" id="secao_glossario" value="">
+            <div id="correcao-secao_glossario" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_glossario and jogo.revisao.secao_glossario.status == 'CORRIGIR' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                <label class="form-label">Observações de Correção:</label>
+                <textarea class="form-control" name="correcao_secao_glossario" rows="3" placeholder="Descreva as correções necessárias...">{% if jogo.revisao and jogo.revisao.secao_glossario and jogo.revisao.secao_glossario.observacoes %}{{ jogo.revisao.secao_glossario.observacoes }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="secao_glossario" id="secao_glossario" value="{% if jogo.revisao and jogo.revisao.secao_glossario %}{{ jogo.revisao.secao_glossario.status }}{% endif %}">
         </div>
     </div>
 
@@ -256,7 +320,7 @@
 function marcarRevisado(secao) {
     const agora = new Date();
     const dataHora = agora.toLocaleString('pt-BR');
-    const usuario = '{{ request.session.usuario_perfil }}' === 'ADMINISTRADOR' ? 'Admin Sistema' : 'Revisor';
+    const usuario = '{{ usuario_logado.nome }}' || 'Revisor';
     
     document.getElementById(secao).value = 'REVISADO';
     
@@ -275,7 +339,7 @@ function marcarRevisado(secao) {
 function marcarCorrigir(secao) {
     const agora = new Date();
     const dataHora = agora.toLocaleString('pt-BR');
-    const usuario = '{{ request.session.usuario_perfil }}' === 'ADMINISTRADOR' ? 'Admin Sistema' : 'Revisor';
+    const usuario = '{{ usuario_logado.nome }}' || 'Revisor';
     
     document.getElementById(secao).value = 'CORRIGIR';
     
@@ -290,5 +354,27 @@ function marcarCorrigir(secao) {
     status.style.display = 'block';
     correcao.style.display = 'block';
 }
+
+// Aplicar estilos baseados no status salvo
+document.addEventListener('DOMContentLoaded', function() {
+    const secoes = [
+        'secao_informacoes_basicas', 'secao_mecanicas', 'secao_temas',
+        'secao_componentes', 'secao_condicoes', 'secao_setup',
+        'secao_estruturas', 'secao_glossario'
+    ];
+    
+    secoes.forEach(function(secao) {
+        const input = document.getElementById(secao);
+        const card = document.getElementById('card-' + secao);
+        
+        if (input && input.value) {
+            if (input.value === 'REVISADO') {
+                card.classList.add('border-success');
+            } else if (input.value === 'CORRIGIR') {
+                card.classList.add('border-warning');
+            }
+        }
+    });
+});
 </script>
 {% endblock %}

@@ -1,5 +1,9 @@
 from django.urls import path
+from django.shortcuts import redirect
 from . import views
+
+def redirect_to_login(request):
+    return redirect('login')
 
 urlpatterns = [
     path('login/', views.login_view, name='login'),
@@ -13,6 +17,7 @@ urlpatterns = [
     path('jogos/copiar/<int:jogo_id>/', views.jogo_copiar, name='jogo_copiar'),
     path('jogos/editar/<int:jogo_id>/', views.jogo_editar, name='jogo_editar'),
     path('jogos/revisao/<int:jogo_id>/', views.jogo_revisao, name='jogo_revisao'),
+    path('jogos/revisao-leitura/<int:jogo_id>/', views.jogo_revisao_leitura, name='jogo_revisao_leitura'),
     path('jogos/imprimir/<int:jogo_id>/', views.jogo_imprimir, name='jogo_imprimir'),
     path('jogos/excluir/<int:jogo_id>/', views.jogo_excluir, name='jogo_excluir'),
     path('mecanicas/', views.mecanicas_lista, name='mecanicas_lista'),

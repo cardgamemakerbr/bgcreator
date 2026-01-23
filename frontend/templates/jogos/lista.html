@@ -91,6 +91,10 @@
                                 <a href="{% url 'jogo_revisao' jogo.id %}" class="btn btn-sm btn-outline-warning me-1" title="Revisar">
                                     <i class="fas fa-clipboard-check"></i>
                                 </a>
+                                {% elif request.session.usuario_perfil == 'AUTOR' %}
+                                <a href="{% url 'jogo_revisao_leitura' jogo.id %}" class="btn btn-sm btn-outline-warning me-1" title="Ver Status da Revisão">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </a>
                                 {% endif %}
                                 {% if request.session.usuario_perfil == 'ADMINISTRADOR' %}
                                 <a href="{% url 'jogo_copiar' jogo.id %}" class="btn btn-sm btn-outline-success me-1" onclick="return confirm('Criar cópia deste jogo?')">

@@ -497,9 +497,12 @@ def debug(request):
         'componentes': componentes,
     })
 
-@login_required
 def home(request):
-    global jogos_criados
+    global jogos_criados, usuario_logado
+    
+    # Se não estiver logado, redirecionar para login
+    if usuario_logado is None:
+        return redirect('login')
     
     # Contar jogos reais (exemplos + criados)
     jogos_exemplo = 2  # Catan e Ticket to Ride
@@ -2066,19 +2069,76 @@ def usuario_bloquear(request, user_id):
     
     return redirect('usuarios_lista')
 
-@admin_or_reviewer_required
-def dicionario(request):
-    return render(request, 'dicionario.html', {'usuario_logado': usuario_logado})
-
-@admin_or_reviewer_required
-def jogo_revisao(request, jogo_id):
+@login_required
+def jogo_revisao_leitura(request, jogo_id):
+    """Versão somente leitura da revisão para autores"""
     global jogos_criados
     
-    # Encontrar o jogo
+    # Verificar se é autor
+    if not usuario_logado or usuario_logado['perfil'] != 'AUTOR':
+        messages.error(request, 'Acesso negado.')
+        return redirect('jogos_lista')
+    
+    # Encontrar o jogo (mesmo código da função principal)
     jogo = None
     for j in jogos_criados:
         if j['id'] == int(jogo_id):
             jogo = j
+            break
+    
+    if not jogo:
+        jogos_exemplo = [
+            {
+                'id': 1, 'nome': 'Catan', 'subtitulo': 'Colonizadores de Catan',
+                'descricao_curta': 'Jogo de estratégia sobre colonização',
+                'jogadores_min': 3, 'jogadores_max': 4, 'tempo_min': 60, 'tempo_max': 90,
+                'idade_recomendada': 10, 'peso': 2.3, 'versao_manual': '1.0.0',
+                'autor': 'Klaus Teuber', 'revisor': 'João Silva', 'setup': [],
+                'mecanicas': ['Construção', 'Negociação'], 'temas': ['Medieval', 'Colonização'],
+                'componentes': [], 'condicoes_vitoria': [], 'condicoes_derrota': [],
+                'estruturas': [], 'glossario': []
+            },
+            {
+                'id': 2, 'nome': 'Ticket to Ride', 'subtitulo': 'Aventura Ferroviária',
+                'descricao_curta': 'Construa rotas de trem pelo mundo',
+                'jogadores_min': 2, 'jogadores_max': 5, 'tempo_min': 30, 'tempo_max': 60,
+                'idade_recomendada': 8, 'peso': 1.8, 'versao_manual': '1.0.0',
+                'autor': 'Alan R. Moon', 'revisor': 'Admin Sistema', 'setup': [],
+                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
+                'temas': ['Transporte', 'Viagem'], 'componentes': [],
+                'condicoes_vitoria': [], 'condicoes_derrota': [], 'estruturas': [], 'glossario': []
+            }
+        ]
+        
+        for j in jogos_exemplo:
+            if j['id'] == int(jogo_id):
+                jogo = j
+                break
+    
+    if not jogo:
+        messages.error(request, 'Jogo não encontrado!')
+        return redirect('jogos_lista')
+    
+    return render(request, 'jogos/revisao_leitura.html', {'jogo': jogo})
+
+@admin_or_reviewer_required
+def dicionario(request):
+    return render(request, 'dicionario.html', {'usuario_logado': usuario_logado})
+def jogo_revisao(request, jogo_id):
+    global jogos_criados, usuario_logado
+    
+    # Verificar se é administrador ou revisor
+    if not usuario_logado or usuario_logado['perfil'] not in ['ADMINISTRADOR', 'REVISOR']:
+        messages.error(request, 'Acesso negado. Apenas administradores e revisores podem acessar a revisão.')
+        return redirect('jogos_lista')
+    
+    # Encontrar o jogo
+    jogo = None
+    jogo_index = None
+    for i, j in enumerate(jogos_criados):
+        if j['id'] == int(jogo_id):
+            jogo = j
+            jogo_index = i
             break
     
     # Buscar nos jogos de exemplo se não encontrou
@@ -2143,6 +2203,51 @@ def jogo_revisao(request, jogo_id):
     
     if request.method == 'POST':
         # Processar dados da revisão
+        from datetime import datetime
+        
+        # Inicializar estrutura de revisão se não existir
+        if 'revisao' not in jogo:
+            jogo['revisao'] = {}
+        
+        # Salvar status de cada seção
+        secoes = [
+            'secao_informacoes_basicas', 'secao_mecanicas', 'secao_temas',
+            'secao_componentes', 'secao_condicoes', 'secao_setup',
+            'secao_estruturas', 'secao_glossario'
+        ]
+        
+        revisor_nome = usuario_logado['nome'] if usuario_logado else 'Revisor'
+        data_revisao = datetime.now().strftime('%d/%m/%Y %H:%M')
+        
+        for secao in secoes:
+            status = request.POST.get(secao, '')
+            if status:
+                jogo['revisao'][secao] = {
+                    'status': status,
+                    'revisor': revisor_nome,
+                    'data': data_revisao
+                }
+                
+                # Salvar observações de correção se existirem
+                correcao_key = f'correcao_{secao}'
+                observacoes = request.POST.get(correcao_key, '').strip()
+                if observacoes:
+                    jogo['revisao'][secao]['observacoes'] = observacoes
+        
+        # Atualizar revisor do jogo com proteção de autoria
+        if usuario_logado:
+            if usuario_logado['perfil'] == 'REVISOR':
+                if jogo.get('revisor') and jogo['revisor'] != usuario_logado['nome']:
+                    jogo['co_revisor'] = usuario_logado['nome']
+                else:
+                    jogo['revisor'] = usuario_logado['nome']
+            elif usuario_logado['perfil'] == 'ADMINISTRADOR':
+                jogo['revisor'] = usuario_logado['nome']
+        
+        # Atualizar jogo na lista se for jogo criado
+        if jogo_index is not None:
+            jogos_criados[jogo_index] = jogo
+        
         messages.success(request, f'Revisão do jogo "{jogo["nome"]}" salva com sucesso!')
         return redirect('jogos_lista')
     
