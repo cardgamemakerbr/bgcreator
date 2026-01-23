@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Backup - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-database"></i> Sistema de Backup</h2>
+    <a href="{% url 'home' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row">
+    <!-- Criar Backup -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-plus-circle"></i> Criar Backup</h5>
+            </div>
+            <div class="card-body">
+                <p>Cria um arquivo ZIP contendo todos os dados do sistema e arquivos de mídia.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="criar_backup">
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('Deseja criar um novo backup?')">
+                        <i class="fas fa-save"></i> Criar Backup
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restaurar Backup -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5><i class="fas fa-upload"></i> Restaurar Backup</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-danger"><strong>Atenção:</strong> Esta operação substituirá todos os dados atuais!</p>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="restaurar_backup">
+                    <div class="mb-3">
+                        <input type="file" class="form-control" name="backup_file" accept=".zip" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('ATENÇÃO: Esta operação substituirá todos os dados atuais. Deseja continuar?')">
+                        <i class="fas fa-undo"></i> Restaurar Backup
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Backups -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-list"></i> Backups Disponíveis</h5>
+    </div>
+    <div class="card-body">
+        {% if backups %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome do Arquivo</th>
+                            <th>Tamanho</th>
+                            <th>Data de Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backup in backups %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-file-archive text-primary"></i>
+                                {{ backup.filename }}
+                            </td>
+                            <td>{{ backup.size }} MB</td>
+                            <td>{{ backup.created }}</td>
+                            <td>
+                                <a href="{% url 'backup_download' backup.filename %}" class="btn btn-sm btn-success me-1" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <a href="{% url 'backup_delete' backup.filename %}" class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('Deseja excluir este backup?')" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-database fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum backup encontrado</h5>
+                <p class="text-muted">Clique em "Criar Backup" para gerar o primeiro backup do sistema</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <h6><i class="fas fa-info-circle"></i> Informações sobre Backup:</h6>
+    <ul class="mb-0">
+        <li><strong>Dados incluídos:</strong> Jogos, mecânicas, componentes, temas e usuários criados</li>
+        <li><strong>Mídia incluída:</strong> Capas de jogos, imagens de setup e glossário</li>
+        <li><strong>Formato:</strong> Arquivo ZIP com dados JSON e arquivos de mídia</li>
+        <li><strong>Restauração:</strong> Substitui completamente os dados atuais</li>
+    </ul>
+</div>
+{% endblock %}

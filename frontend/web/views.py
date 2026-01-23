@@ -2121,9 +2121,141 @@ def jogo_revisao_leitura(request, jogo_id):
     
     return render(request, 'jogos/revisao_leitura.html', {'jogo': jogo})
 
+import zipfile
+import json
+from datetime import datetime
+from django.http import HttpResponse, FileResponse
+import shutil
+
+@admin_required
+def backup_sistema(request):
+    global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados, usuarios_criados
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'criar_backup':
+            # Criar backup
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            backup_filename = f'bgcreator_backup_{timestamp}.zip'
+            backup_path = os.path.join('backups', backup_filename)
+            
+            # Criar diretório de backup se não existir
+            os.makedirs('backups', exist_ok=True)
+            
+            # Dados para backup
+            backup_data = {
+                'timestamp': timestamp,
+                'jogos': jogos_criados,
+                'mecanicas': mecanicas_criadas,
+                'componentes': componentes_criados,
+                'temas': temas_criados,
+                'usuarios': usuarios_criados
+            }
+            
+            # Criar arquivo ZIP
+            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                # Adicionar dados JSON
+                zipf.writestr('dados.json', json.dumps(backup_data, indent=2, ensure_ascii=False))
+                
+                # Adicionar arquivos de mídia
+                media_dirs = ['media/capas', 'media/setup', 'media/glossario']
+                for media_dir in media_dirs:
+                    if os.path.exists(media_dir):
+                        for root, dirs, files in os.walk(media_dir):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                arcname = os.path.relpath(file_path, 'media')
+                                zipf.write(file_path, f'media/{arcname}')
+            
+            messages.success(request, f'Backup criado com sucesso: {backup_filename}')
+            
+        elif action == 'restaurar_backup':
+            # Restaurar backup
+            if 'backup_file' in request.FILES:
+                backup_file = request.FILES['backup_file']
+                
+                # Salvar arquivo temporariamente
+                temp_path = f'temp_{backup_file.name}'
+                with open(temp_path, 'wb+') as destination:
+                    for chunk in backup_file.chunks():
+                        destination.write(chunk)
+                
+                try:
+                    # Extrair e restaurar dados
+                    with zipfile.ZipFile(temp_path, 'r') as zipf:
+                        # Ler dados JSON
+                        dados_json = zipf.read('dados.json').decode('utf-8')
+                        backup_data = json.loads(dados_json)
+                        
+                        # Restaurar dados
+                        jogos_criados.clear()
+                        jogos_criados.extend(backup_data.get('jogos', []))
+                        
+                        mecanicas_criadas.clear()
+                        mecanicas_criadas.extend(backup_data.get('mecanicas', []))
+                        
+                        componentes_criados.clear()
+                        componentes_criados.extend(backup_data.get('componentes', []))
+                        
+                        temas_criados.clear()
+                        temas_criados.extend(backup_data.get('temas', []))
+                        
+                        usuarios_criados.clear()
+                        usuarios_criados.extend(backup_data.get('usuarios', []))
+                        
+                        # Restaurar arquivos de mídia
+                        for file_info in zipf.infolist():
+                            if file_info.filename.startswith('media/'):
+                                zipf.extract(file_info, '.')
+                    
+                    messages.success(request, 'Backup restaurado com sucesso!')
+                    
+                except Exception as e:
+                    messages.error(request, f'Erro ao restaurar backup: {str(e)}')
+                
+                finally:
+                    # Remover arquivo temporário
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+            else:
+                messages.error(request, 'Nenhum arquivo de backup selecionado.')
+    
+    # Listar backups existentes
+    backups = []
+    if os.path.exists('backups'):
+        for filename in os.listdir('backups'):
+            if filename.endswith('.zip'):
+                filepath = os.path.join('backups', filename)
+                stat = os.stat(filepath)
+                backups.append({
+                    'filename': filename,
+                    'size': round(stat.st_size / 1024 / 1024, 2),  # MB
+                    'created': datetime.fromtimestamp(stat.st_ctime).strftime('%d/%m/%Y %H:%M')
+                })
+    
+    return render(request, 'backup/sistema.html', {'backups': backups})
+
+@admin_required
+def backup_download(request, filename):
+    backup_path = os.path.join('backups', filename)
+    if os.path.exists(backup_path):
+        return FileResponse(open(backup_path, 'rb'), as_attachment=True, filename=filename)
+    else:
+        messages.error(request, 'Arquivo de backup não encontrado.')
+        return redirect('backup_sistema')
+
+@admin_required
+def backup_delete(request, filename):
+    backup_path = os.path.join('backups', filename)
+    if os.path.exists(backup_path):
+        os.remove(backup_path)
+        messages.success(request, f'Backup {filename} excluído com sucesso.')
+    else:
+        messages.error(request, 'Arquivo de backup não encontrado.')
+    return redirect('backup_sistema')
+
 @admin_or_reviewer_required
-def dicionario(request):
-    return render(request, 'dicionario.html', {'usuario_logado': usuario_logado})
 def jogo_revisao(request, jogo_id):
     global jogos_criados, usuario_logado
     

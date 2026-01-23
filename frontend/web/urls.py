@@ -37,6 +37,8 @@ urlpatterns = [
     path('usuarios/editar/<int:user_id>/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/excluir/<int:user_id>/', views.usuario_excluir, name='usuario_excluir'),
     path('usuarios/bloquear/<int:user_id>/', views.usuario_bloquear, name='usuario_bloquear'),
-    path('dicionario/', views.dicionario, name='dicionario'),
+    path('backup/', views.backup_sistema, name='backup_sistema'),
+    path('backup/download/<str:filename>/', views.backup_download, name='backup_download'),
+    path('backup/delete/<str:filename>/', views.backup_delete, name='backup_delete'),
     path('api/<path:path>', views.api_proxy, name='api_proxy'),
 ]
