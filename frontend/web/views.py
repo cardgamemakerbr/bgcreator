@@ -146,6 +146,14 @@ comentarios_criados = []
 usuario_logado = None
 complexidade_senha = 1  # 1=Desativado, 2=Letras+números 6+, 3=Maiúsc+minúsc+números 8+, 4=Completa 10+
 
+# Status dos usuários do sistema (para permitir ativação/desativação)
+usuarios_sistema_status = {
+    1: True,  # admin
+    2: True,  # autor
+    3: True,  # revisor
+    4: True   # leitor
+}
+
 def salvar_imagem_glossario(arquivo):
     """Salva imagem do glossário e retorna o caminho"""
     if arquivo:
@@ -1893,18 +1901,18 @@ def tema_excluir(request, item_id):
     return redirect('temas_lista')
 
 def login_view(request):
-    global usuario_logado, usuarios_criados
+    global usuario_logado, usuarios_criados, usuarios_sistema_status
     
     if request.method == 'POST':
         login = request.POST.get('login')
         senha = request.POST.get('senha')
         
-        # Usuários do sistema
+        # Usuários do sistema com status dinâmico
         usuarios_sistema = [
-            {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': True},
-            {'login': 'autor', 'senha': '123', 'nome': 'Autor Sistema', 'perfil': 'AUTOR', 'ativo': True},
-            {'login': 'revisor', 'senha': '123', 'nome': 'Revisor Sistema', 'perfil': 'REVISOR', 'ativo': True},
-            {'login': 'leitor', 'senha': '123', 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': True},
+            {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status[1], 'id': 1},
+            {'login': 'autor', 'senha': '123', 'nome': 'Autor Sistema', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status[2], 'id': 2},
+            {'login': 'revisor', 'senha': '123', 'nome': 'Revisor Sistema', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status[3], 'id': 3},
+            {'login': 'leitor', 'senha': '123', 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status[4], 'id': 4},
         ]
         
         # Verificar usuários do sistema + criados
@@ -1927,7 +1935,7 @@ def login_view(request):
                         messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
                         return redirect('home')
         
-        messages.error(request, 'Login ou senha inválidos!')
+        messages.error(request, 'Login ou senha inválidos, ou usuário desativado!')
     
     return render(request, 'login.html')
 
@@ -2004,14 +2012,14 @@ def configurar_complexidade_senha(request):
     
 @admin_required
 def usuarios_lista(request):
-    global usuarios_criados, complexidade_senha
+    global usuarios_criados, complexidade_senha, usuarios_sistema_status
     
-    # Usuários de exemplo
+    # Usuários de exemplo com status dinâmico
     usuarios_exemplo = [
-        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': True},
-        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': True},
-        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': True},
-        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': True},
+        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status[1]},
+        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status[2]},
+        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status[3]},
+        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status[4]},
     ]
     
     todos_usuarios = usuarios_exemplo + usuarios_criados
@@ -2093,14 +2101,29 @@ def usuario_novo(request):
 
 @admin_required
 def usuario_editar(request, user_id):
-    global usuarios_criados
+    global usuarios_criados, usuarios_sistema_status
     
-    # Encontrar usuário
+    # Encontrar usuário (sistema ou criado)
     usuario = None
-    for u in usuarios_criados:
+    usuarios_sistema = [
+        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status[1]},
+        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status[2]},
+        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status[3]},
+        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status[4]},
+    ]
+    
+    # Buscar em usuários do sistema
+    for u in usuarios_sistema:
         if u['id'] == user_id:
             usuario = u
             break
+    
+    # Se não encontrou, buscar em usuários criados
+    if not usuario:
+        for u in usuarios_criados:
+            if u['id'] == user_id:
+                usuario = u
+                break
     
     if not usuario:
         messages.error(request, 'Usuário não encontrado!')
@@ -2113,14 +2136,8 @@ def usuario_editar(request, user_id):
         
         # Verificar duplicatas apenas se mudou login ou email
         if login_novo.lower() != usuario['login'].lower() or email_novo.lower() != usuario.get('email', '').lower():
-            usuarios_sistema = [
-                {'id': 1, 'login': 'admin', 'email': 'admin@bgcreator.com'},
-                {'id': 2, 'login': 'autor', 'email': 'autor@bgcreator.com'},
-                {'id': 3, 'login': 'revisor', 'email': 'revisor@bgcreator.com'},
-                {'id': 4, 'login': 'leitor', 'email': 'leitor@bgcreator.com'},
-            ]
-            
-            todos_usuarios = usuarios_sistema + [u for u in usuarios_criados if u['id'] != user_id]
+            todos_usuarios = usuarios_sistema + usuarios_criados
+            todos_usuarios = [u for u in todos_usuarios if u['id'] != user_id]  # Excluir o próprio usuário
             
             for u in todos_usuarios:
                 if u['login'].lower() == login_novo.lower():
@@ -2130,24 +2147,30 @@ def usuario_editar(request, user_id):
                     messages.error(request, f'E-mail "{email_novo}" já está em uso!')
                     return render(request, 'usuarios/editar.html', {'usuario': usuario})
         
+        # Atualizar dados
         usuario['nome'] = nome_novo
         usuario['login'] = login_novo
         usuario['email'] = email_novo
         usuario['perfil'] = request.POST.get('perfil', usuario['perfil'])
-        usuario['ativo'] = request.POST.get('ativo') == 'on'
+        novo_status = request.POST.get('ativo') == 'on'
         
-        # Atualizar senha se fornecida
+        # Atualizar status conforme o tipo de usuário
+        if user_id < 1000:  # Usuário do sistema
+            usuarios_sistema_status[user_id] = novo_status
+        else:  # Usuário criado
+            usuario['ativo'] = novo_status
+        
+        # Atualizar senha se fornecida (apenas para usuários criados)
         senha = request.POST.get('senha')
         confirma_senha = request.POST.get('confirma_senha')
-        if senha:
+        if senha and user_id >= 1000:  # Apenas usuários criados podem ter senha alterada
             if senha == confirma_senha:
-                # Validar complexidade da senha
                 senha_valida, erro_senha = validar_senha(senha)
                 if not senha_valida:
                     messages.error(request, erro_senha)
                     return render(request, 'usuarios/editar.html', {'usuario': usuario})
                 
-                usuario['senha'] = senha  # Atualizar senha
+                usuario['senha'] = senha
                 messages.success(request, 'Senha atualizada com sucesso!')
             else:
                 messages.error(request, 'Senhas não conferem!')
@@ -2162,18 +2185,18 @@ def usuario_editar(request, user_id):
 def usuario_excluir(request, user_id):
     global usuarios_criados
     
-    # Verificar se é usuário criado (ID >= 1000)
+    # Permitir exclusão apenas de usuários criados (ID >= 1000)
     if user_id >= 1000:
         usuarios_criados = [u for u in usuarios_criados if u['id'] != user_id]
         messages.success(request, 'Usuário excluído com sucesso!')
     else:
-        messages.warning(request, 'Não é possível excluir usuários do sistema.')
+        messages.warning(request, 'Usuários do sistema não podem ser excluídos, apenas desativados.')
     
     return redirect('usuarios_lista')
 
 @admin_required
 def usuario_bloquear(request, user_id):
-    global usuarios_criados
+    global usuarios_criados, usuarios_sistema_status
     
     # Verificar se é usuário criado (ID >= 1000)
     if user_id >= 1000:
@@ -2184,7 +2207,13 @@ def usuario_bloquear(request, user_id):
                 messages.success(request, f'Usuário {status} com sucesso!')
                 break
     else:
-        messages.warning(request, 'Não é possível bloquear usuários do sistema.')
+        # Para usuários do sistema, alterar status na variável global
+        if user_id in usuarios_sistema_status:
+            usuarios_sistema_status[user_id] = not usuarios_sistema_status[user_id]
+            status = 'ativado' if usuarios_sistema_status[user_id] else 'desativado'
+            messages.success(request, f'Usuário do sistema {status} com sucesso!')
+        else:
+            messages.error(request, 'Usuário não encontrado!')
     
     return redirect('usuarios_lista')
 
