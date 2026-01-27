@@ -222,7 +222,7 @@ O BGCreator está pronto para ser usado em produção e pode evoluir para:
 
 
 
-- Comentarios para leitores
+ok - Comentarios para leitores
     - Avaliação 1 a 5 nos comentarios
 - Complexadade de senhas
 - Adicionar icone de ! E ok da correção
@@ -238,3 +238,11 @@ O BGCreator está pronto para ser usado em produção e pode evoluir para:
 - Pode adicionar duas novas funções para o perfil de leitores
     - comentarios para leitores (salvando no banco de dados)
     - Avaliação 1 a 5 nos comentarios (salvando no banco de dados)
+
+- Complexadade de senhas
+    - Pode criar um campo onde com 4 opções para gerenciar complexidade de senhas
+    - 1 : desativado
+    - 2 : Letras e numeros, minimo de 6 digitos
+    - 3 : Letras maiusculas e minusculas, numeros e minimo de 8 digitos
+    - 4 : Letras maiusculas e minusculas, numeros, caracter especial e minimo de 10 digitos
+Esta opção deve ficar disponivel no painel de gerencia de usuario, com um formato de barra de seleção

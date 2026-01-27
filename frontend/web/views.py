@@ -71,6 +71,45 @@ def admin_or_reviewer_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
+def validar_senha(senha):
+    """Valida senha baseado na complexidade configurada"""
+    global complexidade_senha
+    import re
+    
+    if complexidade_senha == 1:  # Desativado
+        return True, ""
+    
+    elif complexidade_senha == 2:  # Letras e números, mínimo 6
+        if len(senha) < 6:
+            return False, "Senha deve ter pelo menos 6 caracteres"
+        if not re.search(r'[a-zA-Z]', senha) or not re.search(r'\d', senha):
+            return False, "Senha deve conter letras e números"
+    
+    elif complexidade_senha == 3:  # Maiúscula, minúscula, números, mínimo 8
+        if len(senha) < 8:
+            return False, "Senha deve ter pelo menos 8 caracteres"
+        if not re.search(r'[a-z]', senha):
+            return False, "Senha deve conter pelo menos uma letra minúscula"
+        if not re.search(r'[A-Z]', senha):
+            return False, "Senha deve conter pelo menos uma letra maiúscula"
+        if not re.search(r'\d', senha):
+            return False, "Senha deve conter pelo menos um número"
+    
+    elif complexidade_senha == 4:  # Completa, mínimo 10
+        if len(senha) < 10:
+            return False, "Senha deve ter pelo menos 10 caracteres"
+        if not re.search(r'[a-z]', senha):
+            return False, "Senha deve conter pelo menos uma letra minúscula"
+        if not re.search(r'[A-Z]', senha):
+            return False, "Senha deve conter pelo menos uma letra maiúscula"
+        if not re.search(r'\d', senha):
+            return False, "Senha deve conter pelo menos um número"
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', senha):
+            return False, "Senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?\":{}|<>)"
+    
+    # Se chegou até aqui, a senha passou em todas as validações
+    return True, ""
+    
 def processar_markdown(texto):
     """Processa texto markdown básico"""
     if not texto:
@@ -105,6 +144,7 @@ jogos_criados = []
 usuarios_criados = []
 comentarios_criados = []
 usuario_logado = None
+complexidade_senha = 1  # 1=Desativado, 2=Letras+números 6+, 3=Maiúsc+minúsc+números 8+, 4=Completa 10+
 
 def salvar_imagem_glossario(arquivo):
     """Salva imagem do glossário e retorna o caminho"""
@@ -616,7 +656,8 @@ def jogo_novo(request):
     # Buscar usuários para dropdowns
     usuarios_sistema = [
         {'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR'},
-        {'nome': 'João Silva', 'perfil': 'AUTOR'},
+        {'nome': 'Autor Sistema', 'perfil': 'AUTOR'},
+        {'nome': 'Revisor Sistema', 'perfil': 'REVISOR'},
     ]
     todos_usuarios = usuarios_sistema + usuarios_criados
     autores = [u for u in todos_usuarios if u['perfil'] in ['AUTOR', 'ADMINISTRADOR']]
@@ -958,7 +999,8 @@ def jogo_editar(request, jogo_id):
     # Buscar usuários para dropdowns
     usuarios_sistema = [
         {'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR'},
-        {'nome': 'João Silva', 'perfil': 'AUTOR'},
+        {'nome': 'Autor Sistema', 'perfil': 'AUTOR'},
+        {'nome': 'Revisor Sistema', 'perfil': 'REVISOR'},
     ]
     todos_usuarios = usuarios_sistema + usuarios_criados
     autores = [u for u in todos_usuarios if u['perfil'] in ['AUTOR', 'ADMINISTRADOR']]
@@ -1860,6 +1902,8 @@ def login_view(request):
         # Usuários do sistema
         usuarios_sistema = [
             {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': True},
+            {'login': 'autor', 'senha': '123', 'nome': 'Autor Sistema', 'perfil': 'AUTOR', 'ativo': True},
+            {'login': 'revisor', 'senha': '123', 'nome': 'Revisor Sistema', 'perfil': 'REVISOR', 'ativo': True},
             {'login': 'leitor', 'senha': '123', 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': True},
         ]
         
@@ -1870,7 +1914,8 @@ def login_view(request):
             if usuario['login'] == login and usuario.get('ativo', True):
                 # Para usuários do sistema, usar senhas fixas
                 if usuario.get('id', 0) <= 10:  # Usuários do sistema
-                    if (login == 'admin' and senha == 'admin') or (login == 'leitor' and senha == '123'):
+                    if ((login == 'admin' and senha == 'admin') or 
+                        (login in ['autor', 'revisor', 'leitor'] and senha == '123')):
                         usuario_logado = usuario
                         request.session['usuario_perfil'] = usuario['perfil']
                         messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
@@ -1940,13 +1985,33 @@ def perfil(request):
     return render(request, 'perfil.html', {'usuario': usuario_logado})
 
 @admin_required
+def configurar_complexidade_senha(request):
+    global complexidade_senha
+    
+    if request.method == 'POST':
+        nova_complexidade = int(request.POST.get('complexidade', 1))
+        complexidade_senha = nova_complexidade
+        
+        niveis = {
+            1: 'Desativado',
+            2: 'Letras e números, mínimo 6 dígitos',
+            3: 'Letras maiúsculas e minúsculas, números, mínimo 8 dígitos',
+            4: 'Letras maiúsculas e minúsculas, números, caractere especial, mínimo 10 dígitos'
+        }
+        
+        messages.success(request, f'Complexidade de senha alterada para: {niveis[nova_complexidade]}')
+        return redirect('usuarios_lista')
+    
+@admin_required
 def usuarios_lista(request):
-    global usuarios_criados
+    global usuarios_criados, complexidade_senha
     
     # Usuários de exemplo
     usuarios_exemplo = [
         {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': True},
-        {'id': 2, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': True},
+        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': True},
+        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': True},
+        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': True},
     ]
     
     todos_usuarios = usuarios_exemplo + usuarios_criados
@@ -1962,7 +2027,10 @@ def usuarios_lista(request):
                 usuarios_filtrados.append(usuario)
         todos_usuarios = usuarios_filtrados
     
-    return render(request, 'usuarios/lista.html', {'usuarios': todos_usuarios})
+    return render(request, 'usuarios/lista.html', {
+        'usuarios': todos_usuarios,
+        'complexidade_senha': complexidade_senha
+    })
 
 @admin_required
 def usuario_novo(request):
@@ -1981,7 +2049,9 @@ def usuario_novo(request):
             # Verificar se login já existe
             usuarios_sistema = [
                 {'login': 'admin', 'email': 'admin@bgcreator.com'},
-                {'login': 'joao', 'email': 'joao@bgcreator.com'},
+                {'login': 'autor', 'email': 'autor@bgcreator.com'},
+                {'login': 'revisor', 'email': 'revisor@bgcreator.com'},
+                {'login': 'leitor', 'email': 'leitor@bgcreator.com'},
             ]
             
             todos_usuarios = usuarios_sistema + usuarios_criados
@@ -1996,6 +2066,12 @@ def usuario_novo(request):
                     return render(request, 'usuarios/novo.html')
             
             if senha == confirma_senha:
+                # Validar complexidade da senha
+                senha_valida, erro_senha = validar_senha(senha)
+                if not senha_valida:
+                    messages.error(request, erro_senha)
+                    return render(request, 'usuarios/novo.html')
+                
                 novo_usuario = {
                     'id': len(usuarios_criados) + 1000,
                     'nome': nome,
@@ -2039,7 +2115,9 @@ def usuario_editar(request, user_id):
         if login_novo.lower() != usuario['login'].lower() or email_novo.lower() != usuario.get('email', '').lower():
             usuarios_sistema = [
                 {'id': 1, 'login': 'admin', 'email': 'admin@bgcreator.com'},
-                {'id': 2, 'login': 'joao', 'email': 'joao@bgcreator.com'},
+                {'id': 2, 'login': 'autor', 'email': 'autor@bgcreator.com'},
+                {'id': 3, 'login': 'revisor', 'email': 'revisor@bgcreator.com'},
+                {'id': 4, 'login': 'leitor', 'email': 'leitor@bgcreator.com'},
             ]
             
             todos_usuarios = usuarios_sistema + [u for u in usuarios_criados if u['id'] != user_id]
@@ -2063,6 +2141,12 @@ def usuario_editar(request, user_id):
         confirma_senha = request.POST.get('confirma_senha')
         if senha:
             if senha == confirma_senha:
+                # Validar complexidade da senha
+                senha_valida, erro_senha = validar_senha(senha)
+                if not senha_valida:
+                    messages.error(request, erro_senha)
+                    return render(request, 'usuarios/editar.html', {'usuario': usuario})
+                
                 usuario['senha'] = senha  # Atualizar senha
                 messages.success(request, 'Senha atualizada com sucesso!')
             else:
@@ -2186,7 +2270,8 @@ def backup_sistema(request):
                 'componentes': componentes_criados,
                 'temas': temas_criados,
                 'usuarios': usuarios_criados,
-                'comentarios': comentarios_criados
+                'comentarios': comentarios_criados,
+                'complexidade_senha': complexidade_senha
             }
             
             # Criar arquivo ZIP
@@ -2242,6 +2327,9 @@ def backup_sistema(request):
                         
                         comentarios_criados.clear()
                         comentarios_criados.extend(backup_data.get('comentarios', []))
+                        
+                        # Restaurar configuração de complexidade
+                        complexidade_senha = backup_data.get('complexidade_senha', 1)
                         
                         # Restaurar arquivos de mídia
                         for file_info in zipf.infolist():

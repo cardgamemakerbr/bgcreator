@@ -10,6 +10,58 @@
     </a>
 </div>
 
+<!-- Configuração de Complexidade de Senhas -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6><i class="fas fa-shield-alt"></i> Complexidade de Senhas</h6>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'configurar_complexidade_senha' %}">
+            {% csrf_token %}
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <label for="complexidade" class="form-label">Nível de Segurança:</label>
+                    <input type="range" class="form-range" id="complexidade" name="complexidade" min="1" max="4" value="{{ complexidade_senha }}" oninput="updateComplexityLabel(this.value)">
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span>Desativado</span>
+                        <span>Básico</span>
+                        <span>Médio</span>
+                        <span>Alto</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="complexity-description" class="alert alert-info mb-2">
+                        {% if complexidade_senha == 1 %}
+                            <strong>Desativado:</strong> Sem restrições
+                        {% elif complexidade_senha == 2 %}
+                            <strong>Básico:</strong> Letras e números, mínimo 6 dígitos
+                        {% elif complexidade_senha == 3 %}
+                            <strong>Médio:</strong> Maiúsculas, minúsculas, números, mínimo 8 dígitos
+                        {% else %}
+                            <strong>Alto:</strong> Maiúsculas, minúsculas, números, caractere especial, mínimo 10 dígitos
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-save"></i> Aplicar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateComplexityLabel(value) {
+    const descriptions = {
+        1: '<strong>Desativado:</strong> Sem restrições',
+        2: '<strong>Básico:</strong> Letras e números, mínimo 6 dígitos',
+        3: '<strong>Médio:</strong> Maiúsculas, minúsculas, números, mínimo 8 dígitos',
+        4: '<strong>Alto:</strong> Maiúsculas, minúsculas, números, caractere especial, mínimo 10 dígitos'
+    };
+    document.getElementById('complexity-description').innerHTML = descriptions[value];
+}
+</script>
+
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">

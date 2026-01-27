@@ -120,6 +120,8 @@ python manage.py runserver
 | Login | Senha | Perfil | Descrição |
 |-------|-------|--------|-----------|
 | admin | admin | Administrador | Acesso total |
+| autor | 123 | Autor | Criar e editar jogos |
+| revisor | 123 | Revisor | Revisar jogos |
 | leitor | 123 | Leitor | Visualizar e comentar jogos |
 
 ## 🏗 Arquitetura
