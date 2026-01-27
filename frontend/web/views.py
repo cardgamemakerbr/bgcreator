@@ -497,12 +497,7 @@ def jogo_novo(request):
     global jogos_criados, usuarios_criados, usuario_logado
     
     # Buscar usuários para dropdowns
-    usuarios_sistema = [
-        {'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR'},
-        {'nome': 'Autor Sistema', 'perfil': 'AUTOR'},
-        {'nome': 'Revisor Sistema', 'perfil': 'REVISOR'},
-    ]
-    todos_usuarios = usuarios_sistema + usuarios_criados
+    todos_usuarios = usuarios_criados
     autores = [u for u in todos_usuarios if u['perfil'] in ['AUTOR', 'ADMINISTRADOR']]
     revisores = [u for u in todos_usuarios if u['perfil'] in ['REVISOR', 'ADMINISTRADOR']]
     
@@ -858,12 +853,7 @@ def jogo_editar(request, jogo_id):
     global jogos_criados, usuarios_criados
     
     # Buscar usuários para dropdowns
-    usuarios_sistema = [
-        {'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR'},
-        {'nome': 'Autor Sistema', 'perfil': 'AUTOR'},
-        {'nome': 'Revisor Sistema', 'perfil': 'REVISOR'},
-    ]
-    todos_usuarios = usuarios_sistema + usuarios_criados
+    todos_usuarios = usuarios_criados
     autores = [u for u in todos_usuarios if u['perfil'] in ['AUTOR', 'ADMINISTRADOR']]
     revisores = [u for u in todos_usuarios if u['perfil'] in ['REVISOR', 'ADMINISTRADOR']]
     
@@ -1946,17 +1936,10 @@ def configurar_complexidade_senha(request):
     
 @admin_required
 def usuarios_lista(request):
-    global usuarios_criados, complexidade_senha, usuarios_sistema_status
+    global usuarios_criados, complexidade_senha
     
-    # Usuários de exemplo com status dinâmico
-    usuarios_exemplo = [
-        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status.get(1, True)},
-        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status.get(2, True)},
-        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status.get(3, True)},
-        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status.get(4, True)},
-    ]
-    
-    todos_usuarios = usuarios_exemplo + usuarios_criados
+    # Usar apenas usuários criados (sem usuários do sistema)
+    todos_usuarios = usuarios_criados
     
     # Processar busca
     busca = request.GET.get('busca', '').strip().lower()
@@ -1988,18 +1971,8 @@ def usuario_novo(request):
         confirma_senha = request.POST.get('confirma_senha')
         
         if nome and login and email and senha:
-            # Verificar se login já existe
-            usuarios_sistema = [
-                {'login': 'admin', 'email': 'admin@bgcreator.com'},
-                {'login': 'autor', 'email': 'autor@bgcreator.com'},
-                {'login': 'revisor', 'email': 'revisor@bgcreator.com'},
-                {'login': 'leitor', 'email': 'leitor@bgcreator.com'},
-            ]
-            
-            todos_usuarios = usuarios_sistema + usuarios_criados
-            
-            # Verificar login duplicado
-            for usuario in todos_usuarios:
+            # Verificar se login já existe apenas nos usuários criados
+            for usuario in usuarios_criados:
                 if usuario['login'].lower() == login.lower():
                     messages.error(request, f'Login "{login}" já está em uso!')
                     return render(request, 'usuarios/novo.html')
@@ -2042,29 +2015,14 @@ def usuario_novo(request):
 
 @admin_required
 def usuario_editar(request, user_id):
-    global usuarios_criados, usuarios_sistema_status
+    global usuarios_criados
     
-    # Encontrar usuário (sistema ou criado)
+    # Encontrar usuário apenas nos criados
     usuario = None
-    usuarios_sistema = [
-        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status.get(1, True)},
-        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status.get(2, True)},
-        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status.get(3, True)},
-        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status.get(4, True)},
-    ]
-    
-    # Buscar em usuários do sistema
-    for u in usuarios_sistema:
+    for u in usuarios_criados:
         if u['id'] == user_id:
             usuario = u
-    
-    
-    # Se não encontrou, buscar em usuários criados
-    if not usuario:
-        for u in usuarios_criados:
-            if u['id'] == user_id:
-                usuario = u
-        
+            break
     
     if not usuario:
         messages.error(request, 'Usuário não encontrado!')
@@ -2077,8 +2035,7 @@ def usuario_editar(request, user_id):
         
         # Verificar duplicatas apenas se mudou login ou email
         if login_novo.lower() != usuario['login'].lower() or email_novo.lower() != usuario.get('email', '').lower():
-            todos_usuarios = usuarios_sistema + usuarios_criados
-            todos_usuarios = [u for u in todos_usuarios if u['id'] != user_id]  # Excluir o próprio usuário
+            todos_usuarios = [u for u in usuarios_criados if u['id'] != user_id]  # Excluir o próprio usuário
             
             for u in todos_usuarios:
                 if u['login'].lower() == login_novo.lower():
@@ -2093,7 +2050,7 @@ def usuario_editar(request, user_id):
         usuario['login'] = login_novo
         usuario['email'] = email_novo
         usuario['perfil'] = request.POST.get('perfil', usuario['perfil'])
-        novo_status = request.POST.get('ativo') == 'on'
+        usuario['ativo'] = request.POST.get('ativo') == 'on'
         
         # Processar upload do avatar
         if 'avatar' in request.FILES:
@@ -2104,16 +2061,10 @@ def usuario_editar(request, user_id):
             # Preservar avatar existente se não há nova imagem
             usuario['avatar'] = request.POST.get('avatar_existente')
         
-        # Atualizar status conforme o tipo de usuário
-        if user_id < 1000:  # Usuário do sistema
-            usuarios_sistema_status[user_id] = novo_status
-        else:  # Usuário criado
-            usuario['ativo'] = novo_status
-        
-        # Atualizar senha se fornecida (apenas para usuários criados)
+        # Atualizar senha se fornecida
         senha = request.POST.get('senha')
         confirma_senha = request.POST.get('confirma_senha')
-        if senha and user_id >= 1000:  # Apenas usuários criados podem ter senha alterada
+        if senha:
             if senha == confirma_senha:
                 senha_valida, erro_senha = validar_senha(senha)
                 if not senha_valida:
@@ -2136,36 +2087,26 @@ def usuario_editar(request, user_id):
 def usuario_excluir(request, user_id):
     global usuarios_criados
     
-    # Permitir exclusão apenas de usuários criados (ID >= 1000)
-    if user_id >= 1000:
-        usuarios_criados = [u for u in usuarios_criados if u['id'] != user_id]
-        messages.success(request, 'Usuário excluído com sucesso!')
-    else:
-        messages.warning(request, 'Usuários do sistema não podem ser excluídos, apenas desativados.')
+    # Excluir apenas usuários criados
+    usuarios_criados = [u for u in usuarios_criados if u['id'] != user_id]
+    messages.success(request, 'Usuário excluído com sucesso!')
     
     salvar_dados()  # Persistir dados
     return redirect('usuarios_lista')
 
 @admin_required
 def usuario_bloquear(request, user_id):
-    global usuarios_criados, usuarios_sistema_status
+    global usuarios_criados
     
-    # Verificar se é usuário criado (ID >= 1000)
-    if user_id >= 1000:
-        for i, u in enumerate(usuarios_criados):
-            if u['id'] == user_id:
-                usuarios_criados[i]['ativo'] = not usuarios_criados[i]['ativo']
-                status = 'desbloqueado' if usuarios_criados[i]['ativo'] else 'bloqueado'
-                messages.success(request, f'Usuário {status} com sucesso!')
-        
+    # Alterar status apenas de usuários criados
+    for i, u in enumerate(usuarios_criados):
+        if u['id'] == user_id:
+            usuarios_criados[i]['ativo'] = not usuarios_criados[i]['ativo']
+            status = 'desbloqueado' if usuarios_criados[i]['ativo'] else 'bloqueado'
+            messages.success(request, f'Usuário {status} com sucesso!')
+            break
     else:
-        # Para usuários do sistema, alterar status na variável global
-        if user_id in usuarios_sistema_status:
-            usuarios_sistema_status[user_id] = not usuarios_sistema_status.get(user_id, True)
-            status = 'ativado' if usuarios_sistema_status[user_id] else 'desativado'
-            messages.success(request, f'Usuário do sistema {status} com sucesso!')
-        else:
-            messages.error(request, 'Usuário não encontrado!')
+        messages.error(request, 'Usuário não encontrado!')
     
     salvar_dados()  # Persistir dados
     return redirect('usuarios_lista')
