@@ -12,7 +12,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
             <div class="row">
@@ -35,6 +35,23 @@
                     <div class="mb-3">
                         <label class="form-label">E-mail *</label>
                         <input type="email" class="form-control" name="email" value="{{ usuario.email }}" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label class="form-label">Avatar</label>
+                        {% if usuario.avatar %}
+                            <div class="mb-2">
+                                <img src="{{ usuario.avatar }}" alt="Avatar atual" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                                <input type="hidden" name="avatar_existente" value="{{ usuario.avatar }}">
+                                <div class="form-text">Avatar atual</div>
+                            </div>
+                        {% endif %}
+                        <input type="file" class="form-control" name="avatar" accept="image/*">
+                        <div class="form-text">Selecione uma nova imagem para alterar o avatar</div>
                     </div>
                 </div>
             </div>

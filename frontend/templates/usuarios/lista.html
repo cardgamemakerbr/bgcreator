@@ -84,6 +84,7 @@ function updateComplexityLabel(value) {
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Avatar</th>
                         <th>ID</th>
                         <th>Nome</th>
                         <th>Login</th>
@@ -96,6 +97,15 @@ function updateComplexityLabel(value) {
                 <tbody>
                     {% for usuario in usuarios %}
                     <tr>
+                        <td>
+                            {% if usuario.avatar %}
+                                <img src="{{ usuario.avatar }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            {% endif %}
+                        </td>
                         <td>{{ usuario.id }}</td>
                         <td>{{ usuario.nome }}</td>
                         <td>{{ usuario.login }}</td>

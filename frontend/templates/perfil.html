@@ -10,13 +10,30 @@
                 <h5><i class="fas fa-user-cog"></i> Meu Perfil</h5>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <!-- Informações Básicas -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h6 class="text-muted mb-3">INFORMAÇÕES BÁSICAS</h6>
+                            
+                            <!-- Avatar -->
+                            <div class="mb-3 text-center">
+                                {% if usuario.avatar %}
+                                    <img src="{{ usuario.avatar }}" alt="Avatar" class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <input type="hidden" name="avatar_existente" value="{{ usuario.avatar }}">
+                                {% else %}
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 100px; height: 100px;">
+                                        <i class="fas fa-user fa-3x text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <label for="avatar" class="form-label">Avatar</label>
+                                    <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                                    <div class="form-text">Selecione uma imagem para seu perfil</div>
+                                </div>
+                            </div>
                             
                             <div class="mb-3">
                                 <label for="nome" class="form-label">Nome Completo</label>

@@ -223,6 +223,29 @@ def salvar_imagem_setup(arquivo):
             return None
     return None
 
+def salvar_avatar_usuario(arquivo):
+    """Salva avatar do usuário e retorna o caminho"""
+    if arquivo:
+        try:
+            # Criar diretório se não existir
+            avatars_dir = 'media/avatars'
+            if not os.path.exists(avatars_dir):
+                os.makedirs(avatars_dir)
+            
+            # Salvar arquivo
+            filename = f"avatar_{arquivo.name}"
+            filepath = os.path.join(avatars_dir, filename)
+            
+            with open(filepath, 'wb+') as destination:
+                for chunk in arquivo.chunks():
+                    destination.write(chunk)
+            
+            return f'/media/avatars/{filename}'
+        except Exception as e:
+            print(f"Erro ao salvar avatar: {e}")
+            return None
+    return None
+
 def get_api_data(endpoint, page=1, per_page=1000, busca=None):
     """Busca dados da API real do backend com fallback local"""
     global mecanicas_criadas, componentes_criados, temas_criados
@@ -1447,10 +1470,23 @@ def jogo_detalhes(request, jogo_id):
         
         if comentario_texto and avaliacao and usuario_logado:
             from datetime import datetime
+            
+            # Buscar avatar do usuário logado
+            avatar_usuario = None
+            if usuario_logado.get('avatar'):
+                avatar_usuario = usuario_logado['avatar']
+            else:
+                # Buscar avatar na lista de usuários criados se não estiver no usuario_logado
+                for u in usuarios_criados:
+                    if u.get('id') == usuario_logado.get('id'):
+                        avatar_usuario = u.get('avatar')
+                        break
+            
             novo_comentario = {
                 'id': len(comentarios_criados) + 1,
                 'jogo_id': int(jogo_id),
                 'usuario': usuario_logado['nome'],
+                'avatar': avatar_usuario,
                 'comentario': comentario_texto,
                 'avaliacao': int(avaliacao),
                 'created_at': datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -1957,6 +1993,15 @@ def perfil(request):
         nova_senha = request.POST.get('nova_senha')
         confirma_senha = request.POST.get('confirma_senha')
         
+        # Processar upload do avatar
+        if 'avatar' in request.FILES:
+            avatar_path = salvar_avatar_usuario(request.FILES['avatar'])
+            if avatar_path:
+                usuario_logado['avatar'] = avatar_path
+        elif request.POST.get('avatar_existente'):
+            # Preservar avatar existente se não há nova imagem
+            usuario_logado['avatar'] = request.POST.get('avatar_existente')
+        
         # Atualizar nome e email
         usuario_logado['nome'] = nome
         usuario_logado['email'] = email
@@ -1979,6 +2024,7 @@ def perfil(request):
                         for i, u in enumerate(usuarios_criados):
                             if u['id'] == usuario_logado['id']:
                                 usuarios_criados[i]['senha'] = nova_senha
+                                usuarios_criados[i]['avatar'] = usuario_logado.get('avatar')
                                 break
                         messages.success(request, 'Senha alterada com sucesso!')
                     else:
@@ -1986,6 +2032,12 @@ def perfil(request):
             else:
                 messages.error(request, 'Nova senha e confirmação não conferem!')
         else:
+            # Atualizar avatar na lista de usuários criados se não alterou senha
+            if usuario_logado.get('id', 0) > 10:
+                for i, u in enumerate(usuarios_criados):
+                    if u['id'] == usuario_logado['id']:
+                        usuarios_criados[i]['avatar'] = usuario_logado.get('avatar')
+                        break
             messages.success(request, 'Perfil atualizado com sucesso!')
         
         return redirect('perfil')
@@ -2080,6 +2132,11 @@ def usuario_novo(request):
                     messages.error(request, erro_senha)
                     return render(request, 'usuarios/novo.html')
                 
+                # Processar upload do avatar
+                avatar_path = None
+                if 'avatar' in request.FILES:
+                    avatar_path = salvar_avatar_usuario(request.FILES['avatar'])
+                
                 novo_usuario = {
                     'id': len(usuarios_criados) + 1000,
                     'nome': nome,
@@ -2087,7 +2144,8 @@ def usuario_novo(request):
                     'email': email,
                     'perfil': perfil,
                     'ativo': ativo,
-                    'senha': senha  # Armazenar senha (em produção usar hash)
+                    'senha': senha,  # Armazenar senha (em produção usar hash)
+                    'avatar': avatar_path
                 }
                 usuarios_criados.append(novo_usuario)
                 messages.success(request, f'Usuário "{nome}" criado com sucesso!')
@@ -2153,6 +2211,15 @@ def usuario_editar(request, user_id):
         usuario['email'] = email_novo
         usuario['perfil'] = request.POST.get('perfil', usuario['perfil'])
         novo_status = request.POST.get('ativo') == 'on'
+        
+        # Processar upload do avatar
+        if 'avatar' in request.FILES:
+            avatar_path = salvar_avatar_usuario(request.FILES['avatar'])
+            if avatar_path:
+                usuario['avatar'] = avatar_path
+        elif request.POST.get('avatar_existente'):
+            # Preservar avatar existente se não há nova imagem
+            usuario['avatar'] = request.POST.get('avatar_existente')
         
         # Atualizar status conforme o tipo de usuário
         if user_id < 1000:  # Usuário do sistema
