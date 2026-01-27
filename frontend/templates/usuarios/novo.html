@@ -19,13 +19,14 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label">Nome do Usuário *</label>
-                        <input type="text" class="form-control" name="nome" required>
+                        <input type="text" class="form-control" name="nome" id="nome" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label">Login *</label>
-                        <input type="text" class="form-control" name="login" required>
+                        <input type="text" class="form-control" name="login" id="login" required autocomplete="off" value="">
+                        <div class="form-text">Sugestão será gerada automaticamente baseada no nome</div>
                     </div>
                 </div>
             </div>
@@ -85,4 +86,46 @@
         </form>
     </div>
 </div>
+
+<script>
+// Função para gerar sugestão de login baseada no nome
+function gerarSugestaoLogin(nome) {
+    if (!nome.trim()) return '';
+    
+    return nome.trim()
+        .toLowerCase()
+        .replace(/\s+/g, '.')  // Substituir espaços por pontos
+        .replace(/[^a-z0-9.]/g, '')  // Remover caracteres especiais exceto pontos
+        .replace(/\.+/g, '.')  // Substituir múltiplos pontos por um só
+        .replace(/^\.|\.$/, '');  // Remover pontos do início e fim
+}
+
+// Garantir que o campo login inicie vazio quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    const loginField = document.getElementById('login');
+    loginField.value = '';  // Forçar campo vazio
+    
+    // Adicionar evento ao campo nome
+    document.getElementById('nome').addEventListener('input', function() {
+        const nome = this.value;
+        
+        // Só sugerir se o campo login estiver vazio ou com sugestão anterior
+        if (!loginField.dataset.userEdited) {
+            loginField.value = gerarSugestaoLogin(nome);
+        }
+    });
+    
+    // Marcar quando usuário editar manualmente o login
+    loginField.addEventListener('input', function() {
+        this.dataset.userEdited = 'true';
+    });
+    
+    // Limpar marcação se campo ficar vazio
+    loginField.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+            delete this.dataset.userEdited;
+        }
+    });
+});
+</script>
 {% endblock %}
