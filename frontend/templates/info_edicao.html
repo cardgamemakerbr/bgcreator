@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Informações sobre Edição - BGCreator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Como Funciona a Edição de Itens</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb"></i> Sistema de Edição Inteligente</h6>
+                        <p class="mb-0">O BGCreator permite editar todos os itens (mecânicas, componentes e temas), incluindo os pré-definidos do sistema.</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-edit text-success"></i> Itens Criados por Você</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Podem ser editados diretamente</li>
+                                <li><i class="fas fa-check text-success"></i> Podem ser excluídos</li>
+                                <li><i class="fas fa-check text-success"></i> Alterações são salvas no item original</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-copy text-primary"></i> Itens Pré-definidos do Sistema</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-primary"></i> Podem ser editados criando uma nova versão</li>
+                                <li><i class="fas fa-times text-danger"></i> Não podem ser excluídos</li>
+                                <li><i class="fas fa-check text-primary"></i> Nova versão fica marcada como "Editada"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6><i class="fas fa-tags"></i> Identificação Visual</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <strong>Item Original</strong>
+                                    <span class="badge bg-info ms-2">Editado</span>
+                                    <p class="small text-muted mt-2">Versão editada de um item pré-definido</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <strong>Item Criado</strong>
+                                    <p class="small text-muted mt-2">Item completamente novo criado por você</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-secondary">
+                                <div class="card-body text-center">
+                                    <strong>Item Sistema</strong>
+                                    <p class="small text-muted mt-2">Item pré-definido do BGCreator</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6><i class="fas fa-question-circle"></i> Perguntas Frequentes</h6>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    O que acontece quando edito um item pré-definido?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Uma nova versão editável é criada com suas modificações, mantendo o item original intacto. A nova versão aparece com o badge "Editado".
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Posso excluir itens pré-definidos?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Não, itens pré-definidos do sistema não podem ser excluídos para manter a integridade da base de dados. Apenas itens criados por você podem ser excluídos.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    Como identifico se um item foi editado?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Itens editados aparecem com um badge azul "Editado" ao lado do nome nas listagens. Isso indica que é uma versão personalizada de um item pré-definido.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

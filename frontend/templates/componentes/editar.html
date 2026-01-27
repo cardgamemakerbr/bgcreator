@@ -12,26 +12,43 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Nome do Componente *</label>
-                <input type="text" class="form-control" name="nome" value="{{ item.nome }}" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Tipo</label>
-                <select class="form-select" name="tipo">
-                    <option value="TATICO" {% if item.tipo == 'TATICO' %}selected{% endif %}>Tático</option>
-                    <option value="SORTE" {% if item.tipo == 'SORTE' %}selected{% endif %}>Sorte</option>
-                    <option value="LUDICO" {% if item.tipo == 'LUDICO' %}selected{% endif %}>Lúdico</option>
-                    <option value="HABILIDADE" {% if item.tipo == 'HABILIDADE' %}selected{% endif %}>Habilidade</option>
-                    <option value="GERENCIAMENTO" {% if item.tipo == 'GERENCIAMENTO' %}selected{% endif %}>Gerenciamento</option>
-                    <option value="NEUTRO" {% if item.tipo == 'NEUTRO' %}selected{% endif %}>Neutro</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Descrição</label>
-                <textarea class="form-control" name="descricao" rows="3">{{ item.descricao }}</textarea>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Componente *</label>
+                        <input type="text" class="form-control" name="nome" value="{{ item.nome }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" name="tipo">
+                            <option value="TATICO" {% if item.tipo == 'TATICO' %}selected{% endif %}>Tático</option>
+                            <option value="SORTE" {% if item.tipo == 'SORTE' %}selected{% endif %}>Sorte</option>
+                            <option value="LUDICO" {% if item.tipo == 'LUDICO' %}selected{% endif %}>Lúdico</option>
+                            <option value="HABILIDADE" {% if item.tipo == 'HABILIDADE' %}selected{% endif %}>Habilidade</option>
+                            <option value="GERENCIAMENTO" {% if item.tipo == 'GERENCIAMENTO' %}selected{% endif %}>Gerenciamento</option>
+                            <option value="NEUTRO" {% if item.tipo == 'NEUTRO' %}selected{% endif %}>Neutro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" name="descricao" rows="3">{{ item.descricao }}</textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Imagem do Componente</label>
+                        {% if item.imagem %}
+                        <div class="mb-2">
+                            <img src="{{ item.imagem }}" alt="{{ item.nome }}" style="width: 64px; height: 64px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;" onerror="this.style.display='none'">
+                            <small class="text-muted d-block">Imagem atual: {{ item.imagem }}</small>
+                        </div>
+                        {% endif %}
+                        <input type="file" class="form-control" name="imagem" accept="image/*">
+                        <small class="text-muted d-block">Formato quadrado pequeno recomendado (ex: 64x64px). Deixe em branco para manter a imagem atual.</small>
+                    </div>
+                </div>
             </div>
             <div class="text-end">
                 <button type="submit" class="btn btn-warning">

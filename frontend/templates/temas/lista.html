@@ -6,9 +6,14 @@
 {% csrf_token %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-palette"></i> Gerenciar Temas</h2>
-    <a href="{% url 'tema_novo' %}" class="btn btn-info">
-        <i class="fas fa-plus"></i> Novo Tema
-    </a>
+    <div>
+        <a href="{% url 'tema_novo' %}" class="btn btn-info me-2">
+            <i class="fas fa-plus"></i> Novo Tema
+        </a>
+        <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#infoModal">
+            <i class="fas fa-info-circle"></i> Como Editar
+        </button>
+    </div>
 </div>
 
 <div class="row mb-3">
@@ -53,11 +58,18 @@
                     <tbody>
                         {% for tema in temas %}
                         <tr>
-                            <td><strong>{{ tema.nome }}</strong></td>
+                            <td>
+                                <strong>{{ tema.nome }}</strong>
+                                {% if tema.original_id %}
+                                <span class="badge bg-info ms-2">Editado</span>
+                                {% endif %}
+                            </td>
                             <td>{{ tema.descricao|default:"Sem descrição" }}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary" onclick="editarTema({{ tema.id }})">Editar</button>
+                                {% if tema.id >= 3000 %}
                                 <button class="btn btn-sm btn-outline-danger" onclick="excluirTema({{ tema.id }})">Excluir</button>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -101,6 +113,46 @@
 </nav>
 {% endif %}
 {% endblock %}
+
+<!-- Modal de Informações -->
+<div class="modal fade" id="infoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Como Funciona a Edição</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-lightbulb"></i> Sistema de Edição Inteligente</h6>
+                    <p class="mb-0">O BGCreator permite editar todos os itens, incluindo os pré-definidos do sistema.</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-edit text-success"></i> Itens Criados por Você</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Podem ser editados diretamente</li>
+                            <li><i class="fas fa-check text-success"></i> Podem ser excluídos</li>
+                            <li><i class="fas fa-check text-success"></i> Alterações são salvas no item original</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-copy text-primary"></i> Itens Pré-definidos</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-primary"></i> Podem ser editados criando nova versão</li>
+                            <li><i class="fas fa-times text-danger"></i> Não podem ser excluídos</li>
+                            <li><i class="fas fa-check text-primary"></i> Nova versão fica marcada como <span class="badge bg-info">Editado</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% block scripts %}
 <script>

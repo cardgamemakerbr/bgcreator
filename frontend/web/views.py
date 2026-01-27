@@ -295,6 +295,29 @@ def salvar_imagem_setup(arquivo):
             return None
     return None
 
+def salvar_imagem_componente(arquivo):
+    """Salva imagem do componente e retorna o caminho"""
+    if arquivo:
+        try:
+            # Criar diretório se não existir
+            componentes_dir = 'media/componentes'
+            if not os.path.exists(componentes_dir):
+                os.makedirs(componentes_dir)
+            
+            # Salvar arquivo
+            filename = f"componente_{arquivo.name}"
+            filepath = os.path.join(componentes_dir, filename)
+            
+            with open(filepath, 'wb+') as destination:
+                for chunk in arquivo.chunks():
+                    destination.write(chunk)
+            
+            return f'/media/componentes/{filename}'
+        except Exception as e:
+            print(f"Erro ao salvar imagem do componente: {e}")
+            return None
+    return None
+
 def salvar_avatar_usuario(arquivo):
     """Salva avatar do usuário e retorna o caminho"""
     if arquivo:
@@ -602,8 +625,17 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(temas_completos)]
         dados.extend(temas_criados)
     elif endpoint == 'componentes':
-        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': tipo} for i, (nome, descricao, tipo) in enumerate(componentes_completos)]
-        dados.extend(componentes_criados)
+        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': tipo, 'imagem': None} for i, (nome, descricao, tipo) in enumerate(componentes_completos)]
+        # Adicionar componentes criados com suas imagens
+        for comp in componentes_criados:
+            dados.append({
+                'id': comp['id'],
+                'nome': comp['nome'],
+                'descricao': comp['descricao'],
+                'tipo': comp['tipo'],
+                'imagem': comp.get('imagem'),
+                'original_id': comp.get('original_id')
+            })
     else:
         dados = []
     
@@ -1021,11 +1053,17 @@ def componente_novo(request):
         descricao = request.POST.get('descricao', '')
         tipo = request.POST.get('tipo', 'TATICO')
         if nome:
+            # Processar upload da imagem
+            imagem_path = None
+            if 'imagem' in request.FILES:
+                imagem_path = salvar_imagem_componente(request.FILES['imagem'])
+            
             novo_componente = {
                 'id': len(componentes_criados) + 2000,
                 'nome': nome,
                 'descricao': descricao,
-                'tipo': tipo
+                'tipo': tipo,
+                'imagem': imagem_path
             }
             componentes_criados.append(novo_componente)
             salvar_dados()  # Persistir dados
@@ -1877,7 +1915,25 @@ def calcular_peso_jogo(jogo_data):
     peso += peso_especiais
     return round(peso, 1)
 
-def calcular_classificacao_jogo(jogo_data):
+def buscar_componente_com_imagem(nome_componente):
+    """Busca componente por nome e retorna dados com imagem"""
+    global componentes_criados
+    
+    # Remover quantidade do nome (ex: "Dados D6 (x2)" -> "Dados D6")
+    nome_limpo = nome_componente.split(' (x')[0].strip()
+    
+    # Buscar primeiro nos componentes criados (têm imagens)
+    for comp in componentes_criados:
+        if comp['nome'] == nome_limpo:
+            return comp
+    
+    # Se não encontrou, buscar nos pré-definidos
+    componentes_data = get_api_data('componentes', page=1, per_page=1000)
+    for comp in componentes_data['results']:
+        if comp['nome'] == nome_limpo:
+            return comp
+    
+    return None
     """Calcula as classificações do jogo baseado em componentes, estruturas e condições especiais"""
     classificacoes = {
         'NEUTRO': 0,
@@ -1960,16 +2016,26 @@ def mecanica_editar(request, item_id):
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
         
-        # Atualizar se for item criado pelo usuário (ID >= 1000)
+        # Atualizar item criado pelo usuário (ID >= 1000)
         if item_id >= 1000:
             for i, m in enumerate(mecanicas_criadas):
                 if m['id'] == item_id:
                     mecanicas_criadas[i]['nome'] = nome
                     mecanicas_criadas[i]['descricao'] = descricao
                     break
+            salvar_dados()
             messages.success(request, 'Mecânica atualizada com sucesso!')
         else:
-            messages.warning(request, 'Não é possível editar mecânicas pré-definidas do sistema.')
+            # Criar nova versão editável do item pré-definido
+            nova_mecanica = {
+                'id': len(mecanicas_criadas) + 1000,
+                'nome': nome,
+                'descricao': descricao,
+                'original_id': item_id  # Referência ao item original
+            }
+            mecanicas_criadas.append(nova_mecanica)
+            salvar_dados()
+            messages.success(request, f'Nova versão editável da mecânica "{nome}" criada com sucesso!')
         
         return redirect('mecanicas_lista')
     
@@ -1990,22 +2056,46 @@ def componente_editar(request, item_id):
         messages.error(request, 'Componente não encontrado!')
         return redirect('componentes_lista')
     
+    print(f"DEBUG - Item encontrado: {item}")  # Debug
+    
     if request.method == 'POST':
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
         tipo = request.POST.get('tipo', 'TATICO')
         
-        # Atualizar se for item criado pelo usuário (ID >= 2000)
+        # Atualizar item criado pelo usuário (ID >= 2000)
         if item_id >= 2000:
+            # Processar upload da imagem
+            imagem_path = item.get('imagem')  # Preservar imagem existente por padrão
+            if 'imagem' in request.FILES:
+                imagem_path = salvar_imagem_componente(request.FILES['imagem'])
+            
             for i, c in enumerate(componentes_criados):
                 if c['id'] == item_id:
                     componentes_criados[i]['nome'] = nome
                     componentes_criados[i]['descricao'] = descricao
                     componentes_criados[i]['tipo'] = tipo
+                    componentes_criados[i]['imagem'] = imagem_path
                     break
+            salvar_dados()
             messages.success(request, 'Componente atualizado com sucesso!')
         else:
-            messages.warning(request, 'Não é possível editar componentes pré-definidos do sistema.')
+            # Criar nova versão editável do item pré-definido
+            imagem_path = None
+            if 'imagem' in request.FILES:
+                imagem_path = salvar_imagem_componente(request.FILES['imagem'])
+            
+            novo_componente = {
+                'id': len(componentes_criados) + 2000,
+                'nome': nome,
+                'descricao': descricao,
+                'tipo': tipo,
+                'imagem': imagem_path,
+                'original_id': item_id
+            }
+            componentes_criados.append(novo_componente)
+            salvar_dados()
+            messages.success(request, f'Nova versão editável do componente "{nome}" criada com sucesso!')
         
         return redirect('componentes_lista')
     
@@ -2029,16 +2119,26 @@ def tema_editar(request, item_id):
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
         
-        # Atualizar se for item criado pelo usuário (ID >= 3000)
+        # Atualizar item criado pelo usuário (ID >= 3000)
         if item_id >= 3000:
             for i, t in enumerate(temas_criados):
                 if t['id'] == item_id:
                     temas_criados[i]['nome'] = nome
                     temas_criados[i]['descricao'] = descricao
                     break
+            salvar_dados()
             messages.success(request, 'Tema atualizado com sucesso!')
         else:
-            messages.warning(request, 'Não é possível editar temas pré-definidos do sistema.')
+            # Criar nova versão editável do item pré-definido
+            novo_tema = {
+                'id': len(temas_criados) + 3000,
+                'nome': nome,
+                'descricao': descricao,
+                'original_id': item_id  # Referência ao item original
+            }
+            temas_criados.append(novo_tema)
+            salvar_dados()
+            messages.success(request, f'Nova versão editável do tema "{nome}" criada com sucesso!')
         
         return redirect('temas_lista')
     

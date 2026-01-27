@@ -224,15 +224,25 @@
         <div class="page-break">
             <h2><span class="section-number">{% if jogo.setup %}3{% else %}2{% endif %}.</span> Componentes do Jogo</h2>
             <div class="mt-4">
-                <ul class="list-group list-group-flush">
+                <div class="row">
                     {% for componente in jogo.componentes %}
                         {% if componente %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>{{ componente }}</span>
-                        </li>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-2 border rounded">
+                                <div class="me-3">
+                                    <div style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-puzzle-piece text-muted" style="font-size: 16px;"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ componente }}</div>
+                                    <small class="text-muted">Componente</small>
+                                </div>
+                            </div>
+                        </div>
                         {% endif %}
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </div>
         {% endif %}

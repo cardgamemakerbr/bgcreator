@@ -227,6 +227,8 @@ ok - Avaliação 1 a 5 nos comentarios
 ok - Complexadade de senhas
 ok - Adicionar avatar no usuario
 ok - Adicionar icone de ! E ok da correção
+
+- Adicionar imagens para componetes
 - Função de backup automatico 1 vez por dia e limpesa de backup 1 a 5 dias
 - Bloqueio de co autor e co editor
 
@@ -257,3 +259,8 @@ Pode avaliar um problema que eu estou percebendo, quando vc faz uma nova atualiz
      - (!) este significa que existe uma revisão e um pedido de correção aberto
      - (icon:check)"o simbulo de check mesmo" correção completamente validada 
  - esta função deve aparecer quando listar os jogos
+
+ pode adicionar um campo novo formulario de;
+    - componentes
+  - Este é um upload de imagem, no formato de quadrados pequenos.
+  - Estas imagens deve ser visualizada ao adicionar um novo componente no manual (criação/edição/visualização/impressão)
