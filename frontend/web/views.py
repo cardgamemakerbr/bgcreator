@@ -103,6 +103,7 @@ componentes_criados = []
 temas_criados = []
 jogos_criados = []
 usuarios_criados = []
+comentarios_criados = []
 usuario_logado = None
 
 def salvar_imagem_glossario(arquivo):
@@ -1263,7 +1264,7 @@ def jogo_copiar(request, jogo_id):
 
 @login_required
 def jogo_detalhes(request, jogo_id):
-    global jogos_criados
+    global jogos_criados, comentarios_criados, usuario_logado
     
     # Encontrar o jogo
     jogo = None
@@ -1389,7 +1390,39 @@ def jogo_detalhes(request, jogo_id):
     # Calcular classificações
     classificacoes = calcular_classificacao_jogo(jogo)
     
-    return render(request, 'jogos/detalhes.html', {'jogo': jogo_processado, 'classificacoes': classificacoes})
+    # Processar comentário se enviado
+    if request.method == 'POST' and 'comentario' in request.POST:
+        comentario_texto = request.POST.get('comentario', '').strip()
+        avaliacao = request.POST.get('avaliacao')
+        
+        if comentario_texto and avaliacao and usuario_logado:
+            from datetime import datetime
+            novo_comentario = {
+                'id': len(comentarios_criados) + 1,
+                'jogo_id': int(jogo_id),
+                'usuario': usuario_logado['nome'],
+                'comentario': comentario_texto,
+                'avaliacao': int(avaliacao),
+                'created_at': datetime.now().strftime('%d/%m/%Y %H:%M')
+            }
+            comentarios_criados.append(novo_comentario)
+            messages.success(request, 'Comentário adicionado com sucesso!')
+            return redirect('jogo_detalhes', jogo_id=jogo_id)
+    
+    # Buscar comentários do jogo
+    comentarios_jogo = [c for c in comentarios_criados if c['jogo_id'] == int(jogo_id)]
+    
+    # Calcular média de avaliações
+    media_avaliacoes = 0
+    if comentarios_jogo:
+        media_avaliacoes = round(sum(c['avaliacao'] for c in comentarios_jogo) / len(comentarios_jogo), 1)
+    
+    return render(request, 'jogos/detalhes.html', {
+        'jogo': jogo_processado, 
+        'classificacoes': classificacoes,
+        'comentarios': comentarios_jogo,
+        'media_avaliacoes': media_avaliacoes
+    })
 
 def jogo_imprimir(request, jogo_id):
     global jogos_criados
@@ -1827,6 +1860,7 @@ def login_view(request):
         # Usuários do sistema
         usuarios_sistema = [
             {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': True},
+            {'login': 'leitor', 'senha': '123', 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': True},
         ]
         
         # Verificar usuários do sistema + criados
@@ -1836,7 +1870,7 @@ def login_view(request):
             if usuario['login'] == login and usuario.get('ativo', True):
                 # Para usuários do sistema, usar senhas fixas
                 if usuario.get('id', 0) <= 10:  # Usuários do sistema
-                    if login == 'admin' and senha == 'admin':
+                    if (login == 'admin' and senha == 'admin') or (login == 'leitor' and senha == '123'):
                         usuario_logado = usuario
                         request.session['usuario_perfil'] = usuario['perfil']
                         messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
@@ -1912,6 +1946,7 @@ def usuarios_lista(request):
     # Usuários de exemplo
     usuarios_exemplo = [
         {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': True},
+        {'id': 2, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': True},
     ]
     
     todos_usuarios = usuarios_exemplo + usuarios_criados
@@ -2129,7 +2164,7 @@ import shutil
 
 @admin_required
 def backup_sistema(request):
-    global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados, usuarios_criados
+    global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados, usuarios_criados, comentarios_criados
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -2150,7 +2185,8 @@ def backup_sistema(request):
                 'mecanicas': mecanicas_criadas,
                 'componentes': componentes_criados,
                 'temas': temas_criados,
-                'usuarios': usuarios_criados
+                'usuarios': usuarios_criados,
+                'comentarios': comentarios_criados
             }
             
             # Criar arquivo ZIP
@@ -2203,6 +2239,9 @@ def backup_sistema(request):
                         
                         usuarios_criados.clear()
                         usuarios_criados.extend(backup_data.get('usuarios', []))
+                        
+                        comentarios_criados.clear()
+                        comentarios_criados.extend(backup_data.get('comentarios', []))
                         
                         # Restaurar arquivos de mídia
                         for file_info in zipf.infolist():

@@ -120,7 +120,7 @@ python manage.py runserver
 | Login | Senha | Perfil | Descrição |
 |-------|-------|--------|-----------|
 | admin | admin | Administrador | Acesso total |
-| joao | 123 | Autor | Criação e edição |
+| leitor | 123 | Leitor | Visualizar e comentar jogos |
 
 ## 🏗 Arquitetura
 
@@ -212,6 +212,7 @@ Distribuição percentual baseada em:
 
 ### Leitor
 - ✅ Visualizar e imprimir jogos
+- ✅ Comentar e avaliar jogos (1 a 5 estrelas)
 - ❌ Todas as outras operações
 
 ## 🤝 Contribuição
@@ -235,6 +236,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 - [ ] Integração com banco MongoDB real
 - [ ] Sistema de notificações
 - [ ] Histórico de alterações
-- [ ] Comentários e anotações
+- [x] Comentários e avaliações de jogos
 - [ ] Templates de jogos
 - [ ] Marketplace de componentes

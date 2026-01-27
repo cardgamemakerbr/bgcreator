@@ -176,3 +176,16 @@ class Glossario(models.Model):
     
     def __str__(self):
         return f"{self.jogo.nome} - {self.palavra}"
+
+class ComentarioJogo(models.Model):
+    jogo = models.ForeignKey(Jogo, on_delete=models.CASCADE)
+    usuario = models.CharField(max_length=100)
+    comentario = models.TextField()
+    avaliacao = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.jogo.nome} - {self.usuario} ({self.avaliacao}★)"

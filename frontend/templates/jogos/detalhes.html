@@ -268,4 +268,74 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Seção de Comentários -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-comments"></i> Comentários e Avaliações</h5>
+        {% if media_avaliacoes > 0 %}
+        <div>
+            <span class="badge bg-warning text-dark">
+                <i class="fas fa-star"></i> {{ media_avaliacoes }}/5
+            </span>
+            <small class="text-muted">({{ comentarios|length }} avaliação{{ comentarios|length|pluralize:"ões" }})</small>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <!-- Formulário para novo comentário -->
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="avaliacao" class="form-label">Avaliação:</label>
+                <select name="avaliacao" id="avaliacao" class="form-select" required>
+                    <option value="">Selecione uma nota</option>
+                    <option value="1">⭐ 1 - Muito Ruim</option>
+                    <option value="2">⭐⭐ 2 - Ruim</option>
+                    <option value="3">⭐⭐⭐ 3 - Regular</option>
+                    <option value="4">⭐⭐⭐⭐ 4 - Bom</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 - Excelente</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="comentario" class="form-label">Comentário:</label>
+                <textarea name="comentario" id="comentario" class="form-control" rows="3" placeholder="Compartilhe sua opinião sobre este jogo..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Enviar Comentário
+            </button>
+        </form>
+        
+        <!-- Lista de comentários -->
+        {% if comentarios %}
+        <hr>
+        <h6>Comentários dos Jogadores:</h6>
+        {% for comentario in comentarios %}
+        <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <strong>{{ comentario.usuario }}</strong>
+                    <div class="text-warning">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= comentario.avaliacao %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <small class="text-muted">{{ comentario.created_at }}</small>
+            </div>
+            <p class="mb-0">{{ comentario.comentario }}</p>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-comments fa-3x mb-3"></i>
+            <p>Seja o primeiro a comentar sobre este jogo!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
