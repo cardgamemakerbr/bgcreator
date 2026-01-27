@@ -345,6 +345,37 @@
         </div>
     </div>
 
+    <!-- Controle de Acesso (apenas para Administradores) -->
+    {% if usuario_logado.perfil == 'Administrador' %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-shield-alt"></i> Controle de Acesso</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="bloquear_co_autor" id="bloquear_co_autor" {% if jogo.bloquear_co_autor %}checked{% endif %}>
+                        <label class="form-check-label" for="bloquear_co_autor">
+                            <i class="fas fa-lock text-warning"></i> Bloquear novos co-autores
+                        </label>
+                        <small class="form-text text-muted">Impede que novos co-autores sejam adicionados ao jogo</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="bloquear_co_revisor" id="bloquear_co_revisor" {% if jogo.bloquear_co_revisor %}checked{% endif %}>
+                        <label class="form-check-label" for="bloquear_co_revisor">
+                            <i class="fas fa-shield-alt text-info"></i> Bloquear novos co-revisores
+                        </label>
+                        <small class="form-text text-muted">Impede que novos co-revisores sejam adicionados ao jogo</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="text-center">
         <button type="submit" class="btn btn-primary btn-lg">
             <i class="fas fa-save"></i> Salvar Revisão

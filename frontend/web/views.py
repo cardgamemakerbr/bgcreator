@@ -936,6 +936,14 @@ def jogo_novo(request):
             # Calcular peso automaticamente
             novo_jogo['peso'] = calcular_peso_jogo(novo_jogo)
             
+            # Processar bloqueios (apenas administradores)
+            if usuario_logado and usuario_logado['perfil'] == 'ADMINISTRADOR':
+                novo_jogo['bloquear_co_autor'] = request.POST.get('bloqueio_co_autor') == 'on'
+                novo_jogo['bloquear_co_revisor'] = request.POST.get('bloqueio_co_revisor') == 'on'
+            else:
+                novo_jogo['bloquear_co_autor'] = False
+                novo_jogo['bloquear_co_revisor'] = False
+            
             # Usar versão manual personalizada do formulário ou calcular automaticamente
             versao_personalizada = request.POST.get('versao_manual')
             if versao_personalizada and versao_personalizada.strip():
@@ -1146,20 +1154,28 @@ def jogo_editar(request, jogo_id):
         jogo['historia'] = request.POST.get('historia', jogo.get('historia', ''))
         # Atualizar autor/revisor com proteção (adicionar co-autor/co-revisor se já existir)
         if usuario_logado:
+            # Verificar bloqueios
+            bloqueio_co_autor = jogo.get('bloqueio_co_autor', False)
+            bloqueio_co_revisor = jogo.get('bloqueio_co_revisor', False)
+            
             if usuario_logado['perfil'] == 'AUTOR':
-                if jogo.get('autor') and jogo['autor'] != usuario_logado['nome']:
-                    # Já existe autor diferente, adicionar como co-autor
+                if jogo.get('autor') and jogo['autor'] != usuario_logado['nome'] and not bloqueio_co_autor:
+                    # Já existe autor diferente e não está bloqueado, adicionar como co-autor
                     jogo['co_autor'] = usuario_logado['nome']
-                else:
+                elif not jogo.get('autor') or jogo['autor'] == usuario_logado['nome']:
                     # Não existe autor ou é o mesmo usuário
                     jogo['autor'] = usuario_logado['nome']
+                elif bloqueio_co_autor:
+                    messages.warning(request, 'Este jogo está bloqueado para novos co-autores.')
             elif usuario_logado['perfil'] == 'REVISOR':
-                if jogo.get('revisor') and jogo['revisor'] != usuario_logado['nome']:
-                    # Já existe revisor diferente, adicionar como co-revisor
+                if jogo.get('revisor') and jogo['revisor'] != usuario_logado['nome'] and not bloqueio_co_revisor:
+                    # Já existe revisor diferente e não está bloqueado, adicionar como co-revisor
                     jogo['co_revisor'] = usuario_logado['nome']
-                else:
+                elif not jogo.get('revisor') or jogo['revisor'] == usuario_logado['nome']:
                     # Não existe revisor ou é o mesmo usuário
                     jogo['revisor'] = usuario_logado['nome']
+                elif bloqueio_co_revisor:
+                    messages.warning(request, 'Este jogo está bloqueado para novos co-revisores.')
             elif usuario_logado['perfil'] == 'ADMINISTRADOR':
                 # Administrador pode atualizar ambos sem proteção
                 jogo['autor'] = usuario_logado['nome']
@@ -1296,6 +1312,11 @@ def jogo_editar(request, jogo_id):
                     'definicao': glossario_definicoes[i] if i < len(glossario_definicoes) else '',
                     'imagem': imagem_path
                 })
+        
+        # Processar bloqueios (apenas administradores)
+        if usuario_logado and usuario_logado['perfil'] == 'ADMINISTRADOR':
+            jogo['bloquear_co_autor'] = request.POST.get('bloqueio_co_autor') == 'on'
+            jogo['bloquear_co_revisor'] = request.POST.get('bloqueio_co_revisor') == 'on'
         
         # Recalcular peso automaticamente
         jogo['peso'] = calcular_peso_jogo(jogo)
@@ -2735,18 +2756,31 @@ def jogo_revisao(request, jogo_id):
         
         # Atualizar revisor do jogo com proteção de autoria
         if usuario_logado:
+            # Verificar bloqueios
+            bloqueio_co_revisor = jogo.get('bloquear_co_revisor', False)
+            
             if usuario_logado['perfil'] == 'REVISOR':
-                if jogo.get('revisor') and jogo['revisor'] != usuario_logado['nome']:
+                if jogo.get('revisor') and jogo['revisor'] != usuario_logado['nome'] and not bloqueio_co_revisor:
+                    # Já existe revisor diferente e não está bloqueado, adicionar como co-revisor
                     jogo['co_revisor'] = usuario_logado['nome']
-                else:
+                elif not jogo.get('revisor') or jogo['revisor'] == usuario_logado['nome']:
+                    # Não existe revisor ou é o mesmo usuário
                     jogo['revisor'] = usuario_logado['nome']
+                elif bloqueio_co_revisor:
+                    messages.warning(request, 'Este jogo está bloqueado para novos co-revisores.')
             elif usuario_logado['perfil'] == 'ADMINISTRADOR':
+                # Administrador pode atualizar sem proteção
                 jogo['revisor'] = usuario_logado['nome']
+                
+                # Processar bloqueios (apenas administradores)
+                jogo['bloquear_co_autor'] = request.POST.get('bloquear_co_autor') == 'on'
+                jogo['bloquear_co_revisor'] = request.POST.get('bloquear_co_revisor') == 'on'
         
         # Atualizar jogo na lista se for jogo criado
         if jogo_index is not None:
             jogos_criados[jogo_index] = jogo
         
+        salvar_dados()  # Persistir dados
         messages.success(request, f'Revisão do jogo "{jogo["nome"]}" salva com sucesso!')
         return redirect('jogos_lista')
     
