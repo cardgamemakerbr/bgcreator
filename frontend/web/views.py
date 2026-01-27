@@ -421,9 +421,8 @@ def home(request):
     if usuario_logado is None:
         return redirect('login')
     
-    # Contar jogos reais (exemplos + criados)
-    jogos_exemplo = 2  # Catan e Ticket to Ride
-    total_jogos = jogos_exemplo + len(jogos_criados)
+    # Contar jogos reais (apenas criados)
+    total_jogos = len(jogos_criados)
     
     # Usar dados locais para contagem
     mecanicas_data = get_api_data('mecanicas', page=1, per_page=1000)
@@ -449,45 +448,8 @@ def home(request):
 def jogos_lista(request):
     global jogos_criados
     
-    print(f"Jogos criados na lista: {len(jogos_criados)}")  # Debug
-    print(f"Jogos: {jogos_criados}")  # Debug
-    
-    # Combinar jogos criados com dados de exemplo
-    jogos_exemplo = [
-        {
-            'id': 1,
-            'nome': 'Catan',
-            'subtitulo': 'Colonizadores de Catan',
-            'descricao_curta': 'Jogo de estratégia sobre colonização',
-            'jogadores_min': 3,
-            'jogadores_max': 4,
-            'tempo_min': 60,
-            'tempo_max': 90,
-            'idade_recomendada': 10,
-            'peso': 2.3,
-            'setup': [],
-            'mecanicas': ['Construção', 'Negociação'],
-            'temas': ['Medieval', 'Colonização']
-        },
-        {
-            'id': 2,
-            'nome': 'Ticket to Ride',
-            'subtitulo': 'Aventura Ferroviária',
-            'descricao_curta': 'Construa rotas de trem pelo mundo',
-            'jogadores_min': 2,
-            'jogadores_max': 5,
-            'tempo_min': 30,
-            'tempo_max': 60,
-            'idade_recomendada': 8,
-            'peso': 1.8,
-            'setup': [],
-            'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
-            'temas': ['Transporte', 'Viagem']
-        }
-    ]
-    
-    # Adicionar jogos criados pelo usuário
-    todos_jogos = jogos_exemplo + jogos_criados
+    # Usar apenas jogos criados (sem exemplos)
+    todos_jogos = jogos_criados
     
     # Processar busca
     busca = request.GET.get('busca', '').strip().lower()
@@ -1138,57 +1100,9 @@ def jogo_copiar(request, jogo_id):
         if j['id'] == int(jogo_id):
             jogo_original = j
             break
-    
-    # Buscar nos jogos de exemplo se não encontrou
+    # Buscar apenas nos jogos criados
     if not jogo_original:
-        jogos_exemplo = [
-            {
-                'id': 1,
-                'nome': 'Catan',
-                'subtitulo': 'Colonizadores de Catan',
-                'descricao_curta': 'Jogo de estratégia sobre colonização',
-                'jogadores_min': 3,
-                'jogadores_max': 4,
-                'tempo_min': 60,
-                'tempo_max': 90,
-                'idade_recomendada': 10,
-                'peso': 2.3,
-                'setup': [],
-                'mecanicas': ['Construção', 'Negociação'],
-                'temas': ['Medieval', 'Colonização'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            },
-            {
-                'id': 2,
-                'nome': 'Ticket to Ride',
-                'subtitulo': 'Aventura Ferroviária',
-                'descricao_curta': 'Construa rotas de trem pelo mundo',
-                'jogadores_min': 2,
-                'jogadores_max': 5,
-                'tempo_min': 30,
-                'tempo_max': 60,
-                'idade_recomendada': 8,
-                'peso': 1.8,
-                'setup': [],
-                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
-                'temas': ['Transporte', 'Viagem'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            }
-        ]
-        
-        for j in jogos_exemplo:
-            if j['id'] == int(jogo_id):
-                jogo_original = j
-                break
-    
+        pass
     if not jogo_original:
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
@@ -1229,61 +1143,9 @@ def jogo_detalhes(request, jogo_id):
             jogo = j
             break
     
-    # Buscar nos jogos de exemplo se não encontrou
+    # Buscar apenas nos jogos criados
     if not jogo:
-        jogos_exemplo = [
-            {
-                'id': 1,
-                'nome': 'Catan',
-                'subtitulo': 'Colonizadores de Catan',
-                'descricao_curta': 'Jogo de estratégia sobre colonização',
-                'jogadores_min': 3,
-                'jogadores_max': 4,
-                'tempo_min': 60,
-                'tempo_max': 90,
-                'idade_recomendada': 10,
-                'peso': 2.3,
-                'versao_manual': '1.0.0',
-                'autor': 'Klaus Teuber',
-                'revisor': 'João Silva',
-                'setup': [],
-                'mecanicas': ['Construção', 'Negociação'],
-                'temas': ['Medieval', 'Colonização'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            },
-            {
-                'id': 2,
-                'nome': 'Ticket to Ride',
-                'subtitulo': 'Aventura Ferroviária',
-                'descricao_curta': 'Construa rotas de trem pelo mundo',
-                'jogadores_min': 2,
-                'jogadores_max': 5,
-                'tempo_min': 30,
-                'tempo_max': 60,
-                'idade_recomendada': 8,
-                'peso': 1.8,
-                'versao_manual': '1.0.0',
-                'autor': 'Alan R. Moon',
-                'revisor': 'Admin Sistema',
-                'setup': [],
-                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
-                'temas': ['Transporte', 'Viagem'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            }
-        ]
-        
-        for j in jogos_exemplo:
-            if j['id'] == int(jogo_id):
-                jogo = j
-                break
+        pass
     
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
@@ -1377,7 +1239,7 @@ def jogo_detalhes(request, jogo_id):
                 for u in usuarios_criados:
                     if u.get('id') == usuario_logado.get('id'):
                         avatar_usuario = u.get('avatar')
-                        break
+                
             
             novo_comentario = {
                 'id': len(comentarios_criados) + 1,
@@ -1418,61 +1280,9 @@ def jogo_imprimir(request, jogo_id):
             jogo = j
             break
     
-    # Buscar nos jogos de exemplo se não encontrou
+    # Buscar apenas nos jogos criados
     if not jogo:
-        jogos_exemplo = [
-            {
-                'id': 1,
-                'nome': 'Catan',
-                'subtitulo': 'Colonizadores de Catan',
-                'descricao_curta': 'Jogo de estratégia sobre colonização',
-                'jogadores_min': 3,
-                'jogadores_max': 4,
-                'tempo_min': 60,
-                'tempo_max': 90,
-                'idade_recomendada': 10,
-                'peso': 2.3,
-                'versao_manual': '1.0.0',
-                'autor': 'Klaus Teuber',
-                'revisor': 'João Silva',
-                'setup': [],
-                'mecanicas': ['Construção', 'Negociação'],
-                'temas': ['Medieval', 'Colonização'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            },
-            {
-                'id': 2,
-                'nome': 'Ticket to Ride',
-                'subtitulo': 'Aventura Ferroviária',
-                'descricao_curta': 'Construa rotas de trem pelo mundo',
-                'jogadores_min': 2,
-                'jogadores_max': 5,
-                'tempo_min': 30,
-                'tempo_max': 60,
-                'idade_recomendada': 8,
-                'peso': 1.8,
-                'versao_manual': '1.0.0',
-                'autor': 'Alan R. Moon',
-                'revisor': 'Admin Sistema',
-                'setup': [],
-                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
-                'temas': ['Transporte', 'Viagem'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            }
-        ]
-        
-        for j in jogos_exemplo:
-            if j['id'] == int(jogo_id):
-                jogo = j
-                break
+        pass
     
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
@@ -1776,7 +1586,7 @@ def mecanica_editar(request, item_id):
     for mecanica in mecanicas_data['results']:
         if mecanica['id'] == item_id:
             item = mecanica
-            break
+    
     
     if not item:
         messages.error(request, 'Mecânica não encontrada!')
@@ -1792,7 +1602,7 @@ def mecanica_editar(request, item_id):
                 if m['id'] == item_id:
                     mecanicas_criadas[i]['nome'] = nome
                     mecanicas_criadas[i]['descricao'] = descricao
-                    break
+            
             salvar_dados()
             messages.success(request, 'Mecânica atualizada com sucesso!')
         else:
@@ -1820,7 +1630,7 @@ def componente_editar(request, item_id):
     for componente in componentes_data['results']:
         if componente['id'] == item_id:
             item = componente
-            break
+    
     
     if not item:
         messages.error(request, 'Componente não encontrado!')
@@ -1846,7 +1656,7 @@ def componente_editar(request, item_id):
                     componentes_criados[i]['descricao'] = descricao
                     componentes_criados[i]['tipo'] = tipo
                     componentes_criados[i]['imagem'] = imagem_path
-                    break
+            
             salvar_dados()
             messages.success(request, 'Componente atualizado com sucesso!')
         else:
@@ -1879,7 +1689,7 @@ def tema_editar(request, item_id):
     for tema in temas_data['results']:
         if tema['id'] == item_id:
             item = tema
-            break
+    
     
     if not item:
         messages.error(request, 'Tema não encontrado!')
@@ -1895,7 +1705,7 @@ def tema_editar(request, item_id):
                 if t['id'] == item_id:
                     temas_criados[i]['nome'] = nome
                     temas_criados[i]['descricao'] = descricao
-                    break
+            
             salvar_dados()
             messages.success(request, 'Tema atualizado com sucesso!')
         else:
@@ -2041,7 +1851,7 @@ def perfil(request):
                             if u['id'] == usuario_logado['id']:
                                 usuarios_criados[i]['senha'] = nova_senha
                                 usuarios_criados[i]['avatar'] = usuario_logado.get('avatar')
-                                break
+                        
                         salvar_dados()
                         messages.success(request, 'Senha alterada com sucesso!')
                     else:
@@ -2055,7 +1865,7 @@ def perfil(request):
                 for i, u in enumerate(usuarios_criados):
                     if u['id'] == usuario_logado['id']:
                         usuarios_criados[i]['avatar'] = usuario_logado.get('avatar')
-                        break
+                
             messages.success(request, 'Perfil atualizado com sucesso!')
         
         return redirect('perfil')
@@ -2194,14 +2004,14 @@ def usuario_editar(request, user_id):
     for u in usuarios_sistema:
         if u['id'] == user_id:
             usuario = u
-            break
+    
     
     # Se não encontrou, buscar em usuários criados
     if not usuario:
         for u in usuarios_criados:
             if u['id'] == user_id:
                 usuario = u
-                break
+        
     
     if not usuario:
         messages.error(request, 'Usuário não encontrado!')
@@ -2294,7 +2104,7 @@ def usuario_bloquear(request, user_id):
                 usuarios_criados[i]['ativo'] = not usuarios_criados[i]['ativo']
                 status = 'desbloqueado' if usuarios_criados[i]['ativo'] else 'bloqueado'
                 messages.success(request, f'Usuário {status} com sucesso!')
-                break
+        
     else:
         # Para usuários do sistema, alterar status na variável global
         if user_id in usuarios_sistema_status:
@@ -2325,33 +2135,7 @@ def jogo_revisao_leitura(request, jogo_id):
             break
     
     if not jogo:
-        jogos_exemplo = [
-            {
-                'id': 1, 'nome': 'Catan', 'subtitulo': 'Colonizadores de Catan',
-                'descricao_curta': 'Jogo de estratégia sobre colonização',
-                'jogadores_min': 3, 'jogadores_max': 4, 'tempo_min': 60, 'tempo_max': 90,
-                'idade_recomendada': 10, 'peso': 2.3, 'versao_manual': '1.0.0',
-                'autor': 'Klaus Teuber', 'revisor': 'João Silva', 'setup': [],
-                'mecanicas': ['Construção', 'Negociação'], 'temas': ['Medieval', 'Colonização'],
-                'componentes': [], 'condicoes_vitoria': [], 'condicoes_derrota': [],
-                'estruturas': [], 'glossario': []
-            },
-            {
-                'id': 2, 'nome': 'Ticket to Ride', 'subtitulo': 'Aventura Ferroviária',
-                'descricao_curta': 'Construa rotas de trem pelo mundo',
-                'jogadores_min': 2, 'jogadores_max': 5, 'tempo_min': 30, 'tempo_max': 60,
-                'idade_recomendada': 8, 'peso': 1.8, 'versao_manual': '1.0.0',
-                'autor': 'Alan R. Moon', 'revisor': 'Admin Sistema', 'setup': [],
-                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
-                'temas': ['Transporte', 'Viagem'], 'componentes': [],
-                'condicoes_vitoria': [], 'condicoes_derrota': [], 'estruturas': [], 'glossario': []
-            }
-        ]
-        
-        for j in jogos_exemplo:
-            if j['id'] == int(jogo_id):
-                jogo = j
-                break
+        pass
     
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
@@ -2528,61 +2312,9 @@ def jogo_revisao(request, jogo_id):
             jogo_index = i
             break
     
-    # Buscar nos jogos de exemplo se não encontrou
+    # Buscar apenas nos jogos criados
     if not jogo:
-        jogos_exemplo = [
-            {
-                'id': 1,
-                'nome': 'Catan',
-                'subtitulo': 'Colonizadores de Catan',
-                'descricao_curta': 'Jogo de estratégia sobre colonização',
-                'jogadores_min': 3,
-                'jogadores_max': 4,
-                'tempo_min': 60,
-                'tempo_max': 90,
-                'idade_recomendada': 10,
-                'peso': 2.3,
-                'versao_manual': '1.0.0',
-                'autor': 'Klaus Teuber',
-                'revisor': 'João Silva',
-                'setup': [],
-                'mecanicas': ['Construção', 'Negociação'],
-                'temas': ['Medieval', 'Colonização'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            },
-            {
-                'id': 2,
-                'nome': 'Ticket to Ride',
-                'subtitulo': 'Aventura Ferroviária',
-                'descricao_curta': 'Construa rotas de trem pelo mundo',
-                'jogadores_min': 2,
-                'jogadores_max': 5,
-                'tempo_min': 30,
-                'tempo_max': 60,
-                'idade_recomendada': 8,
-                'peso': 1.8,
-                'versao_manual': '1.0.0',
-                'autor': 'Alan R. Moon',
-                'revisor': 'Admin Sistema',
-                'setup': [],
-                'mecanicas': ['Colecionar Conjuntos', 'Construção de Rotas'],
-                'temas': ['Transporte', 'Viagem'],
-                'componentes': [],
-                'condicoes_vitoria': [],
-                'condicoes_derrota': [],
-                'estruturas': [],
-                'glossario': []
-            }
-        ]
-        
-        for j in jogos_exemplo:
-            if j['id'] == int(jogo_id):
-                jogo = j
-                break
+        pass
     
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
