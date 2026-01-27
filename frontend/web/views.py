@@ -1760,22 +1760,19 @@ def tema_excluir(request, item_id):
 def login_view(request):
     global usuario_logado, usuarios_criados, usuarios_sistema_status, senhas_sistema
     
+    # Verificar se existe pelo menos um administrador
+    tem_admin = any(u['perfil'] == 'ADMINISTRADOR' for u in usuarios_criados)
+    
+    # Se não há administrador, mostrar tela de cadastro inicial
+    if not tem_admin:
+        return cadastrar_admin_inicial(request)
+    
     if request.method == 'POST':
         login = request.POST.get('login')
         senha = request.POST.get('senha')
         
-        # Usuários do sistema com status dinâmico
-        usuarios_sistema = [
-            {'login': 'admin', 'senha': senhas_mod.get_senha('admin'), 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status.get(1, True), 'id': 1},
-            {'login': 'autor', 'senha': senhas_mod.get_senha('autor'), 'nome': 'Autor Sistema', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status.get(2, True), 'id': 2},
-            {'login': 'revisor', 'senha': senhas_mod.get_senha('revisor'), 'nome': 'Revisor Sistema', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status.get(3, True), 'id': 3},
-            {'login': 'leitor', 'senha': senhas_mod.get_senha('leitor'), 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status.get(4, True), 'id': 4},
-        ]
-        
-        # Verificar usuários do sistema + criados
-        todos_usuarios = usuarios_sistema + usuarios_criados
-        
-        for usuario in todos_usuarios:
+        # Verificar apenas usuários criados (sem usuários do sistema)
+        for usuario in usuarios_criados:
             if usuario['login'] == login and usuario.get('ativo', True):
                 # Verificar senha
                 if usuario.get('senha') == senha:
@@ -1787,6 +1784,62 @@ def login_view(request):
         messages.error(request, 'Login ou senha inválidos, ou usuário desativado!')
     
     return render(request, 'login.html')
+
+def cadastrar_admin_inicial(request):
+    """Tela de cadastro do primeiro administrador do sistema"""
+    global usuarios_criados
+    
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        login = request.POST.get('login')
+        email = request.POST.get('email')
+        senha = request.POST.get('senha')
+        confirma_senha = request.POST.get('confirma_senha')
+        
+        if nome and login and email and senha:
+            # Verificar se login já existe
+            for usuario in usuarios_criados:
+                if usuario['login'].lower() == login.lower():
+                    messages.error(request, f'Login "{login}" já está em uso!')
+                    return render(request, 'cadastro_admin_inicial.html')
+                if usuario.get('email', '').lower() == email.lower():
+                    messages.error(request, f'E-mail "{email}" já está em uso!')
+                    return render(request, 'cadastro_admin_inicial.html')
+            
+            if senha == confirma_senha:
+                # Validar complexidade da senha
+                senha_valida, erro_senha = validar_senha(senha)
+                if not senha_valida:
+                    messages.error(request, erro_senha)
+                    return render(request, 'cadastro_admin_inicial.html')
+                
+                # Processar upload do avatar
+                avatar_path = None
+                if 'avatar' in request.FILES:
+                    avatar_path = salvar_avatar_usuario(request.FILES['avatar'])
+                
+                # Criar primeiro administrador
+                primeiro_admin = {
+                    'id': len(usuarios_criados) + 1000,  # ID único
+                    'nome': nome,
+                    'login': login,
+                    'email': email,
+                    'perfil': 'ADMINISTRADOR',
+                    'ativo': True,
+                    'senha': senha,
+                    'avatar': avatar_path
+                }
+                usuarios_criados.append(primeiro_admin)
+                salvar_dados()
+                
+                messages.success(request, f'Administrador "{nome}" criado com sucesso! Faça login para continuar.')
+                return redirect('login')
+            else:
+                messages.error(request, 'Senhas não conferem!')
+        else:
+            messages.error(request, 'Todos os campos são obrigatórios!')
+    
+    return render(request, 'cadastro_admin_inicial.html')
 
 def logout_view(request):
     global usuario_logado
@@ -2387,3 +2440,103 @@ def jogo_revisao(request, jogo_id):
         return redirect('jogos_lista')
     
     return render(request, 'jogos/revisao.html', {'jogo': jogo})
+
+# Funções de backup automático
+def criar_backup_automatico():
+    """Cria backup automático do sistema"""
+    global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados, usuarios_criados, comentarios_criados
+    
+    try:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_filename = f'bgcreator_backup_auto_{timestamp}.zip'
+        backup_path = os.path.join('backups', backup_filename)
+        
+        # Criar diretório de backup se não existir
+        os.makedirs('backups', exist_ok=True)
+        
+        # Dados para backup
+        backup_data = {
+            'timestamp': timestamp,
+            'tipo': 'automatico',
+            'jogos': jogos_criados,
+            'mecanicas': mecanicas_criadas,
+            'componentes': componentes_criados,
+            'temas': temas_criados,
+            'usuarios': usuarios_criados,
+            'comentarios': comentarios_criados,
+            'complexidade_senha': complexidade_senha,
+            'senhas_sistema': senhas_mod.SENHAS_SISTEMA
+        }
+        
+        # Criar arquivo ZIP
+        with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Adicionar dados JSON
+            zipf.writestr('dados.json', json.dumps(backup_data, indent=2, ensure_ascii=False))
+            
+            # Adicionar arquivos de mídia
+            media_dirs = ['media/capas', 'media/setup', 'media/glossario', 'media/componentes', 'media/avatars']
+            for media_dir in media_dirs:
+                if os.path.exists(media_dir):
+                    for root, dirs, files in os.walk(media_dir):
+                        for file in files:
+                            file_path = os.path.join(root, file)
+                            arcname = os.path.relpath(file_path, 'media')
+                            zipf.write(file_path, f'media/{arcname}')
+        
+        print(f'Backup automático criado: {backup_filename}')
+        return True
+    except Exception as e:
+        print(f'Erro ao criar backup automático: {e}')
+        return False
+
+def limpar_backups_antigos(dias_manter=5):
+    """Remove backups mais antigos que o número de dias especificado"""
+    try:
+        if not os.path.exists('backups'):
+            return
+        
+        from datetime import datetime, timedelta
+        data_limite = datetime.now() - timedelta(days=dias_manter)
+        
+        backups_removidos = 0
+        for filename in os.listdir('backups'):
+            if filename.endswith('.zip'):
+                filepath = os.path.join('backups', filename)
+                data_arquivo = datetime.fromtimestamp(os.path.getctime(filepath))
+                
+                if data_arquivo < data_limite:
+                    os.remove(filepath)
+                    backups_removidos += 1
+                    print(f'Backup antigo removido: {filename}')
+        
+        if backups_removidos > 0:
+            print(f'Total de backups antigos removidos: {backups_removidos}')
+    except Exception as e:
+        print(f'Erro ao limpar backups antigos: {e}')
+
+# Executar backup automático na inicialização (apenas uma vez por dia)
+if not globals().get('_backup_executado', False):
+    from datetime import datetime
+    hoje = datetime.now().strftime('%Y%m%d')
+    ultimo_backup_file = 'ultimo_backup.txt'
+    
+    try:
+        if os.path.exists(ultimo_backup_file):
+            with open(ultimo_backup_file, 'r') as f:
+                ultimo_backup = f.read().strip()
+        else:
+            ultimo_backup = ''
+        
+        if ultimo_backup != hoje:
+            # Executar backup automático
+            if criar_backup_automatico():
+                # Limpar backups antigos
+                limpar_backups_antigos(5)  # Manter apenas 5 dias
+                
+                # Salvar data do último backup
+                with open(ultimo_backup_file, 'w') as f:
+                    f.write(hoje)
+    except Exception as e:
+        print(f'Erro no backup automático: {e}')
+    
+    globals()['_backup_executado'] = True

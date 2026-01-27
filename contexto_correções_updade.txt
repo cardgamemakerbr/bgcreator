@@ -264,3 +264,10 @@ Pode avaliar um problema que eu estou percebendo, quando vc faz uma nova atualiz
     - componentes
   - Este é um upload de imagem, no formato de quadrados pequenos.
   - Estas imagens deve ser visualizada ao adicionar um novo componente no manual (criação/edição/visualização/impressão)
+
+
+  Quero preparar a aplicação para um deploy inicial (instalação do zero)
+ - Preciso remover todos os 4 usuarios de sistemas (admin, autor, editor e leitor)
+ - Logo em seguida preciso vc crie na tela de login uma função chamada: Cadastra o Administrador do sistema
+ - caso a aplicação não identifique nenhum usuario administror cadastrado, ira aparecer esta tela de cadastra um usuario administrador: como os mesmos campos de cadastro de um novo usuario, porem apenas estara disponivel o perfil administradro.
+ - Apos cdastrado este usuario adm, esta função deve sair da tela de login e ficar a tela padrao
