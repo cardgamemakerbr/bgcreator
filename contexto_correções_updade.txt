@@ -271,3 +271,10 @@ Pode avaliar um problema que eu estou percebendo, quando vc faz uma nova atualiz
  - Logo em seguida preciso vc crie na tela de login uma função chamada: Cadastra o Administrador do sistema
  - caso a aplicação não identifique nenhum usuario administror cadastrado, ira aparecer esta tela de cadastra um usuario administrador: como os mesmos campos de cadastro de um novo usuario, porem apenas estara disponivel o perfil administradro.
  - Apos cdastrado este usuario adm, esta função deve sair da tela de login e ficar a tela padrao
+
+ ajuste: formuario: cadastrar novo manual
+    |-> no primeiro campo de idade esta parecendo apenas 0 e 1 deveria ser 1 a 9
+
+ Nova função, no cadastro e edição de manuais
+    |-> nos campos componentes, temas, mecancias
+    |-> adicionar no proprio campo uma função cadastrar, quando eu digitar uma opção na cadastrada, aparece um botão ao lador <cadastra> e este cadas o item na tabela referente

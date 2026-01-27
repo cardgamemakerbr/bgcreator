@@ -2382,6 +2382,59 @@ def jogo_revisao(request, jogo_id):
     
     return render(request, 'jogos/revisao.html', {'jogo': jogo})
 
+# Funções AJAX para cadastro rápido
+from django.http import JsonResponse
+
+@autor_or_admin_required
+def cadastrar_mecanica_rapido(request):
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        if nome:
+            global mecanicas_criadas
+            nova_mecanica = {
+                'id': len(mecanicas_criadas) + 1000,
+                'nome': nome,
+                'descricao': f'Mecânica criada rapidamente: {nome}'
+            }
+            mecanicas_criadas.append(nova_mecanica)
+            salvar_dados()
+            return JsonResponse({'success': True, 'id': nova_mecanica['id'], 'nome': nome})
+    return JsonResponse({'success': False})
+
+@autor_or_admin_required
+def cadastrar_tema_rapido(request):
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        if nome:
+            global temas_criados
+            novo_tema = {
+                'id': len(temas_criados) + 3000,
+                'nome': nome,
+                'descricao': f'Tema criado rapidamente: {nome}'
+            }
+            temas_criados.append(novo_tema)
+            salvar_dados()
+            return JsonResponse({'success': True, 'id': novo_tema['id'], 'nome': nome})
+    return JsonResponse({'success': False})
+
+@autor_or_admin_required
+def cadastrar_componente_rapido(request):
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        if nome:
+            global componentes_criados
+            novo_componente = {
+                'id': len(componentes_criados) + 2000,
+                'nome': nome,
+                'descricao': f'Componente criado rapidamente: {nome}',
+                'tipo': 'NEUTRO',
+                'imagem': None
+            }
+            componentes_criados.append(novo_componente)
+            salvar_dados()
+            return JsonResponse({'success': True, 'id': novo_componente['id'], 'nome': nome})
+    return JsonResponse({'success': False})
+
 # Funções de backup automático
 def criar_backup_automatico():
     """Cria backup automático do sistema"""

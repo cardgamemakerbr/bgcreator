@@ -159,8 +159,15 @@
                         <label class="form-label"><i class="fas fa-users text-primary"></i> Jogadores</label>
                         <div class="d-flex">
                             <select class="form-select me-2" name="jogadores_min">
-                                <option value="0">0</option>
                                 <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
                             </select>
                             <span class="align-self-center mx-2">a</span>
                             <select class="form-select" name="jogadores_max">
@@ -1074,11 +1081,6 @@ function setupSearch(input, type) {
 function showSuggestions(input, items, type) {
     hideSuggestions(input);
     
-    if (!items || items.length === 0) {
-        console.log('Nenhum item encontrado');
-        return;
-    }
-    
     const dropdown = document.createElement('div');
     dropdown.className = 'search-dropdown';
     dropdown.style.cssText = `
@@ -1095,16 +1097,49 @@ function showSuggestions(input, items, type) {
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     `;
     
-    items.forEach(item => {
-        const option = document.createElement('div');
-        option.className = 'search-option';
-        option.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;';
-        option.textContent = item.nome;
-        option.addEventListener('click', () => selectItem(input, item, type));
-        option.addEventListener('mouseenter', () => option.style.backgroundColor = '#f8f9fa');
-        option.addEventListener('mouseleave', () => option.style.backgroundColor = 'white');
-        dropdown.appendChild(option);
-    });
+    if (!items || items.length === 0) {
+        // Mostrar opção de cadastro quando não encontrar resultados
+        const noResults = document.createElement('div');
+        noResults.style.cssText = 'padding: 8px 12px; color: #666; border-bottom: 1px solid #eee;';
+        noResults.innerHTML = `Nenhum resultado encontrado para "${input.value}"`;
+        dropdown.appendChild(noResults);
+        
+        const createOption = document.createElement('div');
+        createOption.className = 'search-option create-option';
+        createOption.style.cssText = 'padding: 8px 12px; cursor: pointer; background: #e8f5e8; color: #155724; font-weight: bold;';
+        createOption.innerHTML = `<i class="fas fa-plus"></i> Cadastrar "${input.value}"`;
+        createOption.addEventListener('click', () => createNewItem(input, input.value, type));
+        createOption.addEventListener('mouseenter', () => createOption.style.backgroundColor = '#d4edda');
+        createOption.addEventListener('mouseleave', () => createOption.style.backgroundColor = '#e8f5e8');
+        dropdown.appendChild(createOption);
+    } else {
+        items.forEach(item => {
+            const option = document.createElement('div');
+            option.className = 'search-option';
+            option.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;';
+            option.textContent = item.nome;
+            option.addEventListener('click', () => selectItem(input, item, type));
+            option.addEventListener('mouseenter', () => option.style.backgroundColor = '#f8f9fa');
+            option.addEventListener('mouseleave', () => option.style.backgroundColor = 'white');
+            dropdown.appendChild(option);
+        });
+        
+        // Adicionar opção de cadastro mesmo quando há resultados
+        if (input.value.trim() && !items.some(item => item.nome.toLowerCase() === input.value.toLowerCase())) {
+            const separator = document.createElement('div');
+            separator.style.cssText = 'border-top: 2px solid #dee2e6; margin: 4px 0;';
+            dropdown.appendChild(separator);
+            
+            const createOption = document.createElement('div');
+            createOption.className = 'search-option create-option';
+            createOption.style.cssText = 'padding: 8px 12px; cursor: pointer; background: #e8f5e8; color: #155724; font-weight: bold;';
+            createOption.innerHTML = `<i class="fas fa-plus"></i> Cadastrar "${input.value}"`;
+            createOption.addEventListener('click', () => createNewItem(input, input.value, type));
+            createOption.addEventListener('mouseenter', () => createOption.style.backgroundColor = '#d4edda');
+            createOption.addEventListener('mouseleave', () => createOption.style.backgroundColor = '#e8f5e8');
+            dropdown.appendChild(createOption);
+        }
+    }
     
     input.parentElement.style.position = 'relative';
     input.parentElement.appendChild(dropdown);
@@ -1123,6 +1158,71 @@ function selectItem(input, item, type) {
     }
     hideSuggestions(input);
     calcularPesoTempo();
+}
+
+// Função para criar novo item via AJAX
+function createNewItem(input, nome, type) {
+    if (!nome || !nome.trim()) {
+        alert('Nome não pode estar vazio');
+        return;
+    }
+    
+    const endpoints = {
+        'mecanicas': '/ajax/cadastrar-mecanica/',
+        'temas': '/ajax/cadastrar-tema/',
+        'componentes': '/ajax/cadastrar-componente/'
+    };
+    
+    const endpoint = endpoints[type];
+    if (!endpoint) {
+        alert('Tipo inválido');
+        return;
+    }
+    
+    // Obter token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Fazer requisição AJAX
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `nome=${encodeURIComponent(nome.trim())}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Selecionar o item recém-criado
+            const newItem = { id: data.id, nome: data.nome };
+            selectItem(input, newItem, type);
+            
+            // Mostrar mensagem de sucesso
+            const successMsg = document.createElement('div');
+            successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+            successMsg.innerHTML = `
+                <i class="fas fa-check-circle"></i> ${type.slice(0, -1).charAt(0).toUpperCase() + type.slice(1, -1)} "${data.nome}" cadastrado com sucesso!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            input.parentElement.appendChild(successMsg);
+            
+            // Remover mensagem após 3 segundos
+            setTimeout(() => {
+                if (successMsg.parentElement) {
+                    successMsg.remove();
+                }
+            }, 3000);
+        } else {
+            alert('Erro ao cadastrar item. Tente novamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao cadastrar item. Verifique sua conexão.');
+    });
+    
+    hideSuggestions(input);
 }
 
 // Função para calcular peso em tempo real
