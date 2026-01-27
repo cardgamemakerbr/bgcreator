@@ -353,270 +353,11 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         print(f"Erro ao conectar com API: {e}")
     
     # Fallback para dados locais
-    mecanicas_completas = [
-        ('Alocação de Trabalhadores (Worker Placement)', 'Posicionar peões em locais do tabuleiro para bloquear a ação para outros e ganhar recursos.'),
-        ('Construção de Baralho (Deck Building)', 'Jogadores compram cartas para melhorar seu próprio baralho durante a partida.'),
-        ('Controle de Área (Area Control)', 'Ganhar bônus ou pontos por ter a maioria de unidades em um território específico.'),
-        ('Colecionar Conjuntos (Set Collection)', 'Acumular itens do mesmo tipo para multiplicar a pontuação final.'),
-        ('Draft de Cartas', 'Escolher uma carta de uma mão e passar o restante para o próximo jogador.'),
-        ('Rolagem de Dados', 'Uso de dados para determinar o sucesso ou a força de uma ação.'),
-        ('Gestão de Mão', 'Otimizar o uso das cartas que você possui para maximizar jogadas.'),
-        ('Movimentação em Grid', 'Mover peças em um tabuleiro dividido em quadrados ou espaços definidos.'),
-        ('Leilão / Licitação', 'Disputar um item ou recurso através de lances de moeda ou pontos.'),
-        ('Colocação de Peças (Tile Placement)', 'Construir o mapa ou cenário encaixando peças como um quebra-cabeça.'),
-        ('Cooperativo', 'Todos os jogadores trabalham juntos contra o sistema do jogo.'),
-        ('Traidor Oculto', 'Um jogador trabalha secretamente para impedir que o grupo vença.'),
-        ('Dedução Social', 'Tentar descobrir a identidade ou intenção dos outros jogadores através da fala e comportamento.'),
-        ('Memória', 'Jogadores devem lembrar a posição ou face de componentes ocultos.'),
-        ('Sorte na Medida (Push Your Luck)', 'Decidir entre parar com o lucro atual ou arriscar tudo por um prêmio maior.'),
-        ('Negociação', 'Troca livre de recursos e favores entre os participantes.'),
-        ('Movimento Ponto-a-Ponto', 'Mover-se através de rotas fixas que conectam locais específicos.'),
-        ('Sistema de Pontos de Ação', 'Você tem um orçamento fixo de pontos para gastar em diversas ações por turno.'),
-        ('Reconhecimento de Padrões', 'Identificar formas ou cores no tabuleiro para completar objetivos.'),
-        ('Storytelling', 'Criar uma narrativa conjunta baseada nos eventos do jogo.'),
-        ('Campanha / Legado', 'O jogo evolui entre sessões, com mudanças permanentes nos componentes.'),
-        ('Destreza', 'Testes físicos como equilíbrio, mira ou rapidez motora.'),
-        ('Eliminação de Jogadores', 'Jogadores saem da partida antes dela acabar ao perderem condições de vitória.'),
-        ('Simulação', 'Tenta replicar fielmente uma situação real (guerra, economia, voo).'),
-        ('Escolha Simultânea de Ações', 'Todos decidem o que fazer ao mesmo tempo e revelam as ações juntos.'),
-        ('Pegar e Entregar', 'Coletar um recurso em um ponto do mapa e transportá-lo até outro para ganhar pontos.'),
-        ('Tabuleiro Modular', 'O mapa é montado de forma diferente a cada partida.'),
-        ('Alocação de Dados', 'Usar os valores sorteados nos dados como se fossem "trabalhadores" para ativar ações.'),
-        ('Construção de Motor (Engine Building)', 'Criar uma sequência de habilidades que se alimentam para gerar recursos infinitos.'),
-        ('Apostas', 'Arriscar recursos prevendo quem será o vencedor ou qual evento ocorrerá.'),
-        ('Programação de Movimento', 'Planejar várias jogadas com antecedência e executá-las em ordem.'),
-        ('Influência em Área', 'Similar ao controle, mas focado no peso político ou de presença em uma região.'),
-        ('Movimento Oculto', 'Um jogador move sua peça em um mapa secreto, invisível aos outros.'),
-        ('Gerenciamento de Recursos', 'Administrar estoques limitados (comida, dinheiro, madeira) para evoluir.'),
-        ('Árvore Tecnológica', 'Gastar recursos para desbloquear melhorias permanentes em uma ordem lógica.'),
-        ('Atuação / Mímica', 'Usar o corpo e expressões para comunicar uma palavra ou ideia.'),
-        ('Desenhar (Paper-and-Pencil)', 'Usar papel e caneta para registrar progresso ou solucionar enigmas.'),
-        ('Rolar e Escrever', 'Rolar dados e marcar os resultados em uma folha individual.'),
-        ('Virar e Escrever', 'Revelar cartas e marcar os resultados em uma folha individual.'),
-        ('Conexões de Rotas', 'Criar caminhos contínuos entre dois pontos do tabuleiro.'),
-        ('Controle de Unidades', 'Comandar soldados ou peças individuais em combate ou exploração.'),
-        ('Resolução de Conflitos por Cartas', 'Usar valores de cartas em vez de dados para decidir combates.'),
-        ('Ciclo de Dia/Noite', 'As regras mudam dependendo da fase de tempo atual no jogo.'),
-        ('Ordem de Turno Variável', 'A ordem de quem joga primeiro muda a cada rodada.'),
-        ('Poderes Variáveis de Jogadores', 'Cada pessoa começa com uma habilidade única e diferente das outras.'),
-        ('Votação', 'O grupo decide o resultado de um evento através do voto.'),
-        ('Componente de Tempo Real', 'Jogar contra um cronômetro, sem turnos definidos.'),
-        ('Captura de Peças', 'Remover peças do oponente do tabuleiro (como no Xadrez).'),
-        ('Linha do Tempo', 'Organizar eventos ou cartas em ordem cronológica correta.'),
-        ('Quebra-cabeça', 'Resolver um desafio lógico de encaixe ou sequência.'),
-        ('Empilhamento', 'Colocar peças umas sobre as outras sem deixá-las cair.'),
-        ('Mercado Dinâmico', 'Preços que variam conforme os jogadores compram ou vendem itens.'),
-        ('Contratos', 'Cumprir requisitos específicos de recursos para ganhar recompensas.'),
-        ('Eventos Aleatórios', 'Cartas ou dados que mudam as regras globais temporariamente.'),
-        ('Movimento por Grade Hexagonal', 'Movimentação estratégica em espaços de 6 lados (favos).'),
-        ('Manobra de Combate', 'Posicionamento tático para ganhar vantagem em lutas.'),
-        ('Reforço de Unidades', 'Adicionar mais peças ao tabuleiro durante o jogo.'),
-        ('Escondidinho (Hidden Information)', 'Informações que apenas alguns jogadores conhecem.'),
-        ('Blefe', 'Tentar convencer os outros de algo falso para ganhar vantagem.'),
-        ('Corridas', 'Ganha quem chegar primeiro a um ponto específico do tabuleiro.'),
-        ('Labirinto', 'Paredes ou caminhos que se movem durante a partida.'),
-        ('Resolução de Enigmas', 'Decifrar códigos ou charadas para avançar.'),
-        ('Troca de Cartas', 'Trocar itens da mão diretamente com outros jogadores.'),
-        ('Drafting de Dados', 'Escolher dados de um conjunto comum para usar em seu turno.'),
-        ('Bag Building', 'Adicionar fichas ou peças em um saco para serem sorteadas depois.'),
-        ('Tableau Building', 'Construir uma área de jogo à sua frente com cartas que dão bônus.'),
-        ('Movimento em Trilhas', 'Avançar um marcador em uma trilha de progresso ou pontuação.'),
-        ('Rodondel', 'Uma roda de ações onde seu movimento limita o que você pode fazer.'),
-        ('Sistema de Herança', 'Habilidades passadas de um personagem morto para o próximo.'),
-        ('RPG Lite', 'Elementos simples de evolução de personagem e narrativa.'),
-        ('Alocação de Trabalhadores com Dados', 'Seus trabalhadores têm valores (dados) que ditam a força da ação.'),
-        ('Combate Baseado em Cartas', 'Ataques e defesas resolvidos puramente por baralho.'),
-        ('Controle de Fluxo', 'Gerenciar a velocidade com que o jogo avança.'),
-        ('Escalonamento', 'O jogo fica mais difícil ou recompensador conforme o tempo passa.'),
-        ('Investimento', 'Gastar agora para colher frutos muito maiores no final do jogo.'),
-        ('Maioria de Área', 'Ganhar pontos por ter mais presença, mesmo sem controle total.'),
-        ('Movimento por Cordas/Régua', 'Usar ferramentas físicas para medir a distância de movimento.'),
-        ('Multiplicadores de Pontos', 'Itens que dobram ou triplicam o valor de outros recursos.'),
-        ('Oráculo/Previsão', 'Ver cartas que ainda vão sair para planejar o futuro.'),
-        ('Padrões Geométricos', 'Organizar peças em formatos específicos (linhas, L, quadrados).'),
-        ('Peças Empinháveis', 'Peças que se encaixam verticalmente para economizar espaço ou indicar nível.'),
-        ('Posicionamento Tático', 'Onde você está no tabuleiro é mais importante do que o que você tem.'),
-        ('Produção Automática', 'Recursos que você ganha todo turno sem precisar de ações.'),
-        ('Recrutamento', 'Adicionar novos aliados ou unidades ao seu exército/grupo.'),
-        ('Recuperação de Ações', 'Gastar um turno para "pegar de volta" cartas ou trabalhadores usados.'),
-        ('Remoção de Peças', 'Estratégia focada em limpar o tabuleiro do oponente.'),
-        ('Reputação / Karma', 'Um medidor de "moralidade" que abre ou fecha caminhos no jogo.'),
-        ('Rodadas de Pontuação Intermediária', 'Pontuar várias vezes durante o jogo, não só no fim.'),
-        ('Seleção de Ações em Grade', 'Escolher ações baseadas em coordenadas de uma tabela.'),
-        ('Sistema de Fome/Sobrevivência', 'Obrigação de gastar recursos apenas para manter as peças vivas.'),
-        ('Solo (Modo Carreira)', 'Regras específicas para jogar sozinho e evoluir.'),
-        ('Tabuleiro Giratório', 'Partes do tabuleiro que giram, mudando as conexões.'),
-        ('Territórios Conquestáveis', 'Regiões que mudam de dono constantemente através de combate.'),
-        ('Testes de Habilidade', 'Comparar um valor de atributo contra uma dificuldade (estilo RPG).'),
-        ('Trapaça Permitida', 'Regras que permitem quebrar normas se não for pego (raro e específico).'),
-        ('Trocas Assimétricas', 'Um recurso vale muito para você, mas pouco para o outro.'),
-        ('Uso de Aplicativo Integrado', 'O jogo exige um tablet ou celular para rodar eventos.'),
-        ('Uso de Áudio', 'Sons ou narrações que fazem parte da mecânica de jogo.'),
-        ('Vantagem do Primeiro Jogador', 'Um bônus compensatório para quem inicia a partida.'),
-        ('Zona de Controle', 'Espaço ao redor de uma unidade que impede o movimento de inimigos.')
-    ]
+    mecanicas_completas = []
     
-    temas_completos = [
-        ('Horror Lovecraftiano', 'Mistérios cósmicos e terror psicológico antigo.'),
-        ('Investigação Criminal', 'Solução de crimes e busca por evidências.'),
-        ('Gastronomia / Culinária', 'Gestão de cozinha e preparo de pratos.'),
-        ('Comércio Marítimo', 'Troca de mercadorias entre portos históricos.'),
-        ('Industrialização', 'O boom das fábricas e ferrovias do século XIX.'),
-        ('Viagem no Tempo', 'Saltos entre eras para alterar a história.'),
-        ('Super-Heróis', 'Combate ao crime com poderes extraordinários.'),
-        ('Cyber-Espionagem', 'Invasão de sistemas e roubo de dados sigilosos.'),
-        ('Mitologia Nórdica', 'Vikings, deuses de Asgard e o fim do mundo.'),
-        ('Safari / Animais', 'Observação e preservação da vida selvagem africana.'),
-        ('Fantasia Medieval', 'Magia, reinos e criaturas místicas.'),
-        ('Exploração Espacial', 'Viagens entre galáxias e descobertas alienígenas.'),
-        ('Cyberpunk', 'Futuro distópico, neon e tecnologia invasiva.'),
-        ('Steampunk', 'Tecnologia a vapor inspirada na era vitoriana.'),
-        ('Zumbis / Apocalipse', 'Sobrevivência após o colapso da civilização.'),
-        ('Egito Antigo', 'Construção de monumentos e divindades do Nilo.'),
-        ('Mitologia Grega', 'Deuses do Olimpo e heróis lendários.'),
-        ('Piratas / Naval', 'Tesouros, saques e exploração dos mares.'),
-        ('Faroeste', 'Xerifes, duelos e a vida no velho oeste americano.'),
-        ('Segunda Guerra Mundial', 'Conflitos históricos entre Aliados e Eixo.'),
-        ('Civilização', 'Desenvolvimento de um povo desde a pedra até a era espacial.'),
-        ('Natureza / Ecossistemas', 'Foco na flora, fauna e equilíbrio ambiental.'),
-        ('Medicina / Pandemia', 'Tratamento de doenças e gestão de crises de saúde.'),
-        ('Política / Eleições', 'Campanhas eleitorais e manobras de poder.'),
-        ('Esportes', 'Simulação de partidas de futebol, corridas ou lutas.'),
-        ('Religião / Espiritualidade', 'Liderança de fés ou busca por iluminação.'),
-        ('Abstrato', 'Sem tema definido, focado puramente na lógica.'),
-        ('Literatura Clássica', 'Jogos baseados em obras de grandes autores.'),
-        ('Cinema / Hollywood', 'Produção de filmes e fama nos estúdios.'),
-        ('Moda / Design', 'Criação de tendências e desfiles de alta costura.'),
-        ('Arqueologia', 'Descoberta de fósseis e artefatos antigos.'),
-        ('Submarino / Abismo', 'Exploração das profundezas oceânicas desconhecidas.'),
-        ('Sobrevivência na Selva', 'Busca por recursos em ambientes tropicais hostis.'),
-        ('Pós-Apocalipse Nuclear', 'Vida após a devastação por bombas atômicas.'),
-        ('Colonização de Marte', 'Estabelecimento de bases no planeta vermelho.'),
-        ('Invasão Alienígena', 'Defesa da Terra contra forças extraterrestres.'),
-        ('Mundo dos Sonhos', 'Cenários surreais e lógica onírica.'),
-        ('Circo', 'Gerenciamento de espetáculos e artistas itinerantes.'),
-        ('Transporte Ferroviário', 'Expansão de linhas de trem e logística.'),
-        ('Mineração', 'Extração de minérios e pedras preciosas.'),
-        ('Alquimia / Magia', 'Mistura de ingredientes para criar poções e feitiços.'),
-        ('Guerra Fria', 'Espionagem e tensão entre superpotências.'),
-        ('Renascimento Italiano', 'Arte, ciência e política das cidades-estado.'),
-        ('Roma Antiga', 'Legiões, senado e glória imperial.'),
-        ('Pré-História', 'Vida entre homens das cavernas e dinossauros.'),
-        ('Arte / Museus', 'Curadoria de exposições e leilões de obras famosas.'),
-        ('Aviação', 'História dos aviões, pilotagem e companhias aéreas.'),
-        ('Império Asteca/Maia', 'Civilizações mesoamericanas e rituais sagrados.'),
-        ('Contos de Fadas', 'Histórias dos irmãos Grimm e folclore infantil.'),
-        ('Guerra de Gangues', 'Conflito pelo controle do submundo urbano.'),
-        ('Economia / Mercado de Ações', 'Investimentos financeiros e especulação.'),
-        ('Ecologia / Poluição', 'Limpeza do planeta e energias renováveis.'),
-        ('Exploração de Cavernas', 'Espeleologia e perigos subterrâneos.'),
-        ('Fábrica / Automação', 'Otimização de linhas de montagem industriais.'),
-        ('Festival de Música', 'Organização de shows e logística de público.'),
-        ('Florestas Encantadas', 'Seres mágicos que vivem em bosques protegidos.'),
-        ('Gladiadores', 'Combate na arena por fama e liberdade.'),
-        ('Insetos / Micromundo', 'A vida sob a perspectiva de formigas ou abelhas.'),
-        ('Inteligência Artificial', 'O despertar e a evolução das máquinas.'),
-        ('Jardim / Botânica', 'Cultivo de flores raras e paisagismo.'),
-        ('Jornalismo', 'Busca por furos de reportagem e edição de notícias.'),
-        ('Luta Livre', 'O show e a força do wrestling profissional.'),
-        ('Máfia', 'Crime organizado, lealdade e família.'),
-        ('Mercado Árabe', 'Trocas comerciais em bazares e caravanas.'),
-        ('Monstros Gigantes', 'Criaturas colossais destruindo cidades.'),
-        ('Montanha-Russa', 'Design de engenharia focado em diversão.'),
-        ('Natal / Festividades', 'Temas sazonais e espírito natalino.'),
-        ('Navegação Astral', 'Viagens místicas entre planos de existência.'),
-        ('Noite de Gala / Cassino', 'Glamour, apostas altas e jogos de azar.'),
-        ('Ópera / Teatro', 'Dramas de palco e produção de grandes peças.'),
-        ('Orfanato Abandonado', 'Terror gótico e exploração urbana.'),
-        ('Padaria / Doces', 'Confeitaria e gerenciamento de vitrines.'),
-        ('Paranormal', 'Caça-fantasmas e eventos inexplicaveis.'),
-        ('Pescaria', 'Competição de pesca em rios ou mar aberto.'),
-        ('Petróleo / Energia', 'Extração de óleo e matrizes energéticas.'),
-        ('Pirâmides', 'Mistérios da engenharia e sepulturas egípcias.'),
-        ('Planetas Alienígenas', 'Vida em ecossistemas fora da Terra.'),
-        ('Polícia vs Ladrão', 'Perseguições e planos de assalto.'),
-        ('Prisão', 'Vida no cárcere e planos de fuga.'),
-        ('Psicologia / Mente Humana', 'Viagem pelo subconsciente e memórias.'),
-        ('Reality Show', 'Busca pela audiência através de desafios públicos.'),
-        ('Restaurante', 'Atendimento a clientes e eficiência de cozinha.'),
-        ('Samurai', 'Código do Bushido e batalhas feudais japonesas.'),
-        ('Saúde Mental', 'Empatia e gestão de emoções/clínicas.'),
-        ('Seitas Misteriosas', 'Rituais sombrios e sociedades secretas.'),
-        ('Shopping Center', 'Consumismo e gestão de lojas.'),
-        ('Sistema Solar', 'Astronomia focada nos nossos planetas vizinhos.'),
-        ('Tecnologia Futurista', 'Gadgets avançados e ciência de ponta.'),
-        ('Tribos Indígenas', 'Cultura, sobrevivência e harmonia com a terra.'),
-        ('Universidades / Escolas', 'Vida acadêmica e exames.'),
-        ('Viagem pelo Mundo', 'Turismo e visitas a pontos turísticos globais.'),
-        ('Vida Marinha', 'Exploração dos oceanos e criaturas aquáticas.'),
-        ('Vulcões', 'Atividade vulcânica e formação geológica.'),
-        ('Western Espacial', 'Faroeste ambientado no espaço sideral.'),
-        ('Xerife do Condado', 'Manutenção da ordem em cidades pequenas.'),
-        ('Yoga / Meditação', 'Práticas espirituais e bem-estar.'),
-        ('Zoologia', 'Estudo e preservação de espécies animais.'),
-        ('Agricultura Moderna', 'Tecnologia aplicada ao cultivo de alimentos.'),
-        ('Biotecnologia', 'Manipulação genética e engenharia biológica.'),
-        ('Clima Extremo', 'Sobrevivência em condições climáticas adversas.'),
-        ('Democracia Antiga', 'Sistemas políticos da Grécia clássica.'),
-        ('Energia Renovavel', 'Sustentabilidade e tecnologias limpas.'),
-        ('Folclore Mundial', 'Lendas e mitos de diferentes culturas.'),
-        ('Genoma Humano', 'Pesquisa genética e medicina personalizada.'),
-        ('Habitat Espacial', 'Construção de estações orbitais.'),
-        ('Idade do Gelo', 'Sobrevivência durante períodos glaciais.'),
-        ('Jazz / Blues', 'Cultura musical afro-americana.')
-    ]
+    temas_completos = []
     
-    componentes_completos = [
-        ('Meeple de Madeira', 'Boneco humanoide que representa trabalhadores.', 'NEUTRO'),
-        ('Dados D6', 'O clássico dado de 6 faces para sorteios.', 'SORTE'),
-        ('Dados Poliédricos', 'Dados de 4, 8, 10, 12 ou 20 faces.', 'SORTE'),
-        ('Cartas Standard', 'Cartas de tamanho padrão de baralho.', 'TATICO'),
-        ('Cartas Mini', 'Versões reduzidas para economizar espaço na mesa.', 'TATICO'),
-        ('Tabuleiro Principal', 'A base onde o jogo central acontece.', 'NEUTRO'),
-        ('Tabuleiros Individuais', 'Área de controle particular de cada jogador.', 'GERENCIAMENTO'),
-        ('Moedas de Metal', 'Dinheiro físico durável e temático.', 'GERENCIAMENTO'),
-        ('Moedas de Papel/Cartão', 'Dinheiro econômico em cartão rígido.', 'GERENCIAMENTO'),
-        ('Cubos de Madeira', 'Representação genérica de recursos variados.', 'GERENCIAMENTO'),
-        ('Miniaturas de Plástico', 'Esculturas detalhadas de personagens.', 'LUDICO'),
-        ('Marcadores de Pontuação', 'Pinos ou fichas para a trilha de pontos.', 'GERENCIAMENTO'),
-        ('Ampulheta', 'Medidor físico de tempo para turnos rápidos.', 'HABILIDADE'),
-        ('Escudo de Jogador', 'Divisória para ocultar cartas e recursos.', 'TATICO'),
-        ('Fichas de Poker', 'Tokens pesados usados como moedas ou apostas.', 'GERENCIAMENTO'),
-        ('Tiles Hexagonais', 'Peças de 6 lados para montar mapas modulares.', 'TATICO'),
-        ('Tiles Quadrados', 'Peças quadradas para construção de cenário.', 'TATICO'),
-        ('Marcador de Primeiro Jogador', 'Item que identifica quem inicia a rodada.', 'NEUTRO'),
-        ('Saco de Pano (Bag)', 'Para sorteio cego de peças (Bag building).', 'SORTE'),
-        ('Gemas de Plástico/Acrílico', 'Pedras coloridas para representar joias.', 'LUDICO'),
-        ('Peões de Plástico', 'Marcadores simples em formato de "pino".', 'NEUTRO'),
-        ('Discos de Madeira', 'Marcadores circulares achatados.', 'NEUTRO'),
-        ('Cartas de Referência', 'Resumo de regras para consulta rápida.', 'NEUTRO'),
-        ('Manual de Regras', 'O livro de instruções oficial do jogo.', 'NEUTRO'),
-        ('Livro de Cenários', 'Guia com missões e montagens específicas.', 'LUDICO'),
-        ('Divisórias de Caixa (Insert)', 'Organizador interno para os componentes.', 'GERENCIAMENTO'),
-        ('Adesivos', 'Para modificar o tabuleiro permanentemente (Legacy).', 'LUDICO'),
-        ('Canetas Dry-Erase', 'Para escrever e apagar em tabuleiros plastificados.', 'HABILIDADE'),
-        ('Lápis', 'Para preencher blocos de papel.', 'HABILIDADE'),
-        ('Blocos de Pontuação', 'Folhas descartáveis para calcular o fim do jogo.', 'GERENCIAMENTO'),
-        ('Clip de Plástico', 'Para encaixar na borda de cartas e indicar valores.', 'GERENCIAMENTO'),
-        ('Suporte de Cartas', 'Acessório para manter as cartas em pé na mesa.', 'NEUTRO'),
-        ('Torre de Dados', 'Estrutura para rolar dados sem que eles voem longe.', 'SORTE'),
-        ('Bandeja de Dados', 'Superfície forrada para silenciar e conter os dados.', 'SORTE'),
-        ('Marcadores de Dano', 'Tokens de coração ou sangue para vida.', 'GERENCIAMENTO'),
-        ('Peças de Encaixe', 'Componentes que se conectam mecanicamente.', 'HABILIDADE'),
-        ('Engrenagens de Papelão', 'Discos que giram afetando o jogo.', 'TATICO'),
-        ('Bússola de Papelão', 'Para indicar direção de vento ou movimento.', 'TATICO'),
-        ('Luva de Cartas (Sleeves)', 'Plásticos para proteger as cartas.', 'NEUTRO'),
-        ('Meeples de Animais', 'Figuras de madeira em formato de bicho.', 'LUDICO'),
-        ('Recipientes de Armazenamento', 'Potes plásticos para separar recursos.', 'GERENCIAMENTO'),
-        ('Cartas Transparentes', 'Para sobrepor informações a outras cartas.', 'TATICO'),
-        ('Espelho', 'Componente reflexivo para jogos de laser ou ótica.', 'HABILIDADE'),
-        ('Peças de Resina Especiais', 'Componentes premium com textura realística.', 'LUDICO'),
-        ('Playmat de Neoprene', 'Tapete de borracha para organizar a mesa.', 'NEUTRO'),
-        ('Marcadores de Nível', 'Tokens que indicam a evolução de um item.', 'GERENCIAMENTO'),
-        ('Relógio de Xadrez', 'Dispositivo para controle rigoroso de tempo.', 'HABILIDADE'),
-        ('Cartas de Evento', 'Baralho que altera o jogo a cada rodada.', 'SORTE'),
-        ('Tiles de Terreno', 'Peças que representam montanhas, florestas, etc.', 'TATICO')
-    ]
+    componentes_completos = []
     
     if endpoint == 'mecanicas':
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(mecanicas_completas)]
@@ -625,7 +366,7 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(temas_completos)]
         dados.extend(temas_criados)
     elif endpoint == 'componentes':
-        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': tipo, 'imagem': None} for i, (nome, descricao, tipo) in enumerate(componentes_completos)]
+        dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': tipo} for i, (nome, descricao, tipo) in enumerate(componentes_completos)]
         # Adicionar componentes criados com suas imagens
         for comp in componentes_criados:
             dados.append({
@@ -1602,6 +1343,20 @@ def jogo_detalhes(request, jogo_id):
             glossario_processado.append(termo_copy)
         jogo_processado['glossario_processado'] = glossario_processado
     
+    # Processar componentes com imagens
+    if jogo.get('componentes'):
+        componentes_processados = []
+        for componente_str in jogo['componentes']:
+            comp_data = buscar_componente_com_imagem(componente_str)
+            componentes_processados.append({
+                'nome_completo': componente_str,
+                'nome': componente_str.split(' (x')[0].strip(),
+                'quantidade': componente_str.split('(x')[1].split(')')[0] if '(x' in componente_str else '1',
+                'imagem': comp_data.get('imagem') if comp_data else None,
+                'tipo': comp_data.get('tipo', 'NEUTRO') if comp_data else 'NEUTRO'
+            })
+        jogo_processado['componentes_processados'] = componentes_processados
+    
     # Calcular classificações
     classificacoes = calcular_classificacao_jogo(jogo)
     
@@ -1777,6 +1532,20 @@ def jogo_imprimir(request, jogo_id):
             glossario_processado.append(termo_copy)
         jogo_processado['glossario_processado'] = glossario_processado
     
+    # Processar componentes com imagens
+    if jogo.get('componentes'):
+        componentes_processados = []
+        for componente_str in jogo['componentes']:
+            comp_data = buscar_componente_com_imagem(componente_str)
+            componentes_processados.append({
+                'nome_completo': componente_str,
+                'nome': componente_str.split(' (x')[0].strip(),
+                'quantidade': componente_str.split('(x')[1].split(')')[0] if '(x' in componente_str else '1',
+                'imagem': comp_data.get('imagem') if comp_data else None,
+                'tipo': comp_data.get('tipo', 'NEUTRO') if comp_data else 'NEUTRO'
+            })
+        jogo_processado['componentes_processados'] = componentes_processados
+    
     # Calcular classificações
     classificacoes = calcular_classificacao_jogo(jogo)
     
@@ -1934,7 +1703,8 @@ def buscar_componente_com_imagem(nome_componente):
             return comp
     
     return None
-    """Calcula as classificações do jogo baseado em componentes, estruturas e condições especiais"""
+
+def calcular_classificacao_jogo(jogo_data):
     classificacoes = {
         'NEUTRO': 0,
         'SORTE': 0,

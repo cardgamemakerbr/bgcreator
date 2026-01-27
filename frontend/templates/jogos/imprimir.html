@@ -220,7 +220,34 @@
         {% endif %}
 
         <!-- {% if jogo.setup %}3{% else %}2{% endif %}. Componentes -->
-        {% if jogo.componentes %}
+        {% if jogo.componentes_processados %}
+        <div class="page-break">
+            <h2><span class="section-number">{% if jogo.setup %}3{% else %}2{% endif %}.</span> Componentes do Jogo</h2>
+            <div class="mt-4">
+                <div class="row">
+                    {% for componente in jogo.componentes_processados %}
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-2 border rounded">
+                                <div class="me-3">
+                                    {% if componente.imagem %}
+                                    <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                    {% else %}
+                                    <div style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-puzzle-piece text-muted" style="font-size: 16px;"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ componente.nome_completo }}</div>
+                                    <small class="text-muted">{{ componente.tipo }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% elif jogo.componentes %}
         <div class="page-break">
             <h2><span class="section-number">{% if jogo.setup %}3{% else %}2{% endif %}.</span> Componentes do Jogo</h2>
             <div class="mt-4">

@@ -117,7 +117,36 @@
         </div>
         {% endif %}
 
-        {% if jogo.componentes %}
+        {% if jogo.componentes_processados %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-puzzle-piece"></i> Componentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for componente in jogo.componentes_processados %}
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-2 border rounded">
+                                <div class="me-3">
+                                    {% if componente.imagem %}
+                                    <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px;">
+                                    {% else %}
+                                    <div style="width: 48px; height: 48px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-puzzle-piece text-muted" style="font-size: 20px;"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ componente.nome_completo }}</div>
+                                    <small class="text-muted">{{ componente.tipo }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% elif jogo.componentes %}
         <div class="card mb-4">
             <div class="card-header">
                 <h5><i class="fas fa-puzzle-piece"></i> Componentes</h5>
