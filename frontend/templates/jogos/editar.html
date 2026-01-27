@@ -832,6 +832,11 @@
             {% endif %}
             
             <div class="text-end">
+                <div class="btn-group me-3" role="group">
+                    <a href="{% url 'exportar_jogo_json' jogo.id %}" class="btn btn-outline-warning">
+                        <i class="fas fa-file-export"></i> Exportar JSON
+                    </a>
+                </div>
                 <input type="hidden" name="versao_manual" id="versao-manual-hidden" value="{{ jogo.versao_manual|default:'1.0.0' }}">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-save"></i> Salvar Alterações

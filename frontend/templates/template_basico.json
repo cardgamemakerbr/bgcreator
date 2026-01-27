@@ -1,0 +1,66 @@
+{
+  "nome": "Nome do Jogo",
+  "subtitulo": "Subtítulo do Jogo",
+  "descricao_curta": "Descrição curta do jogo em **markdown**",
+  "historia": "História e ambientação do jogo",
+  "jogadores_min": 2,
+  "jogadores_max": 4,
+  "tempo_min": 30,
+  "tempo_max": 60,
+  "idade_recomendada": 10,
+  "mecanicas": [
+    "Construção de Baralho",
+    "Coleta de Conjuntos"
+  ],
+  "temas": [
+    "Fantasia Medieval",
+    "Aventura"
+  ],
+  "componentes": [
+    "Cartas Standard (x54)",
+    "Dados D6 (x2)",
+    "Meeple de Madeira (x20)"
+  ],
+  "condicoes_vitoria": [
+    "Primeiro jogador a alcançar 50 pontos",
+    "Completar 3 objetivos"
+  ],
+  "condicoes_derrota": [
+    "Ficar sem cartas na mão"
+  ],
+  "setup": [
+    {
+      "nome": "Preparação Inicial",
+      "descricao": "Cada jogador recebe 7 cartas iniciais"
+    },
+    {
+      "nome": "Tabuleiro",
+      "descricao": "Posicione o tabuleiro no centro da mesa"
+    }
+  ],
+  "estruturas": [
+    {
+      "nome": "Fase de Compra",
+      "tipo": "FASE",
+      "classificacao": "TATICO",
+      "descricao": "Jogadores compram novas cartas",
+      "condicoes_especiais": [
+        {
+          "nome": "Limite de Compra",
+          "tipo": "GERENCIAMENTO",
+          "descricao": "Máximo 3 cartas por turno"
+        }
+      ]
+    }
+  ],
+  "glossario": [
+    {
+      "palavra": "Mana",
+      "definicao": "Recurso usado para jogar cartas"
+    },
+    {
+      "palavra": "Turno",
+      "definicao": "Sequência de ações de um jogador"
+    }
+  ]
+}

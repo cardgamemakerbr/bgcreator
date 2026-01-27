@@ -537,11 +537,22 @@
             {% endif %}
             
             <div class="text-end">
+                <div class="btn-group me-3" role="group">
+                    <a href="{% url 'download_template_json' %}" class="btn btn-outline-info">
+                        <i class="fas fa-download"></i> Download Template
+                    </a>
+                    <button type="button" class="btn btn-outline-success" onclick="document.getElementById('json-upload').click()">
+                        <i class="fas fa-upload"></i> Upload Novo Jogo
+                    </button>
+                </div>
                 <input type="hidden" name="versao_manual" id="versao-manual-hidden" value="1.0.0">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-save"></i> Salvar Jogo
                 </button>
             </div>
+            
+            <!-- Upload JSON oculto -->
+            <input type="file" id="json-upload" accept=".json" style="display: none;" onchange="uploadJsonFile(this)">
         </form>
     </div>
 </div>
@@ -1554,6 +1565,47 @@ function salvarTodasPalavras() {
     document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
         if (campo.value.trim()) marcarErros(campo);
     });
+}
+
+// Função para upload de arquivo JSON
+function uploadJsonFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    if (!file.name.endsWith('.json')) {
+        alert('Por favor, selecione um arquivo JSON válido.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('json_file', file);
+    
+    // Obter token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('/template/upload/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Jogo "${data.nome}" importado com sucesso!`);
+            window.location.href = '/jogos/';
+        } else {
+            alert(`Erro ao importar jogo: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao fazer upload do arquivo.');
+    });
+    
+    // Limpar input
+    input.value = '';
 }
 
 // Adicionar eventos para recalcular peso e versão

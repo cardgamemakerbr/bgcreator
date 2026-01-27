@@ -284,3 +284,9 @@ bug: ajustar o campo numeros de componetes
     |-> exempo: Conjuto de Marcadores Pequenos (x40) (x1) (x1)
     |-> sendo que apenas o primeiro de x40 é o valor validado
     (dica de possivel logia, os componentes vem com o valor 0 e se este campo permanecer 0 ele não atribui novo valor nos componentes)
+
+Nova função, Importar e Exporta manuais no formato arquivo: "template".json
+     - Esta função tem o objetivo na contrução dinamica dos manuais
+     - Olhando para os campos principais construa um template.jsom (modelo basico mesmo)
+     - Na tela de formulario adicione os 2 botões <download template> <upload novo jogo>
+     - Dentro do formulario de edição apenas, coloque um botão <Exporta> "nome-do-jogo.json" (neste exporte ignore as todas as imagens do jogo)

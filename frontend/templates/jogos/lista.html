@@ -5,12 +5,24 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-gamepad"></i> Gerenciar Jogos</h2>
-    {% if request.session.usuario_perfil in 'AUTOR,ADMINISTRADOR' %}
-    <a href="{% url 'jogo_novo' %}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Novo Jogo
-    </a>
-    {% endif %}
+    <div>
+        {% if request.session.usuario_perfil in 'ADMINISTRADOR,AUTOR,REVISOR' %}
+        <button type="button" class="btn btn-outline-success me-2" onclick="document.getElementById('json-import').click()">
+            <i class="fas fa-file-import"></i> Importar JSON
+        </button>
+        {% endif %}
+        {% if request.session.usuario_perfil in 'AUTOR,ADMINISTRADOR' %}
+        <a href="{% url 'jogo_novo' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Novo Jogo
+        </a>
+        {% endif %}
+    </div>
 </div>
+
+<!-- Input oculto para importar JSON -->
+{% if request.session.usuario_perfil in 'ADMINISTRADOR,AUTOR,REVISOR' %}
+<input type="file" id="json-import" accept=".json" style="display: none;" onchange="importJsonFile(this)">
+{% endif %}
 
 <div class="row mb-3">
     <div class="col-md-6">
@@ -161,4 +173,81 @@
         {% endif %}
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Função para importar arquivo JSON na listagem
+function importJsonFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    if (!file.name.endsWith('.json')) {
+        alert('Por favor, selecione um arquivo JSON válido.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('json_file', file);
+    
+    // Obter token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                      document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+    
+    if (!csrfToken) {
+        // Criar token CSRF temporário
+        const tempForm = document.createElement('form');
+        tempForm.innerHTML = '{% csrf_token %}';
+        document.body.appendChild(tempForm);
+        const token = tempForm.querySelector('[name=csrfmiddlewaretoken]').value;
+        document.body.removeChild(tempForm);
+        
+        fetch('/template/upload/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': token
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Jogo "${data.nome}" importado com sucesso!`);
+                window.location.reload();
+            } else {
+                alert(`Erro ao importar jogo: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao fazer upload do arquivo.');
+        });
+    } else {
+        fetch('/template/upload/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Jogo "${data.nome}" importado com sucesso!`);
+                window.location.reload();
+            } else {
+                alert(`Erro ao importar jogo: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao fazer upload do arquivo.');
+        });
+    }
+    
+    // Limpar input
+    input.value = '';
+}
+</script>
 {% endblock %}

@@ -2392,7 +2392,8 @@ def jogo_revisao(request, jogo_id):
     return render(request, 'jogos/revisao.html', {'jogo': jogo})
 
 # Funções AJAX para cadastro rápido
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+import json
 
 @autor_or_admin_required
 def cadastrar_mecanica_rapido(request):
@@ -2443,6 +2444,175 @@ def cadastrar_componente_rapido(request):
             salvar_dados()
             return JsonResponse({'success': True, 'id': novo_componente['id'], 'nome': nome})
     return JsonResponse({'success': False})
+
+@autor_or_admin_required
+def download_template_json(request):
+    """Download do template básico JSON"""
+    template_path = 'templates/template_basico.json'
+    try:
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template_data = f.read()
+        
+        response = HttpResponse(template_data, content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename="template_basico.json"'
+        return response
+    except FileNotFoundError:
+        # Template básico inline se arquivo não existir
+        template_basico = {
+            "nome": "Nome do Jogo",
+            "subtitulo": "Subtítulo do Jogo",
+            "descricao_curta": "Descrição curta do jogo em **markdown**",
+            "historia": "História e ambientação do jogo",
+            "jogadores_min": 2,
+            "jogadores_max": 4,
+            "tempo_min": 30,
+            "tempo_max": 60,
+            "idade_recomendada": 10,
+            "mecanicas": ["Construção de Baralho", "Coleta de Conjuntos"],
+            "temas": ["Fantasia Medieval", "Aventura"],
+            "componentes": ["Cartas Standard (x54)", "Dados D6 (x2)"],
+            "condicoes_vitoria": ["Primeiro jogador a alcançar 50 pontos"],
+            "condicoes_derrota": ["Ficar sem cartas na mão"],
+            "setup": [{"nome": "Preparação Inicial", "descricao": "Cada jogador recebe 7 cartas iniciais"}],
+            "estruturas": [{"nome": "Fase de Compra", "tipo": "FASE", "classificacao": "TATICO", "descricao": "Jogadores compram novas cartas", "condicoes_especiais": []}],
+            "glossario": [{"palavra": "Mana", "definicao": "Recurso usado para jogar cartas"}]
+        }
+        
+        response = HttpResponse(json.dumps(template_basico, indent=2, ensure_ascii=False), content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename="template_basico.json"'
+        return response
+
+@autor_or_admin_required
+def upload_jogo_json(request):
+    """Upload de jogo via JSON"""
+    global jogos_criados, usuario_logado
+    
+    if request.method == 'POST' and 'json_file' in request.FILES:
+        json_file = request.FILES['json_file']
+        
+        try:
+            # Ler e parsear JSON
+            json_data = json.loads(json_file.read().decode('utf-8'))
+            
+            # Validar campos obrigatórios
+            if not json_data.get('nome'):
+                return JsonResponse({'success': False, 'error': 'Campo "nome" é obrigatório'})
+            
+            # Preencher autor/revisor automaticamente
+            autor_automatico = ''
+            revisor_automatico = ''
+            
+            if usuario_logado:
+                if usuario_logado['perfil'] == 'AUTOR':
+                    autor_automatico = usuario_logado['nome']
+                elif usuario_logado['perfil'] == 'REVISOR':
+                    revisor_automatico = usuario_logado['nome']
+                elif usuario_logado['perfil'] == 'ADMINISTRADOR':
+                    autor_automatico = usuario_logado['nome']
+                    revisor_automatico = usuario_logado['nome']
+            
+            # Criar jogo a partir do JSON
+            novo_jogo = {
+                'id': len(jogos_criados) + 100,
+                'nome': json_data.get('nome', ''),
+                'subtitulo': json_data.get('subtitulo', ''),
+                'descricao_curta': json_data.get('descricao_curta', ''),
+                'historia': json_data.get('historia', ''),
+                'autor': autor_automatico,
+                'revisor': revisor_automatico,
+                'capa': None,  # Imagens ignoradas no import
+                'jogadores_min': int(json_data.get('jogadores_min', 1)),
+                'jogadores_max': int(json_data.get('jogadores_max', 4)),
+                'tempo_min': int(json_data.get('tempo_min', 30)),
+                'tempo_max': int(json_data.get('tempo_max', 60)),
+                'idade_recomendada': int(json_data.get('idade_recomendada', 10)),
+                'mecanicas': json_data.get('mecanicas', []),
+                'temas': json_data.get('temas', []),
+                'componentes': json_data.get('componentes', []),
+                'condicoes_vitoria': json_data.get('condicoes_vitoria', []),
+                'condicoes_derrota': json_data.get('condicoes_derrota', []),
+                'setup': json_data.get('setup', []),
+                'estruturas': json_data.get('estruturas', []),
+                'glossario': json_data.get('glossario', []),
+                'bloquear_co_autor': False,
+                'bloquear_co_revisor': False
+            }
+            
+            # Calcular peso e versão
+            novo_jogo['peso'] = calcular_peso_jogo(novo_jogo)
+            novo_jogo['versao_manual'] = calcular_versao_manual(novo_jogo)
+            
+            # Adicionar à lista
+            jogos_criados.append(novo_jogo)
+            salvar_dados()
+            
+            return JsonResponse({'success': True, 'jogo_id': novo_jogo['id'], 'nome': novo_jogo['nome']})
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Arquivo JSON inválido'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f'Erro ao processar arquivo: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'error': 'Nenhum arquivo enviado'})
+
+@editor_required
+def exportar_jogo_json(request, jogo_id):
+    """Exportar jogo como JSON (sem imagens)"""
+    global jogos_criados
+    
+    # Encontrar o jogo
+    jogo = None
+    for j in jogos_criados:
+        if j['id'] == int(jogo_id):
+            jogo = j
+            break
+    
+    if not jogo:
+        messages.error(request, 'Jogo não encontrado!')
+        return redirect('jogos_lista')
+    
+    # Criar cópia do jogo sem imagens
+    jogo_export = {
+        'nome': jogo.get('nome', ''),
+        'subtitulo': jogo.get('subtitulo', ''),
+        'descricao_curta': jogo.get('descricao_curta', ''),
+        'historia': jogo.get('historia', ''),
+        'jogadores_min': jogo.get('jogadores_min', 1),
+        'jogadores_max': jogo.get('jogadores_max', 4),
+        'tempo_min': jogo.get('tempo_min', 30),
+        'tempo_max': jogo.get('tempo_max', 60),
+        'idade_recomendada': jogo.get('idade_recomendada', 10),
+        'mecanicas': jogo.get('mecanicas', []),
+        'temas': jogo.get('temas', []),
+        'componentes': jogo.get('componentes', []),
+        'condicoes_vitoria': jogo.get('condicoes_vitoria', []),
+        'condicoes_derrota': jogo.get('condicoes_derrota', []),
+        'setup': [],
+        'estruturas': jogo.get('estruturas', []),
+        'glossario': []
+    }
+    
+    # Processar setup removendo imagens
+    for setup in jogo.get('setup', []):
+        jogo_export['setup'].append({
+            'nome': setup.get('nome', ''),
+            'descricao': setup.get('descricao', '')
+        })
+    
+    # Processar glossário removendo imagens
+    for termo in jogo.get('glossario', []):
+        jogo_export['glossario'].append({
+            'palavra': termo.get('palavra', ''),
+            'definicao': termo.get('definicao', '')
+        })
+    
+    # Gerar nome do arquivo
+    nome_arquivo = f"{jogo['nome'].replace(' ', '_').lower()}.json"
+    
+    # Retornar JSON como download
+    response = HttpResponse(json.dumps(jogo_export, indent=2, ensure_ascii=False), content_type='application/json')
+    response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
+    return response
 
 # Funções de backup automático
 def criar_backup_automatico():

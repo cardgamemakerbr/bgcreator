@@ -44,5 +44,10 @@ urlpatterns = [
     path('ajax/cadastrar-mecanica/', views.cadastrar_mecanica_rapido, name='cadastrar_mecanica_rapido'),
     path('ajax/cadastrar-tema/', views.cadastrar_tema_rapido, name='cadastrar_tema_rapido'),
     path('ajax/cadastrar-componente/', views.cadastrar_componente_rapido, name='cadastrar_componente_rapido'),
+    
+    # Template JSON
+    path('template/download/', views.download_template_json, name='download_template_json'),
+    path('template/upload/', views.upload_jogo_json, name='upload_jogo_json'),
+    path('jogos/<int:jogo_id>/exportar/', views.exportar_jogo_json, name='exportar_jogo_json'),
     path('api/<path:path>', views.api_proxy, name='api_proxy'),
 ]
