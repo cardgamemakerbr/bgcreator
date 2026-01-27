@@ -223,10 +223,10 @@ O BGCreator está pronto para ser usado em produção e pode evoluir para:
 
 
 ok - Comentarios para leitores
-    - Avaliação 1 a 5 nos comentarios
-ok Complexadade de senhas
-- Adicionar avatar no usuario
-- Adicionar icone de ! E ok da correção
+ok - Avaliação 1 a 5 nos comentarios
+ok - Complexadade de senhas
+ok - Adicionar avatar no usuario
+ok - Adicionar icone de ! E ok da correção
 - Função de backup automatico 1 vez por dia e limpesa de backup 1 a 5 dias
 - Bloqueio de co autor e co editor
 
@@ -250,3 +250,10 @@ Esta opção deve ficar disponivel no painel de gerencia de usuario, com um form
 
 - Adicionar avatar no usuario
     - Pode adiciona a função de fazer uploade de avatares para usuarios
+
+Pode avaliar um problema que eu estou percebendo, quando vc faz uma nova atualização, os dados do banco estão sendo perdidos, estou com receio de que quando subir o codigo em produção ele não persiste os dados de banco e midias ao atulaizar o sistema    
+
+ Adicionar uma nova função no manual os icones de; 
+     - (!) este significa que existe uma revisão e um pedido de correção aberto
+     - (icon:check)"o simbulo de check mesmo" correção completamente validada 
+ - esta função deve aparecer quando listar os jogos

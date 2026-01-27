@@ -33,6 +33,18 @@
     </div>
 </div>
 
+<!-- Legenda dos ícones de status -->
+<div class="alert alert-light border mb-3">
+    <small class="text-muted">
+        <strong>Status de Revisão:</strong>
+        <i class="fas fa-exclamation-triangle text-warning ms-2"></i> Correções pendentes
+        <i class="fas fa-check-circle text-success ms-2"></i> Totalmente aprovado (8/8)
+        <i class="fas fa-clock text-info ms-2"></i> Em revisão (parcial)
+        <i class="fas fa-minus text-muted ms-2"></i> Sem revisão (0/8)
+        <br><small class="text-muted">Números indicam: seções revisadas/total de seções</small>
+    </small>
+</div>
+
 <div class="card">
     <div class="card-body">
         {% if request.GET.busca %}
@@ -56,6 +68,7 @@
                             <th>Idade</th>
                             <th>Versão</th>
                             <th>Peso</th>
+                            <th>Status</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -82,6 +95,21 @@
                             </td>
                             <td>
                                 <span class="badge bg-secondary">{{ jogo.peso }}</span>
+                            </td>
+                            <td>
+                                {% if jogo.status_revisao == 'correcao_pendente' %}
+                                <i class="fas fa-exclamation-triangle text-warning" title="{{ jogo.stats_revisao.com_correcao }} correção(s) pendente(s)"></i>
+                                <small class="text-muted d-block">{{ jogo.stats_revisao.com_correcao }}/{{ jogo.stats_revisao.total }}</small>
+                                {% elif jogo.status_revisao == 'totalmente_aprovado' %}
+                                <i class="fas fa-check-circle text-success" title="Totalmente aprovado ({{ jogo.stats_revisao.validadas }}/{{ jogo.stats_revisao.total }})"></i>
+                                <small class="text-success d-block">{{ jogo.stats_revisao.validadas }}/{{ jogo.stats_revisao.total }}</small>
+                                {% elif jogo.status_revisao == 'em_revisao' %}
+                                <i class="fas fa-clock text-info" title="Em revisão ({{ jogo.stats_revisao.revisadas }}/{{ jogo.stats_revisao.total }})"></i>
+                                <small class="text-info d-block">{{ jogo.stats_revisao.revisadas }}/{{ jogo.stats_revisao.total }}</small>
+                                {% else %}
+                                <i class="fas fa-minus text-muted" title="Sem revisão"></i>
+                                <small class="text-muted d-block">0/{{ jogo.stats_revisao.total }}</small>
+                                {% endif %}
                             </td>
                             <td>
                                 <a href="{% url 'jogo_detalhes' jogo.id %}" class="btn btn-sm btn-outline-info me-1">

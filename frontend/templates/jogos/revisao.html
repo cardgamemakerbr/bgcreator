@@ -10,6 +10,42 @@
     </a>
 </div>
 
+<!-- Painel de Estatísticas de Revisão -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total de Seções</h5>
+                <h2 class="text-primary">8</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Revisadas</h5>
+                <h2 id="contador-revisadas">{{ jogo.stats_revisao.revisadas|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Validadas</h5>
+                <h2 id="contador-validadas">{{ jogo.stats_revisao.validadas|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Correções</h5>
+                <h2 id="contador-correcoes">{{ jogo.stats_revisao.com_correcao|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
 <form method="post" id="revisaoForm">
     {% csrf_token %}
     
@@ -35,9 +71,9 @@
             
             <div id="status-secao_informacoes_basicas" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas %}style="display: block;"{% else %}style="display: none;"{% endif %}>
                 {% if jogo.revisao and jogo.revisao.secao_informacoes_basicas %}
-                    {% if jogo.revisao.secao_informacoes_basicas.status == 'REVISADO' %}
+                    {% if jogo.revisao.secao_informacoes_basicas.status == 'aprovado' %}
                         <div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [{{ jogo.revisao.secao_informacoes_basicas.revisor }}] {{ jogo.revisao.secao_informacoes_basicas.data }}</div>
-                    {% elif jogo.revisao.secao_informacoes_basicas.status == 'CORRIGIR' %}
+                    {% elif jogo.revisao.secao_informacoes_basicas.status == 'correcao' %}
                         <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [{{ jogo.revisao.secao_informacoes_basicas.revisor }}] {{ jogo.revisao.secao_informacoes_basicas.data }}</div>
                     {% endif %}
                 {% endif %}
@@ -322,7 +358,7 @@ function marcarRevisado(secao) {
     const dataHora = agora.toLocaleString('pt-BR');
     const usuario = '{{ usuario_logado.nome }}' || 'Revisor';
     
-    document.getElementById(secao).value = 'REVISADO';
+    document.getElementById(secao).value = 'aprovado';
     
     const card = document.getElementById('card-' + secao);
     const status = document.getElementById('status-' + secao);
@@ -334,6 +370,8 @@ function marcarRevisado(secao) {
     status.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> REVISADO [${usuario}] ${dataHora}</div>`;
     status.style.display = 'block';
     correcao.style.display = 'none';
+    
+    atualizarContadores();
 }
 
 function marcarCorrigir(secao) {
@@ -341,7 +379,7 @@ function marcarCorrigir(secao) {
     const dataHora = agora.toLocaleString('pt-BR');
     const usuario = '{{ usuario_logado.nome }}' || 'Revisor';
     
-    document.getElementById(secao).value = 'CORRIGIR';
+    document.getElementById(secao).value = 'correcao';
     
     const card = document.getElementById('card-' + secao);
     const status = document.getElementById('status-' + secao);
@@ -353,6 +391,36 @@ function marcarCorrigir(secao) {
     status.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> CORREÇÃO SOLICITADA [${usuario}] ${dataHora}</div>`;
     status.style.display = 'block';
     correcao.style.display = 'block';
+    
+    atualizarContadores();
+}
+
+function atualizarContadores() {
+    const secoes = [
+        'secao_informacoes_basicas', 'secao_mecanicas', 'secao_temas',
+        'secao_componentes', 'secao_condicoes', 'secao_setup',
+        'secao_estruturas', 'secao_glossario'
+    ];
+    
+    let revisadas = 0;
+    let validadas = 0;
+    let correcoes = 0;
+    
+    secoes.forEach(function(secao) {
+        const input = document.getElementById(secao);
+        if (input && input.value) {
+            revisadas++;
+            if (input.value === 'aprovado') {
+                validadas++;
+            } else if (input.value === 'correcao') {
+                correcoes++;
+            }
+        }
+    });
+    
+    document.getElementById('contador-revisadas').textContent = revisadas;
+    document.getElementById('contador-validadas').textContent = validadas;
+    document.getElementById('contador-correcoes').textContent = correcoes;
 }
 
 // Aplicar estilos baseados no status salvo
@@ -368,9 +436,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const card = document.getElementById('card-' + secao);
         
         if (input && input.value) {
-            if (input.value === 'REVISADO') {
+            if (input.value === 'aprovado') {
                 card.classList.add('border-success');
-            } else if (input.value === 'CORRIGIR') {
+            } else if (input.value === 'correcao') {
                 card.classList.add('border-warning');
             }
         }

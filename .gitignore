@@ -67,3 +67,8 @@ coverage.xml
 
 # MongoDB
 data/
+
+# BGCreator - Dados de produção
+frontend/data/bgcreator_data.json
+frontend/media/
+frontend/backups/

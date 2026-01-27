@@ -8,6 +8,10 @@ from django.core.files.base import ContentFile
 from django.utils.safestring import mark_safe
 import re
 from functools import wraps
+import json
+from datetime import datetime
+from pathlib import Path
+import senhas_sistema as senhas_mod
 
 def login_required(view_func):
     @wraps(view_func)
@@ -153,6 +157,74 @@ usuarios_sistema_status = {
     3: True,  # revisor
     4: True   # leitor
 }
+
+# Arquivo para persistência de dados
+DATA_FILE = 'data/bgcreator_data.json'
+
+def salvar_dados():
+    """Salva todos os dados em arquivo JSON"""
+    global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados
+    global usuarios_criados, comentarios_criados, complexidade_senha, usuarios_sistema_status
+    
+    # Criar diretório se não existir
+    Path('data').mkdir(exist_ok=True)
+    
+    dados = {
+        'jogos_criados': jogos_criados,
+        'mecanicas_criadas': mecanicas_criadas,
+        'componentes_criados': componentes_criados,
+        'temas_criados': temas_criados,
+        'usuarios_criados': usuarios_criados,
+        'comentarios_criados': comentarios_criados,
+        'complexidade_senha': complexidade_senha,
+        'usuarios_sistema_status': usuarios_sistema_status,
+        'senhas_sistema': senhas_mod.SENHAS_SISTEMA,
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    try:
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(dados, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Erro ao salvar dados: {e}")
+
+def carregar_dados():
+    """Carrega todos os dados do arquivo JSON"""
+    global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados
+    global usuarios_criados, comentarios_criados, complexidade_senha, usuarios_sistema_status
+    
+    try:
+        if Path(DATA_FILE).exists():
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                dados = json.load(f)
+            
+            jogos_criados = dados.get('jogos_criados', [])
+            mecanicas_criadas = dados.get('mecanicas_criadas', [])
+            componentes_criados = dados.get('componentes_criados', [])
+            temas_criados = dados.get('temas_criados', [])
+            usuarios_criados = dados.get('usuarios_criados', [])
+            comentarios_criados = dados.get('comentarios_criados', [])
+            complexidade_senha = dados.get('complexidade_senha', 1)
+            usuarios_sistema_status = dados.get('usuarios_sistema_status', {
+                1: True, 2: True, 3: True, 4: True
+            })
+            
+            # Carregar senhas do sistema
+            senhas_salvas = dados.get('senhas_sistema', {
+                'admin': 'admin', 'autor': '123', 'revisor': '123', 'leitor': '123'
+            })
+            senhas_mod.SENHAS_SISTEMA.update(senhas_salvas)
+            
+            print(f"Dados carregados com sucesso. Timestamp: {dados.get('timestamp', 'N/A')}")
+        else:
+            print("Arquivo de dados não encontrado. Usando dados padrão.")
+    except Exception as e:
+        print(f"Erro ao carregar dados: {e}. Usando dados padrão.")
+
+# Carregar dados na inicialização (apenas uma vez)
+if not globals().get('_dados_carregados', False):
+    carregar_dados()
+    globals()['_dados_carregados'] = True
 
 def salvar_imagem_glossario(arquivo):
     """Salva imagem do glossário e retorna o caminho"""
@@ -678,6 +750,11 @@ def jogos_lista(request):
         
         todos_jogos = jogos_filtrados
     
+    # Adicionar status de revisão e estatísticas para cada jogo
+    for jogo in todos_jogos:
+        jogo['status_revisao'] = calcular_status_revisao(jogo)
+        jogo['stats_revisao'] = calcular_estatisticas_revisao(jogo)
+    
     return render(request, 'jogos/lista.html', {'jogos': {'results': todos_jogos}})
 
 @autor_or_admin_required
@@ -868,6 +945,7 @@ def jogo_novo(request):
             
             # Adicionar à lista
             jogos_criados.append(novo_jogo)
+            salvar_dados()  # Persistir dados
             print(f"Jogo completo adicionado: {novo_jogo}")  # Debug
             
             messages.success(request, f'Jogo "{nome}" criado com sucesso!')
@@ -907,6 +985,7 @@ def mecanica_novo(request):
                 'descricao': descricao
             }
             mecanicas_criadas.append(nova_mecanica)
+            salvar_dados()  # Persistir dados
             messages.success(request, 'Mecânica criada com sucesso!')
         else:
             messages.error(request, 'Nome é obrigatório!')
@@ -941,6 +1020,7 @@ def componente_novo(request):
                 'tipo': tipo
             }
             componentes_criados.append(novo_componente)
+            salvar_dados()  # Persistir dados
             messages.success(request, 'Componente criado com sucesso!')
         else:
             messages.error(request, 'Nome é obrigatório!')
@@ -973,6 +1053,7 @@ def tema_novo(request):
                 'descricao': descricao
             }
             temas_criados.append(novo_tema)
+            salvar_dados()  # Persistir dados
             messages.success(request, 'Tema criado com sucesso!')
         else:
             messages.error(request, 'Nome é obrigatório!')
@@ -1235,6 +1316,7 @@ def jogo_editar(request, jogo_id):
             jogo['versao_manual'] = f"{major}.{minor}.{patch + 1}"
         
         messages.success(request, f'Jogo "{jogo["nome"]}" atualizado com sucesso!')
+        salvar_dados()  # Persistir dados
         return redirect('jogos_lista')
     
     return render(request, 'jogos/editar.html', {
@@ -1331,6 +1413,7 @@ def jogo_copiar(request, jogo_id):
     
     # Adicionar à lista de jogos criados
     jogos_criados.append(jogo_copia)
+    salvar_dados()  # Persistir dados
     
     messages.success(request, f'Cópia do jogo "{jogo_original["nome"]}" criada com sucesso!')
     return redirect('jogo_detalhes', jogo_id=jogo_copia['id'])
@@ -1492,6 +1575,7 @@ def jogo_detalhes(request, jogo_id):
                 'created_at': datetime.now().strftime('%d/%m/%Y %H:%M')
             }
             comentarios_criados.append(novo_comentario)
+            salvar_dados()  # Persistir dados
             messages.success(request, 'Comentário adicionado com sucesso!')
             return redirect('jogo_detalhes', jogo_id=jogo_id)
     
@@ -1693,6 +1777,42 @@ def calcular_versao_manual(jogo_data):
     versao_patch = 0
     
     return f"{versao_jogo}.{versao_minor}.{versao_patch}"
+
+def calcular_estatisticas_revisao(jogo):
+    """Calcula estatísticas de revisão do jogo"""
+    secoes_totais = 8  # Total de seções revisáveis
+    secoes_revisadas = 0
+    secoes_validadas = 0
+    secoes_com_correcao = 0
+    
+    if jogo.get('revisao'):
+        for secao, dados in jogo['revisao'].items():
+            if isinstance(dados, dict) and 'status' in dados:
+                secoes_revisadas += 1
+                if dados['status'] == 'aprovado':
+                    secoes_validadas += 1
+                elif dados['status'] == 'correcao':
+                    secoes_com_correcao += 1
+    
+    return {
+        'total': secoes_totais,
+        'revisadas': secoes_revisadas,
+        'validadas': secoes_validadas,
+        'com_correcao': secoes_com_correcao
+    }
+
+def calcular_status_revisao(jogo):
+    """Calcula o status de revisão baseado nas estatísticas"""
+    stats = calcular_estatisticas_revisao(jogo)
+    
+    if stats['com_correcao'] > 0:
+        return 'correcao_pendente'  # Ícone de !
+    elif stats['validadas'] == stats['total']:
+        return 'totalmente_aprovado'  # Ícone de check
+    elif stats['revisadas'] > 0:
+        return 'em_revisao'  # Ícone de clock
+    else:
+        return 'sem_revisao'  # Ícone de minus
 
 def calcular_peso_jogo(jogo_data):
     """Calcula o peso do jogo baseado nas regras de negócio"""
@@ -1937,7 +2057,7 @@ def tema_excluir(request, item_id):
     return redirect('temas_lista')
 
 def login_view(request):
-    global usuario_logado, usuarios_criados, usuarios_sistema_status
+    global usuario_logado, usuarios_criados, usuarios_sistema_status, senhas_sistema
     
     if request.method == 'POST':
         login = request.POST.get('login')
@@ -1945,10 +2065,10 @@ def login_view(request):
         
         # Usuários do sistema com status dinâmico
         usuarios_sistema = [
-            {'login': 'admin', 'senha': 'admin', 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status[1], 'id': 1},
-            {'login': 'autor', 'senha': '123', 'nome': 'Autor Sistema', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status[2], 'id': 2},
-            {'login': 'revisor', 'senha': '123', 'nome': 'Revisor Sistema', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status[3], 'id': 3},
-            {'login': 'leitor', 'senha': '123', 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status[4], 'id': 4},
+            {'login': 'admin', 'senha': senhas_mod.get_senha('admin'), 'nome': 'Admin Sistema', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status.get(1, True), 'id': 1},
+            {'login': 'autor', 'senha': senhas_mod.get_senha('autor'), 'nome': 'Autor Sistema', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status.get(2, True), 'id': 2},
+            {'login': 'revisor', 'senha': senhas_mod.get_senha('revisor'), 'nome': 'Revisor Sistema', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status.get(3, True), 'id': 3},
+            {'login': 'leitor', 'senha': senhas_mod.get_senha('leitor'), 'nome': 'Leitor Teste', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status.get(4, True), 'id': 4},
         ]
         
         # Verificar usuários do sistema + criados
@@ -1956,20 +2076,12 @@ def login_view(request):
         
         for usuario in todos_usuarios:
             if usuario['login'] == login and usuario.get('ativo', True):
-                # Para usuários do sistema, usar senhas fixas
-                if usuario.get('id', 0) <= 10:  # Usuários do sistema
-                    if ((login == 'admin' and senha == 'admin') or 
-                        (login in ['autor', 'revisor', 'leitor'] and senha == '123')):
-                        usuario_logado = usuario
-                        request.session['usuario_perfil'] = usuario['perfil']
-                        messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
-                        return redirect('home')
-                else:  # Usuários criados - verificar senha armazenada
-                    if usuario.get('senha') == senha:
-                        usuario_logado = usuario
-                        request.session['usuario_perfil'] = usuario['perfil']
-                        messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
-                        return redirect('home')
+                # Verificar senha
+                if usuario.get('senha') == senha:
+                    usuario_logado = usuario
+                    request.session['usuario_perfil'] = usuario['perfil']
+                    messages.success(request, f'Bem-vindo, {usuario["nome"]}!')
+                    return redirect('home')
         
         messages.error(request, 'Login ou senha inválidos, ou usuário desativado!')
     
@@ -2009,13 +2121,26 @@ def perfil(request):
         # Atualizar senha se fornecida
         if nova_senha:
             if nova_senha == confirma_senha:
+                # Validar complexidade da senha
+                senha_valida, erro_senha = validar_senha(nova_senha)
+                if not senha_valida:
+                    messages.error(request, erro_senha)
+                    return redirect('perfil')
+                
                 # Para usuários do sistema, verificar senha atual
                 if usuario_logado.get('id', 0) <= 10:
-                    if usuario_logado['login'] == 'admin' and senha_atual == 'admin':
-                        # Não podemos alterar senhas de usuários do sistema
-                        messages.warning(request, 'Não é possível alterar a senha de usuários do sistema.')
+                    # Verificar senha atual do sistema
+                    senha_esperada = senhas_mod.get_senha(usuario_logado['login'])
+                    
+                    if senha_atual == senha_esperada:
+                        # Atualizar senha do usuário do sistema
+                        senhas_mod.set_senha(usuario_logado['login'], nova_senha)
+                        usuario_logado['senha'] = nova_senha  # Atualizar também no objeto logado
+                        salvar_dados()
+                        messages.success(request, 'Senha do usuário do sistema alterada com sucesso!')
                     else:
                         messages.error(request, 'Senha atual incorreta.')
+                        return redirect('perfil')
                 else:
                     # Usuário criado - verificar senha atual
                     if usuario_logado.get('senha') == senha_atual:
@@ -2026,9 +2151,11 @@ def perfil(request):
                                 usuarios_criados[i]['senha'] = nova_senha
                                 usuarios_criados[i]['avatar'] = usuario_logado.get('avatar')
                                 break
+                        salvar_dados()
                         messages.success(request, 'Senha alterada com sucesso!')
                     else:
                         messages.error(request, 'Senha atual incorreta.')
+                        return redirect('perfil')
             else:
                 messages.error(request, 'Nova senha e confirmação não conferem!')
         else:
@@ -2060,6 +2187,7 @@ def configurar_complexidade_senha(request):
         }
         
         messages.success(request, f'Complexidade de senha alterada para: {niveis[nova_complexidade]}')
+        salvar_dados()  # Persistir dados
         return redirect('usuarios_lista')
     
 @admin_required
@@ -2068,10 +2196,10 @@ def usuarios_lista(request):
     
     # Usuários de exemplo com status dinâmico
     usuarios_exemplo = [
-        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status[1]},
-        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status[2]},
-        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status[3]},
-        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status[4]},
+        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status.get(1, True)},
+        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status.get(2, True)},
+        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status.get(3, True)},
+        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status.get(4, True)},
     ]
     
     todos_usuarios = usuarios_exemplo + usuarios_criados
@@ -2148,6 +2276,7 @@ def usuario_novo(request):
                     'avatar': avatar_path
                 }
                 usuarios_criados.append(novo_usuario)
+                salvar_dados()  # Persistir dados
                 messages.success(request, f'Usuário "{nome}" criado com sucesso!')
                 return redirect('usuarios_lista')
             else:
@@ -2164,10 +2293,10 @@ def usuario_editar(request, user_id):
     # Encontrar usuário (sistema ou criado)
     usuario = None
     usuarios_sistema = [
-        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status[1]},
-        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status[2]},
-        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status[3]},
-        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status[4]},
+        {'id': 1, 'nome': 'Admin Sistema', 'login': 'admin', 'email': 'admin@bgcreator.com', 'perfil': 'ADMINISTRADOR', 'ativo': usuarios_sistema_status.get(1, True)},
+        {'id': 2, 'nome': 'Autor Sistema', 'login': 'autor', 'email': 'autor@bgcreator.com', 'perfil': 'AUTOR', 'ativo': usuarios_sistema_status.get(2, True)},
+        {'id': 3, 'nome': 'Revisor Sistema', 'login': 'revisor', 'email': 'revisor@bgcreator.com', 'perfil': 'REVISOR', 'ativo': usuarios_sistema_status.get(3, True)},
+        {'id': 4, 'nome': 'Leitor Teste', 'login': 'leitor', 'email': 'leitor@bgcreator.com', 'perfil': 'LEITOR', 'ativo': usuarios_sistema_status.get(4, True)},
     ]
     
     # Buscar em usuários do sistema
@@ -2244,6 +2373,7 @@ def usuario_editar(request, user_id):
                 return render(request, 'usuarios/editar.html', {'usuario': usuario})
         
         messages.success(request, f'Usuário "{usuario["nome"]}" atualizado com sucesso!')
+        salvar_dados()  # Persistir dados
         return redirect('usuarios_lista')
     
     return render(request, 'usuarios/editar.html', {'usuario': usuario})
@@ -2259,6 +2389,7 @@ def usuario_excluir(request, user_id):
     else:
         messages.warning(request, 'Usuários do sistema não podem ser excluídos, apenas desativados.')
     
+    salvar_dados()  # Persistir dados
     return redirect('usuarios_lista')
 
 @admin_required
@@ -2276,12 +2407,13 @@ def usuario_bloquear(request, user_id):
     else:
         # Para usuários do sistema, alterar status na variável global
         if user_id in usuarios_sistema_status:
-            usuarios_sistema_status[user_id] = not usuarios_sistema_status[user_id]
+            usuarios_sistema_status[user_id] = not usuarios_sistema_status.get(user_id, True)
             status = 'ativado' if usuarios_sistema_status[user_id] else 'desativado'
             messages.success(request, f'Usuário do sistema {status} com sucesso!')
         else:
             messages.error(request, 'Usuário não encontrado!')
     
+    salvar_dados()  # Persistir dados
     return redirect('usuarios_lista')
 
 @login_required
@@ -2341,6 +2473,8 @@ import json
 from datetime import datetime
 from django.http import HttpResponse, FileResponse
 import shutil
+import pickle
+from pathlib import Path
 
 @admin_required
 def backup_sistema(request):
@@ -2367,7 +2501,8 @@ def backup_sistema(request):
                 'temas': temas_criados,
                 'usuarios': usuarios_criados,
                 'comentarios': comentarios_criados,
-                'complexidade_senha': complexidade_senha
+                'complexidade_senha': complexidade_senha,
+                'senhas_sistema': senhas_mod.SENHAS_SISTEMA
             }
             
             # Criar arquivo ZIP
@@ -2426,6 +2561,12 @@ def backup_sistema(request):
                         
                         # Restaurar configuração de complexidade
                         complexidade_senha = backup_data.get('complexidade_senha', 1)
+                        
+                        # Restaurar senhas do sistema
+                        senhas_salvas = backup_data.get('senhas_sistema', {
+                            'admin': 'admin', 'autor': '123', 'revisor': '123', 'leitor': '123'
+                        })
+                        senhas_mod.SENHAS_SISTEMA.update(senhas_salvas)
                         
                         # Restaurar arquivos de mídia
                         for file_info in zipf.infolist():
@@ -2555,6 +2696,9 @@ def jogo_revisao(request, jogo_id):
     if not jogo:
         messages.error(request, 'Jogo não encontrado!')
         return redirect('jogos_lista')
+    
+    # Calcular estatísticas de revisão
+    jogo['stats_revisao'] = calcular_estatisticas_revisao(jogo)
     
     if request.method == 'POST':
         # Processar dados da revisão
