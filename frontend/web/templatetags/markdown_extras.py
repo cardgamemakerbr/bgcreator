@@ -30,3 +30,25 @@ def markdown(value):
             value = f'<p>{value}</p>'
     
     return mark_safe(value)
+
+@register.filter
+def parse_component_name(component_str):
+    """Extrai o nome do componente removendo a quantidade"""
+    if not component_str:
+        return ""
+    if '(x' in component_str:
+        return component_str.split(' (x')[0].strip()
+    return component_str.strip()
+
+@register.filter
+def parse_component_quantity(component_str):
+    """Extrai a quantidade do componente"""
+    if not component_str:
+        return "1"
+    if '(x' in component_str and ')' in component_str:
+        try:
+            qty_part = component_str.split('(x')[1].split(')')[0]
+            return qty_part
+        except:
+            return "1"
+    return "1"

@@ -278,3 +278,9 @@ Pode avaliar um problema que eu estou percebendo, quando vc faz uma nova atualiz
  Nova função, no cadastro e edição de manuais
     |-> nos campos componentes, temas, mecancias
     |-> adicionar no proprio campo uma função cadastrar, quando eu digitar uma opção na cadastrada, aparece um botão ao lador <cadastra> e este cadas o item na tabela referente
+
+bug: ajustar o campo numeros de componetes
+    |-> Ao editar um jogo ele esta atribuindo novas valores para o mesmo componente
+    |-> exempo: Conjuto de Marcadores Pequenos (x40) (x1) (x1)
+    |-> sendo que apenas o primeiro de x40 é o valor validado
+    (dica de possivel logia, os componentes vem com o valor 0 e se este campo permanecer 0 ele não atribui novo valor nos componentes)

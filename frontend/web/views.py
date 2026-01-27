@@ -560,8 +560,10 @@ def jogo_novo(request):
             
             for i, nome_comp in enumerate(componentes_nomes):
                 if nome_comp.strip():
-                    qtd = componentes_qtds[i] if i < len(componentes_qtds) else '1'
-                    novo_jogo['componentes'].append(f"{nome_comp} (x{qtd})")
+                    qtd = componentes_qtds[i] if i < len(componentes_qtds) and componentes_qtds[i].strip() else '1'
+                    # Só adicionar se quantidade for maior que 0
+                    if qtd and qtd != '0':
+                        novo_jogo['componentes'].append(f"{nome_comp} (x{qtd})")
             
             # Processar estruturas
             estruturas_nomes = request.POST.getlist('estruturas_nome[]')
@@ -928,8 +930,15 @@ def jogo_editar(request, jogo_id):
         
         for i, nome_comp in enumerate(componentes_nomes):
             if nome_comp.strip():
-                qtd = componentes_qtds[i] if i < len(componentes_qtds) else '1'
-                jogo['componentes'].append(f"{nome_comp} (x{qtd})")
+                qtd = componentes_qtds[i] if i < len(componentes_qtds) and componentes_qtds[i].strip() else '1'
+                # Remover quantidade existente do nome se houver
+                nome_limpo = nome_comp.split(' (x')[0].strip()
+                # Só adicionar quantidade se for maior que 0
+                if qtd and qtd != '0':
+                    jogo['componentes'].append(f"{nome_limpo} (x{qtd})")
+                elif qtd == '0':
+                    # Se quantidade for 0, não adicionar este componente
+                    continue
         jogo['condicoes_vitoria'] = [c for c in request.POST.getlist('condicoes_vitoria[]') if c.strip()]
         jogo['condicoes_derrota'] = [c for c in request.POST.getlist('condicoes_derrota[]') if c.strip()]
         

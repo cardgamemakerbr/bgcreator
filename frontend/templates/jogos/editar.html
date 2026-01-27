@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load markdown_extras %}
 
 {% block title %}Editar Jogo - BGCreator{% endblock %}
 
@@ -321,9 +322,9 @@
                     {% for componente in jogo.componentes %}
                         {% if componente %}
                         <div class="d-flex mb-2">
-                            <input type="text" class="form-control me-2 componente-search" value="{{ componente }}" autocomplete="off">
-                            <input type="number" class="form-control me-2" name="componentes_qtd[]" placeholder="Qtd" min="1" value="1" style="width: 80px;">
-                            <input type="hidden" name="componentes[]" class="componente-id" value="{{ componente }}">
+                            <input type="text" class="form-control me-2 componente-search" value="{{ componente|parse_component_name }}" autocomplete="off">
+                            <input type="number" class="form-control me-2" name="componentes_qtd[]" placeholder="Qtd" min="1" value="{{ componente|parse_component_quantity }}" style="width: 80px;">
+                            <input type="hidden" name="componentes[]" class="componente-id" value="{{ componente|parse_component_name }}">
                             <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">-</button>
                         </div>
                         {% endif %}
