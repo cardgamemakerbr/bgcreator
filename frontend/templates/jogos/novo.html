@@ -338,7 +338,7 @@
                                     <textarea class="form-control mb-2" name="setup_descricao[]" placeholder="Ex: Coloque o tabuleiro no centro da mesa. Cada jogador escolhe uma cor e pega os componentes correspondentes: 4 meeples, 1 marcador de pontuação e 5 cartas iniciais." rows="3"></textarea>
                                 </div>
                                 <div class="col-md-1">
-                                    <button type="button" class="btn btn-success" onclick="addSetup()">+</button>
+                                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
                                 </div>
                             </div>
                             <div class="mt-2">
@@ -358,6 +358,12 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <!-- Botão para adicionar nova etapa sempre visível -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success" onclick="addSetup()">
+                            <i class="fas fa-plus"></i> Adicionar Nova Etapa de Setup
+                        </button>
                     </div>
                 </div>
             </div>
@@ -399,7 +405,7 @@
                                     <textarea class="form-control mb-2" name="estruturas_descricao[]" placeholder="Ex: Os jogadores movem seus personagens pelo tabuleiro, descobrem novos locais e coletam recursos. Cada movimento custa 1 ponto de energia." rows="3"></textarea>
                                 </div>
                                 <div class="col-md-1">
-                                    <button type="button" class="btn btn-success" onclick="addEstrutura()">+</button>
+                                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()">-</button>
                                 </div>
                             </div>
                             <div class="mt-2">
@@ -429,6 +435,12 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <!-- Botão para adicionar nova estrutura sempre visível -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-success" onclick="addEstrutura()">
+                            <i class="fas fa-plus"></i> Adicionar Nova Estrutura
+                        </button>
                     </div>
                 </div>
             </div>
@@ -873,7 +885,7 @@ function addDerrota() {
 
 function addSetup() {
     const container = document.getElementById('setup-container');
-    const index = container.children.length;
+    const index = container.children.length - 1; // -1 por causa do botão
     const div = document.createElement('div');
     div.className = 'card mb-3';
     div.innerHTML = `
@@ -913,7 +925,7 @@ function addSetup() {
             </div>
         </div>
     `;
-    container.appendChild(div);
+    container.insertBefore(div, container.lastElementChild);
 }
 
 function addSetupImagem(button) {
@@ -937,7 +949,7 @@ function addSetupImagem(button) {
 
 function addEstrutura() {
     const container = document.getElementById('estruturas-container');
-    const index = container.children.length;
+    const index = container.children.length - 1; // -1 por causa do botão
     const div = document.createElement('div');
     div.className = 'card mb-3';
     div.innerHTML = `
@@ -1004,7 +1016,7 @@ function addEstrutura() {
             </div>
         </div>
     `;
-    container.appendChild(div);
+    container.insertBefore(div, container.lastElementChild);
 }
 
 function addCondicaoEspecial(button) {
