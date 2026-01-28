@@ -309,9 +309,8 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8">
-                                <select class="form-select" id="componente-anatomia-select">
-                                    <option value="">Selecione um componente para detalhar...</option>
-                                </select>
+                                <input type="text" class="form-control" id="componente-anatomia-search" placeholder="Digite para buscar componente cadastrado no jogo..." autocomplete="off">
+                                <input type="hidden" id="componente-anatomia-selected">
                             </div>
                             <div class="col-md-4">
                                 <button type="button" class="btn btn-primary" onclick="adicionarAnatomiaComponente()">
@@ -845,13 +844,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tema-search').forEach(input => setupSearch(input, 'temas'));
     document.querySelectorAll('.componente-search').forEach(input => setupSearch(input, 'componentes'));
     
-    // Carregar componentes para anatomia
-    carregarComponentesAnatomia();
+    // Configurar busca de anatomia
+    setupAnatomiaSearch();
     
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.search-dropdown') && !e.target.matches('.mecanica-search, .tema-search, .componente-search')) {
             document.querySelectorAll('.search-dropdown').forEach(dropdown => dropdown.remove());
+        }
+        if (!e.target.closest('.anatomia-dropdown') && !e.target.matches('#componente-anatomia-search')) {
+            document.querySelectorAll('.anatomia-dropdown').forEach(dropdown => dropdown.remove());
         }
     });
 });
@@ -1655,53 +1657,129 @@ function uploadJsonFile(input) {
     input.value = '';
 }
 
-// Função para carregar componentes no seletor de anatomia
-function carregarComponentesAnatomia() {
-    const select = document.getElementById('componente-anatomia-select');
-    if (!select) return;
+// Função para configurar busca de componentes da anatomia
+function setupAnatomiaSearch() {
+    const input = document.getElementById('componente-anatomia-search');
+    if (!input) return;
     
-    // Buscar todos os componentes disponíveis
-    fetch('/api/api/componentes/?per_page=1000')
-        .then(response => response.json())
-        .then(data => {
-            // Limpar opções existentes (exceto a primeira)
-            while (select.children.length > 1) {
-                select.removeChild(select.lastChild);
+    let timeout;
+    input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                // Buscar apenas nos componentes cadastrados no jogo
+                const componentesCadastrados = getComponentesCadastrados();
+                const filtrados = componentesCadastrados.filter(comp => 
+                    comp.nome.toLowerCase().includes(query.toLowerCase())
+                );
+                showAnatomiaDropdown(this, filtrados);
+            } else {
+                hideAnatomiaDropdown(this);
             }
-            
-            // Adicionar componentes
-            if (data.results) {
-                data.results.forEach(componente => {
-                    const option = document.createElement('option');
-                    option.value = componente.nome;
-                    option.textContent = componente.nome;
-                    option.dataset.tipo = componente.tipo || 'NEUTRO';
-                    option.dataset.descricao = componente.descricao || '';
-                    option.dataset.imagem = componente.imagem || '';
-                    select.appendChild(option);
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao carregar componentes:', error);
+        }, 300);
+    });
+}
+
+// Função para obter componentes cadastrados no jogo
+function getComponentesCadastrados() {
+    const componentesInputs = document.querySelectorAll('input[name="componentes[]"]');
+    const componentes = [];
+    
+    componentesInputs.forEach(input => {
+        const nome = input.value.trim();
+        if (nome && !componentes.find(c => c.nome === nome)) {
+            componentes.push({
+                nome: nome,
+                tipo: 'NEUTRO', // Tipo padrão
+                descricao: '',
+                imagem: ''
+            });
+        }
+    });
+    
+    return componentes;
+}
+
+// Função para mostrar dropdown de anatomia
+function showAnatomiaDropdown(input, items) {
+    hideAnatomiaDropdown(input);
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'anatomia-dropdown';
+    dropdown.style.cssText = `
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    `;
+    
+    if (!items || items.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.style.cssText = 'padding: 8px 12px; color: #666; text-align: center;';
+        noResults.innerHTML = `<i class="fas fa-info-circle"></i> Nenhum componente cadastrado encontrado`;
+        dropdown.appendChild(noResults);
+    } else {
+        items.forEach(item => {
+            const option = document.createElement('div');
+            option.className = 'anatomia-option';
+            option.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;';
+            option.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-puzzle-piece text-primary me-2"></i>
+                    <span>${item.nome}</span>
+                </div>
+            `;
+            option.addEventListener('click', () => selectAnatomiaItem(input, item));
+            option.addEventListener('mouseenter', () => option.style.backgroundColor = '#f8f9fa');
+            option.addEventListener('mouseleave', () => option.style.backgroundColor = 'white');
+            dropdown.appendChild(option);
         });
+    }
+    
+    input.parentElement.style.position = 'relative';
+    input.parentElement.appendChild(dropdown);
+}
+
+// Função para ocultar dropdown de anatomia
+function hideAnatomiaDropdown(input) {
+    const dropdown = input.parentElement.querySelector('.anatomia-dropdown');
+    if (dropdown) dropdown.remove();
+}
+
+// Função para selecionar item da anatomia
+function selectAnatomiaItem(input, item) {
+    input.value = item.nome;
+    const hiddenInput = document.getElementById('componente-anatomia-selected');
+    if (hiddenInput) {
+        hiddenInput.value = JSON.stringify(item);
+    }
+    hideAnatomiaDropdown(input);
 }
 
 // Função para adicionar componente à anatomia
 function adicionarAnatomiaComponente() {
-    const select = document.getElementById('componente-anatomia-select');
+    const input = document.getElementById('componente-anatomia-search');
+    const hiddenInput = document.getElementById('componente-anatomia-selected');
     const container = document.getElementById('anatomia-componentes-container');
     
-    if (!select.value) {
-        alert('Selecione um componente primeiro.');
+    if (!input.value.trim() || !hiddenInput.value) {
+        alert('Selecione um componente da lista primeiro.');
         return;
     }
     
-    const selectedOption = select.options[select.selectedIndex];
-    const nomeComponente = selectedOption.value;
-    const tipoComponente = selectedOption.dataset.tipo || 'NEUTRO';
-    const descricaoComponente = selectedOption.dataset.descricao || '';
-    const imagemComponente = selectedOption.dataset.imagem || '';
+    const componenteData = JSON.parse(hiddenInput.value);
+    const nomeComponente = componenteData.nome;
+    const tipoComponente = componenteData.tipo || 'NEUTRO';
+    const descricaoComponente = componenteData.descricao || '';
+    const imagemComponente = componenteData.imagem || '';
     
     // Verificar se já existe
     const existente = container.querySelector(`[data-componente="${nomeComponente}"]`);
@@ -1759,8 +1837,9 @@ function adicionarAnatomiaComponente() {
     
     container.appendChild(card);
     
-    // Resetar seletor
-    select.selectedIndex = 0;
+    // Resetar campos
+    input.value = '';
+    hiddenInput.value = '';
 }
 
 // Adicionar eventos para recalcular peso e versão
