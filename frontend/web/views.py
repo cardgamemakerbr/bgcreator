@@ -418,10 +418,18 @@ def debug(request):
     })
 
 def home(request):
-    global jogos_criados, usuario_logado
+    global jogos_criados, usuario_logado, usuarios_criados
     
-    # Se não estiver logado, redirecionar para login
+    # Se não estiver logado, verificar se há administradores antes de redirecionar
     if usuario_logado is None:
+        # Verificar se existe pelo menos um administrador
+        tem_admin = any(u['perfil'] == 'ADMINISTRADOR' for u in usuarios_criados)
+        
+        # Se não há administrador, mostrar tela de cadastro inicial
+        if not tem_admin:
+            return cadastrar_admin_inicial(request)
+        
+        # Se há administrador, redirecionar para login
         return redirect('login')
     
     # Contar jogos reais (apenas criados)
