@@ -117,6 +117,44 @@
         </div>
         {% endif %}
 
+        {% if jogo.anatomia_componentes %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-microscope"></i> Anatomia dos Componentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for componente in jogo.anatomia_componentes %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="me-3">
+                                            {% if componente.imagem %}
+                                            <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;">
+                                            {% else %}
+                                            <div style="width: 80px; height: 80px; background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-puzzle-piece text-muted" style="font-size: 32px;"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title mb-1">{{ componente.nome }}</h6>
+                                            <span class="badge bg-secondary mb-2">{{ componente.tipo }}</span>
+                                            {% if componente.descricao %}
+                                            <p class="card-text text-muted small mb-0">{{ componente.descricao }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         {% if jogo.componentes_processados %}
         <div class="card mb-4">
             <div class="card-header">

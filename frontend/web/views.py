@@ -676,6 +676,34 @@ def jogo_novo(request):
                         'imagem': imagem_path
                     })
             
+            # Processar anatomia dos componentes
+            anatomia_nomes = request.POST.getlist('anatomia_componente_nome[]')
+            anatomia_tipos = request.POST.getlist('anatomia_componente_tipo[]')
+            anatomia_descricoes = request.POST.getlist('anatomia_componente_descricao[]')
+            
+            novo_jogo['anatomia_componentes'] = []
+            for i, nome in enumerate(anatomia_nomes):
+                if nome.strip():
+                    # Processar imagem da anatomia
+                    imagem_path = None
+                    if 'anatomia_componente_imagem[]' in request.FILES:
+                        imagens = request.FILES.getlist('anatomia_componente_imagem[]')
+                        if i < len(imagens) and imagens[i]:
+                            imagem_path = salvar_imagem_componente(imagens[i])
+                    
+                    # Verificar se há imagem existente
+                    if not imagem_path:
+                        imagens_existentes = request.POST.getlist('anatomia_componente_imagem_existente[]')
+                        if i < len(imagens_existentes) and imagens_existentes[i]:
+                            imagem_path = imagens_existentes[i]
+                    
+                    novo_jogo['anatomia_componentes'].append({
+                        'nome': nome,
+                        'tipo': anatomia_tipos[i] if i < len(anatomia_tipos) else 'NEUTRO',
+                        'descricao': anatomia_descricoes[i] if i < len(anatomia_descricoes) else '',
+                        'imagem': imagem_path
+                    })
+            
             # Calcular peso automaticamente
             novo_jogo['peso'] = calcular_peso_jogo(novo_jogo)
             
@@ -1061,6 +1089,33 @@ def jogo_editar(request, jogo_id):
                 jogo['glossario'].append({
                     'palavra': palavra,
                     'definicao': glossario_definicoes[i] if i < len(glossario_definicoes) else '',
+                    'imagem': imagem_path
+                })
+        
+        # Atualizar anatomia dos componentes
+        anatomia_nomes = request.POST.getlist('anatomia_componente_nome[]')
+        anatomia_tipos = request.POST.getlist('anatomia_componente_tipo[]')
+        anatomia_descricoes = request.POST.getlist('anatomia_componente_descricao[]')
+        anatomia_imagens_existentes = request.POST.getlist('anatomia_componente_imagem_existente[]')
+        
+        jogo['anatomia_componentes'] = []
+        for i, nome in enumerate(anatomia_nomes):
+            if nome.strip():
+                # Processar imagem da anatomia
+                imagem_path = None
+                if 'anatomia_componente_imagem[]' in request.FILES:
+                    imagens = request.FILES.getlist('anatomia_componente_imagem[]')
+                    if i < len(imagens) and imagens[i]:
+                        imagem_path = salvar_imagem_componente(imagens[i])
+                
+                # Se não há nova imagem, usar a existente
+                if not imagem_path and i < len(anatomia_imagens_existentes) and anatomia_imagens_existentes[i]:
+                    imagem_path = anatomia_imagens_existentes[i]
+                
+                jogo['anatomia_componentes'].append({
+                    'nome': nome,
+                    'tipo': anatomia_tipos[i] if i < len(anatomia_tipos) else 'NEUTRO',
+                    'descricao': anatomia_descricoes[i] if i < len(anatomia_descricoes) else '',
                     'imagem': imagem_path
                 })
         

@@ -167,6 +167,35 @@
                 <p>Nenhum componente informado.</p>
             {% endfor %}
             </ul>
+            
+            <!-- Anatomia dos Componentes -->
+            {% if jogo.anatomia_componentes %}
+            <h6 class="mt-3"><i class="fas fa-microscope"></i> Anatomia dos Componentes</h6>
+            <div class="row">
+                {% for componente in jogo.anatomia_componentes %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-start p-2 border rounded">
+                            <div class="me-2">
+                                {% if componente.imagem %}
+                                <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                {% else %}
+                                <div style="width: 40px; height: 40px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-puzzle-piece text-muted" style="font-size: 16px;"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ componente.nome }}</div>
+                                <small class="text-muted">{{ componente.tipo }}</small>
+                                {% if componente.descricao %}
+                                <div class="small text-muted">{{ componente.descricao }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
             <div id="status-secao_componentes" class="mt-3" {% if jogo.revisao and jogo.revisao.secao_componentes %}style="display: block;"{% else %}style="display: none;"{% endif %}>
                 {% if jogo.revisao and jogo.revisao.secao_componentes %}
                     {% if jogo.revisao.secao_componentes.status == 'REVISADO' %}

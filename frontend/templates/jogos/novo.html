@@ -296,6 +296,38 @@
                 </div>
             </div>
 
+            <!-- Anatomia dos Componentes -->
+            <div class="mb-4">
+                <h5><i class="fas fa-microscope"></i> Anatomia dos Componentes</h5>
+                <small class="text-muted mb-3 d-block">
+                    <i class="fas fa-info-circle"></i> 
+                    Detalhe os componentes do seu jogo com imagens e descrições específicas.
+                </small>
+                
+                <!-- Seletor de componente -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <select class="form-select" id="componente-anatomia-select">
+                                    <option value="">Selecione um componente para detalhar...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary" onclick="adicionarAnatomiaComponente()">
+                                    <i class="fas fa-plus"></i> Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Container dos componentes detalhados -->
+                <div id="anatomia-componentes-container">
+                    <!-- Componentes detalhados aparecerão aqui -->
+                </div>
+            </div>
+
             <!-- Condições de Vitória -->
             <div class="mb-4">
                 <h5><i class="fas fa-trophy"></i> Condições de Vitória</h5>
@@ -812,6 +844,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.mecanica-search').forEach(input => setupSearch(input, 'mecanicas'));
     document.querySelectorAll('.tema-search').forEach(input => setupSearch(input, 'temas'));
     document.querySelectorAll('.componente-search').forEach(input => setupSearch(input, 'componentes'));
+    
+    // Carregar componentes para anatomia
+    carregarComponentesAnatomia();
     
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', function(e) {
@@ -1618,6 +1653,114 @@ function uploadJsonFile(input) {
     
     // Limpar input
     input.value = '';
+}
+
+// Função para carregar componentes no seletor de anatomia
+function carregarComponentesAnatomia() {
+    const select = document.getElementById('componente-anatomia-select');
+    if (!select) return;
+    
+    // Buscar todos os componentes disponíveis
+    fetch('/api/api/componentes/?per_page=1000')
+        .then(response => response.json())
+        .then(data => {
+            // Limpar opções existentes (exceto a primeira)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Adicionar componentes
+            if (data.results) {
+                data.results.forEach(componente => {
+                    const option = document.createElement('option');
+                    option.value = componente.nome;
+                    option.textContent = componente.nome;
+                    option.dataset.tipo = componente.tipo || 'NEUTRO';
+                    option.dataset.descricao = componente.descricao || '';
+                    option.dataset.imagem = componente.imagem || '';
+                    select.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar componentes:', error);
+        });
+}
+
+// Função para adicionar componente à anatomia
+function adicionarAnatomiaComponente() {
+    const select = document.getElementById('componente-anatomia-select');
+    const container = document.getElementById('anatomia-componentes-container');
+    
+    if (!select.value) {
+        alert('Selecione um componente primeiro.');
+        return;
+    }
+    
+    const selectedOption = select.options[select.selectedIndex];
+    const nomeComponente = selectedOption.value;
+    const tipoComponente = selectedOption.dataset.tipo || 'NEUTRO';
+    const descricaoComponente = selectedOption.dataset.descricao || '';
+    const imagemComponente = selectedOption.dataset.imagem || '';
+    
+    // Verificar se já existe
+    const existente = container.querySelector(`[data-componente="${nomeComponente}"]`);
+    if (existente) {
+        alert('Este componente já foi adicionado à anatomia.');
+        return;
+    }
+    
+    // Criar card do componente
+    const card = document.createElement('div');
+    card.className = 'card mb-3 anatomia-componente';
+    card.dataset.componente = nomeComponente;
+    
+    card.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Nome do Componente</label>
+                    <input type="text" class="form-control" value="${nomeComponente}" readonly>
+                    <input type="hidden" name="anatomia_componente_nome[]" value="${nomeComponente}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Imagem</label>
+                    ${imagemComponente ? `
+                        <div class="mb-2">
+                            <img src="${imagemComponente}" alt="${nomeComponente}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        </div>
+                        <input type="hidden" name="anatomia_componente_imagem_existente[]" value="${imagemComponente}">
+                    ` : ''}
+                    <input type="file" class="form-control" name="anatomia_componente_imagem[]" accept="image/*">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" name="anatomia_componente_tipo[]">
+                        <option value="NEUTRO" ${tipoComponente === 'NEUTRO' ? 'selected' : ''}>Neutro</option>
+                        <option value="SORTE" ${tipoComponente === 'SORTE' ? 'selected' : ''}>Sorte</option>
+                        <option value="TATICO" ${tipoComponente === 'TATICO' ? 'selected' : ''}>Tático</option>
+                        <option value="HABILIDADE" ${tipoComponente === 'HABILIDADE' ? 'selected' : ''}>Habilidade</option>
+                        <option value="LUDICO" ${tipoComponente === 'LUDICO' ? 'selected' : ''}>Lúdico</option>
+                        <option value="GERENCIAMENTO" ${tipoComponente === 'GERENCIAMENTO' ? 'selected' : ''}>Gerenciamento</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Descrição</label>
+                    <textarea class="form-control" name="anatomia_componente_descricao[]" rows="3" placeholder="Descreva o componente...">${descricaoComponente}</textarea>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()" title="Remover">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(card);
+    
+    // Resetar seletor
+    select.selectedIndex = 0;
 }
 
 // Adicionar eventos para recalcular peso e versão

@@ -290,3 +290,10 @@ Nova função, Importar e Exporta manuais no formato arquivo: "template".json
      - Olhando para os campos principais construa um template.jsom (modelo basico mesmo)
      - Na tela de formulario adicione os 2 botões <download template> <upload novo jogo>
      - Dentro do formulario de edição apenas, coloque um botão <Exporta> "nome-do-jogo.json" (neste exporte ignore as todas as imagens do jogo)
+
+Nova função, Anatomia dos componentes: dentro da sessão de compontestes dos formularios novo e editar
+    - deve ter um campo que lista os componentes cadastrados [ selecione o componente] <adicionar>
+    - ao clicar em adicionar deve surgi em baixo um campo as seguintes informações:
+    - Nome do componente / Imagem (se não tiver imagem, permitir o upload) / tipo (o seletor do campo) / e a descrição
+    - Este campo deve ser conectado as "tabelas" do formulario de componte, uma forma de agilizar a edição
+    - e esta anatomia deve aparecer no formularios de visualizar e editar

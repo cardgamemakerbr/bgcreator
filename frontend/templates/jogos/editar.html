@@ -347,6 +347,122 @@
                 </div>
             </div>
 
+            <!-- Anatomia dos Componentes -->
+            <div class="mb-4">
+                <h5><i class="fas fa-microscope"></i> Anatomia dos Componentes</h5>
+                <small class="text-muted mb-3 d-block">
+                    <i class="fas fa-info-circle"></i> 
+                    Detalhe os componentes do seu jogo com imagens e descrições específicas.
+                </small>
+                
+                <!-- Seletor de componente -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <select class="form-select" id="componente-anatomia-select">
+                                    <option value="">Selecione um componente para detalhar...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary" onclick="adicionarAnatomiaComponente()">
+                                    <i class="fas fa-plus"></i> Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Container dos componentes detalhados -->
+                <div id="anatomia-componentes-container">
+                    {% for componente in jogo.componentes_processados %}
+                        {% if componente %}
+                        <div class="card mb-3 anatomia-componente" data-componente="{{ componente.nome }}">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Nome do Componente</label>
+                                        <input type="text" class="form-control" value="{{ componente.nome }}" readonly>
+                                        <input type="hidden" name="anatomia_componente_nome[]" value="{{ componente.nome }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Imagem</label>
+                                        {% if componente.imagem %}
+                                            <div class="mb-2">
+                                                <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                            </div>
+                                            <input type="hidden" name="anatomia_componente_imagem_existente[]" value="{{ componente.imagem }}">
+                                        {% endif %}
+                                        <input type="file" class="form-control" name="anatomia_componente_imagem[]" accept="image/*">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Tipo</label>
+                                        <select class="form-select" name="anatomia_componente_tipo[]">
+                                            <option value="NEUTRO" {% if componente.tipo == 'NEUTRO' %}selected{% endif %}>Neutro</option>
+                                            <option value="SORTE" {% if componente.tipo == 'SORTE' %}selected{% endif %}>Sorte</option>
+                                            <option value="TATICO" {% if componente.tipo == 'TATICO' %}selected{% endif %}>Tático</option>
+                                            <option value="HABILIDADE" {% if componente.tipo == 'HABILIDADE' %}selected{% endif %}>Habilidade</option>
+                                            <option value="LUDICO" {% if componente.tipo == 'LUDICO' %}selected{% endif %}>Lúdico</option>
+                                            <option value="GERENCIAMENTO" {% if componente.tipo == 'GERENCIAMENTO' %}selected{% endif %}>Gerenciamento</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Descrição</label>
+                                        <textarea class="form-control" name="anatomia_componente_descricao[]" rows="3" placeholder="Descreva o componente...">{{ componente.descricao|default:'' }}</textarea>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()" title="Remover">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Visualização da Anatomia dos Componentes Cadastrados -->
+            {% if jogo.anatomia_componentes %}
+            <div class="mb-4">
+                <h6><i class="fas fa-microscope text-info"></i> Anatomia dos Componentes Cadastrados</h6>
+                <div class="row" id="anatomia-cadastrados-container">
+                    {% for componente in jogo.anatomia_componentes %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-info">
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            {% if componente.imagem %}
+                                            <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;">
+                                            {% else %}
+                                            <div style="width: 50px; height: 50px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-puzzle-piece text-muted"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ componente.nome }}</h6>
+                                            <span class="badge bg-secondary mb-1">{{ componente.tipo }}</span>
+                                            {% if componente.descricao %}
+                                            <p class="text-muted small mb-0">{{ componente.descricao }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ms-2">
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="removerAnatomiaExistente('{{ componente.nome }}', this)" title="Remover">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Condições de Vitória -->
             <div class="mb-4">
                 <h5><i class="fas fa-trophy"></i> Condições de Vitória</h5>
@@ -1085,6 +1201,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tema-search').forEach(input => setupSearch(input, 'temas'));
     document.querySelectorAll('.componente-search').forEach(input => setupSearch(input, 'componentes'));
     
+    // Carregar componentes para anatomia
+    carregarComponentesAnatomia();
+    
     // Fechar dropdown ao clicar fora
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.search-dropdown') && !e.target.matches('.mecanica-search, .tema-search, .componente-search')) {
@@ -1767,6 +1886,164 @@ function salvarTodasPalavras() {
     document.querySelectorAll('textarea[name="descricao_curta"], textarea[name="historia"], textarea[name="setup_descricao[]"], textarea[name="estruturas_descricao[]"], textarea[name*="condicoes_especiais_desc"]').forEach(campo => {
         if (campo.value.trim()) marcarErros(campo);
     });
+}
+
+// Função para carregar componentes no seletor de anatomia
+function carregarComponentesAnatomia() {
+    const select = document.getElementById('componente-anatomia-select');
+    if (!select) return;
+    
+    // Buscar todos os componentes disponíveis
+    fetch('/api/api/componentes/?per_page=1000')
+        .then(response => response.json())
+        .then(data => {
+            // Limpar opções existentes (exceto a primeira)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Adicionar componentes
+            if (data.results) {
+                data.results.forEach(componente => {
+                    const option = document.createElement('option');
+                    option.value = componente.nome;
+                    option.textContent = componente.nome;
+                    option.dataset.tipo = componente.tipo || 'NEUTRO';
+                    option.dataset.descricao = componente.descricao || '';
+                    option.dataset.imagem = componente.imagem || '';
+                    select.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar componentes:', error);
+        });
+}
+
+// Função para adicionar componente à anatomia
+function adicionarAnatomiaComponente() {
+    const select = document.getElementById('componente-anatomia-select');
+    const container = document.getElementById('anatomia-componentes-container');
+    
+    if (!select.value) {
+        alert('Selecione um componente primeiro.');
+        return;
+    }
+    
+    const selectedOption = select.options[select.selectedIndex];
+    const nomeComponente = selectedOption.value;
+    const tipoComponente = selectedOption.dataset.tipo || 'NEUTRO';
+    const descricaoComponente = selectedOption.dataset.descricao || '';
+    const imagemComponente = selectedOption.dataset.imagem || '';
+    
+    // Verificar se já existe no container de edição
+    const existenteEdicao = container.querySelector(`[data-componente="${nomeComponente}"]`);
+    if (existenteEdicao) {
+        alert('Este componente já foi adicionado à anatomia.');
+        return;
+    }
+    
+    // Verificar se já existe nos cadastrados
+    const cadastradosContainer = document.getElementById('anatomia-cadastrados-container');
+    if (cadastradosContainer) {
+        const existenteCadastrado = Array.from(cadastradosContainer.querySelectorAll('.card')).find(card => {
+            const nomeCard = card.querySelector('h6').textContent.trim();
+            return nomeCard === nomeComponente;
+        });
+        if (existenteCadastrado) {
+            alert('Este componente já está cadastrado na anatomia.');
+            return;
+        }
+    }
+    
+    // Criar card do componente
+    const card = document.createElement('div');
+    card.className = 'card mb-3 anatomia-componente';
+    card.dataset.componente = nomeComponente;
+    
+    card.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Nome do Componente</label>
+                    <input type="text" class="form-control" value="${nomeComponente}" readonly>
+                    <input type="hidden" name="anatomia_componente_nome[]" value="${nomeComponente}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Imagem</label>
+                    ${imagemComponente ? `
+                        <div class="mb-2">
+                            <img src="${imagemComponente}" alt="${nomeComponente}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        </div>
+                        <input type="hidden" name="anatomia_componente_imagem_existente[]" value="${imagemComponente}">
+                    ` : '<input type="hidden" name="anatomia_componente_imagem_existente[]" value="">'}
+                    <input type="file" class="form-control" name="anatomia_componente_imagem[]" accept="image/*">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" name="anatomia_componente_tipo[]">
+                        <option value="NEUTRO" ${tipoComponente === 'NEUTRO' ? 'selected' : ''}>Neutro</option>
+                        <option value="SORTE" ${tipoComponente === 'SORTE' ? 'selected' : ''}>Sorte</option>
+                        <option value="TATICO" ${tipoComponente === 'TATICO' ? 'selected' : ''}>Tático</option>
+                        <option value="HABILIDADE" ${tipoComponente === 'HABILIDADE' ? 'selected' : ''}>Habilidade</option>
+                        <option value="LUDICO" ${tipoComponente === 'LUDICO' ? 'selected' : ''}>Lúdico</option>
+                        <option value="GERENCIAMENTO" ${tipoComponente === 'GERENCIAMENTO' ? 'selected' : ''}>Gerenciamento</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Descrição</label>
+                    <textarea class="form-control" name="anatomia_componente_descricao[]" rows="3" placeholder="Descreva o componente...">${descricaoComponente}</textarea>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="this.closest('.card').remove()" title="Remover">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(card);
+    
+    // Resetar seletor
+    select.selectedIndex = 0;
+    
+    // Mostrar mensagem de sucesso
+    const successMsg = document.createElement('div');
+    successMsg.className = 'alert alert-success alert-dismissible fade show mt-2';
+    successMsg.innerHTML = `
+        <i class="fas fa-check-circle"></i> Componente "${nomeComponente}" adicionado à anatomia!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    container.parentElement.appendChild(successMsg);
+    
+    // Remover mensagem após 3 segundos
+    setTimeout(() => {
+        if (successMsg.parentElement) {
+            successMsg.remove();
+        }
+    }, 3000);
+}
+
+// Função para remover componente de anatomia já existente
+function removerAnatomiaExistente(nomeComponente, button) {
+    if (confirm(`Tem certeza que deseja remover "${nomeComponente}" da anatomia?`)) {
+        // Criar input hidden para marcar remoção
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'remover_anatomia_componente[]';
+        hiddenInput.value = nomeComponente;
+        document.querySelector('form').appendChild(hiddenInput);
+        
+        // Remover visualmente
+        button.closest('.col-md-6').remove();
+        
+        // Verificar se não há mais componentes e ocultar seção
+        const container = document.getElementById('anatomia-cadastrados-container');
+        if (container && container.children.length === 0) {
+            container.parentElement.style.display = 'none';
+        }
+    }
 }
 
 // Adicionar eventos para recalcular peso e versão

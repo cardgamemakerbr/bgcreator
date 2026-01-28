@@ -246,6 +246,36 @@
                     {% endfor %}
                 </div>
             </div>
+            <!-- Anatomia dos Componentes -->
+            {% if jogo.anatomia_componentes %}
+            <h3>{% if jogo.setup %}3{% else %}2{% endif %}.1 Anatomia dos Componentes</h3>
+            <div class="row mt-3">
+                {% for componente in jogo.anatomia_componentes %}
+                    <div class="col-md-6 mb-4">
+                        <div class="border rounded p-3">
+                            <div class="d-flex align-items-start mb-2">
+                                <div class="me-3">
+                                    {% if componente.imagem %}
+                                    <img src="{{ componente.imagem }}" alt="{{ componente.nome }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                    {% else %}
+                                    <div style="width: 60px; height: 60px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-puzzle-piece text-muted" style="font-size: 24px;"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ componente.nome }}</h6>
+                                    <span class="badge bg-secondary mb-1">{{ componente.tipo }}</span>
+                                </div>
+                            </div>
+                            {% if componente.descricao %}
+                            <p class="text-muted small mb-0">{{ componente.descricao }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         {% elif jogo.componentes %}
         <div class="page-break">
