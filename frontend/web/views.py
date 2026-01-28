@@ -1092,15 +1092,31 @@ def jogo_editar(request, jogo_id):
                     'imagem': imagem_path
                 })
         
+        # Processar remoções de anatomia de componentes
+        componentes_para_remover = request.POST.getlist('remover_anatomia_componente[]')
+        if componentes_para_remover:
+            # Filtrar componentes existentes removendo os marcados para remoção
+            anatomia_existente = jogo.get('anatomia_componentes', [])
+            jogo['anatomia_componentes'] = [comp for comp in anatomia_existente if comp['nome'] not in componentes_para_remover]
+        
         # Atualizar anatomia dos componentes
         anatomia_nomes = request.POST.getlist('anatomia_componente_nome[]')
         anatomia_tipos = request.POST.getlist('anatomia_componente_tipo[]')
         anatomia_descricoes = request.POST.getlist('anatomia_componente_descricao[]')
         anatomia_imagens_existentes = request.POST.getlist('anatomia_componente_imagem_existente[]')
         
-        jogo['anatomia_componentes'] = []
+        # Manter componentes existentes se não foram removidos
+        if 'anatomia_componentes' not in jogo:
+            jogo['anatomia_componentes'] = []
+        
+        # Adicionar novos componentes de anatomia
         for i, nome in enumerate(anatomia_nomes):
             if nome.strip():
+                # Verificar se já existe
+                ja_existe = any(comp['nome'] == nome for comp in jogo['anatomia_componentes'])
+                if ja_existe:
+                    continue  # Pular se já existe
+                
                 # Processar imagem da anatomia
                 imagem_path = None
                 if 'anatomia_componente_imagem[]' in request.FILES:
