@@ -19,7 +19,7 @@
 <div class="row mb-3">
     <div class="col-md-4">
         <form method="get" class="d-flex">
-            <input type="text" class="form-control me-2" name="busca" value="{{ request.GET.busca }}" placeholder="Buscar componente..." onkeyup="searchItems()">
+            <input type="text" class="form-control me-2" id="searchInput" name="busca" value="{{ request.GET.busca }}" placeholder="Buscar componente..." onkeyup="searchItems()">
             <button type="submit" class="btn btn-outline-primary">
                 <i class="fas fa-search"></i>
             </button>
@@ -198,12 +198,16 @@ function searchItems() {
     const rows = table.getElementsByTagName('tr');
 
     for (let i = 0; i < rows.length; i++) {
-        const nameCell = rows[i].getElementsByTagName('td')[0];
-        const descCell = rows[i].getElementsByTagName('td')[1];
+        const nameCell = rows[i].getElementsByTagName('td')[1]; // Nome está na segunda coluna (índice 1)
+        const typeCell = rows[i].getElementsByTagName('td')[2]; // Tipo está na terceira coluna (índice 2)
+        const descCell = rows[i].getElementsByTagName('td')[3]; // Descrição está na quarta coluna (índice 3)
         if (nameCell && descCell) {
             const nameText = nameCell.textContent || nameCell.innerText;
+            const typeText = typeCell ? (typeCell.textContent || typeCell.innerText) : '';
             const descText = descCell.textContent || descCell.innerText;
-            if (nameText.toLowerCase().indexOf(filter) > -1 || descText.toLowerCase().indexOf(filter) > -1) {
+            if (nameText.toLowerCase().indexOf(filter) > -1 || 
+                typeText.toLowerCase().indexOf(filter) > -1 || 
+                descText.toLowerCase().indexOf(filter) > -1) {
                 rows[i].style.display = '';
             } else {
                 rows[i].style.display = 'none';

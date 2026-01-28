@@ -11,6 +11,7 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('', views.home, name='home'),
     path('debug/', views.debug, name='debug'),
+    path('test-componentes/', views.test_componentes, name='test_componentes'),
     path('jogos/', views.jogos_lista, name='jogos_lista'),
     path('jogos/novo/', views.jogo_novo, name='jogo_novo'),
     path('jogos/<int:jogo_id>/', views.jogo_detalhes, name='jogo_detalhes'),
@@ -51,6 +52,7 @@ urlpatterns = [
     path('ajax/cadastrar-mecanica/', views.cadastrar_mecanica_rapido, name='cadastrar_mecanica_rapido'),
     path('ajax/cadastrar-tema/', views.cadastrar_tema_rapido, name='cadastrar_tema_rapido'),
     path('ajax/cadastrar-componente/', views.cadastrar_componente_rapido, name='cadastrar_componente_rapido'),
+    path('ajax/atualizar-componente-imagem/', views.atualizar_componente_imagem, name='atualizar_componente_imagem'),
     
     # Template JSON
     path('template/download/', views.download_template_json, name='download_template_json'),

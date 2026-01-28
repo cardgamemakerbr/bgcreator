@@ -344,6 +344,37 @@ def salvar_avatar_usuario(arquivo):
             return None
     return None
 
+def atualizar_componente_com_imagem(nome_componente, imagem_path, tipo_componente):
+    """Atualiza ou cria componente com imagem quando adicionado na anatomia"""
+    global componentes_criados
+    
+    # Buscar componente existente
+    componente_encontrado = None
+    for i, comp in enumerate(componentes_criados):
+        if comp['nome'] == nome_componente:
+            componente_encontrado = i
+            break
+    
+    if componente_encontrado is not None:
+        # Atualizar componente existente
+        componentes_criados[componente_encontrado]['imagem'] = imagem_path
+        componentes_criados[componente_encontrado]['tipo'] = tipo_componente
+        print(f"Componente '{nome_componente}' atualizado com imagem: {imagem_path}")
+    else:
+        # Criar novo componente se não existir
+        novo_componente = {
+            'id': len(componentes_criados) + 2000,
+            'nome': nome_componente,
+            'descricao': f'Componente criado via anatomia: {nome_componente}',
+            'tipo': tipo_componente,
+            'imagem': imagem_path
+        }
+        componentes_criados.append(novo_componente)
+        print(f"Novo componente '{nome_componente}' criado com imagem: {imagem_path}")
+    
+    # Salvar dados atualizados
+    salvar_dados()
+
 def get_api_data(endpoint, page=1, per_page=1000, busca=None):
     """Busca dados da API real do backend com fallback local"""
     global mecanicas_criadas, componentes_criados, temas_criados
@@ -356,11 +387,29 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         print(f"Erro ao conectar com API: {e}")
     
     # Fallback para dados locais
-    mecanicas_completas = []
+    mecanicas_completas = [
+        ('Construção de Baralho', 'Jogadores constroem seus próprios baralhos durante o jogo'),
+        ('Coleta de Conjuntos', 'Jogadores coletam cartas ou itens para formar conjuntos'),
+        ('Controle de Área', 'Jogadores competem pelo controle de áreas do tabuleiro'),
+        ('Gestão de Mão', 'Jogadores gerenciam cartas em suas mãos'),
+        ('Colocação de Trabalhadores', 'Jogadores posicionam trabalhadores em locais do tabuleiro')
+    ]
     
-    temas_completos = []
+    temas_completos = [
+        ('Fantasia Medieval', 'Ambientação em mundo medieval com elementos fantásticos'),
+        ('Ficção Científica', 'Ambientação futurista com tecnologia avançada'),
+        ('Aventura', 'Temas de exploração e descoberta'),
+        ('Estratégia Militar', 'Combate e táticas militares'),
+        ('Economia', 'Gestão de recursos e comércio')
+    ]
     
-    componentes_completos = []
+    componentes_completos = [
+        ('Cartas Standard', 'Cartas de tamanho padrão (63x88mm)', 'TATICO'),
+        ('Dados D6', 'Dados de seis faces', 'SORTE'),
+        ('Meeples de Madeira', 'Peças de madeira representando jogadores', 'NEUTRO'),
+        ('Tabuleiro Principal', 'Tabuleiro central do jogo', 'NEUTRO'),
+        ('Fichas de Poker', 'Fichas para representar pontos ou moedas', 'GERENCIAMENTO')
+    ]
     
     if endpoint == 'mecanicas':
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao} for i, (nome, descricao) in enumerate(mecanicas_completas)]
@@ -370,7 +419,7 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         dados.extend(temas_criados)
     elif endpoint == 'componentes':
         dados = [{'id': i+1, 'nome': nome, 'descricao': descricao, 'tipo': tipo} for i, (nome, descricao, tipo) in enumerate(componentes_completos)]
-        # Adicionar componentes criados com suas imagens
+        # Adicionar componentes criados com suas imagens (sempre os mais atualizados)
         for comp in componentes_criados:
             dados.append({
                 'id': comp['id'],
@@ -405,6 +454,20 @@ def get_api_data(endpoint, page=1, per_page=1000, busca=None):
         'current_page': page,
         'per_page': per_page
     }
+
+def test_componentes(request):
+    """Página de teste para verificar funcionalidades dos componentes"""
+    from django.http import HttpResponse
+    import os
+    
+    # Ler o arquivo de teste
+    test_file_path = os.path.join(os.path.dirname(__file__), '..', 'test_componentes.html')
+    try:
+        with open(test_file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return HttpResponse(content)
+    except FileNotFoundError:
+        return HttpResponse('<h1>Arquivo de teste não encontrado</h1>')
 
 def debug(request):
     mecanicas = get_api_data('mecanicas')
@@ -697,6 +760,10 @@ def jogo_novo(request):
                         if i < len(imagens_existentes) and imagens_existentes[i]:
                             imagem_path = imagens_existentes[i]
                     
+                    # Atualizar componente correspondente se existir imagem
+                    if imagem_path:
+                        atualizar_componente_com_imagem(nome, imagem_path, anatomia_tipos[i] if i < len(anatomia_tipos) else 'NEUTRO')
+                    
                     novo_jogo['anatomia_componentes'].append({
                         'nome': nome,
                         'tipo': anatomia_tipos[i] if i < len(anatomia_tipos) else 'NEUTRO',
@@ -849,18 +916,25 @@ def api_proxy(request, path):
     """Proxy para chamadas da API com suporte a busca"""
     from django.http import JsonResponse
     
+    print(f"DEBUG - API Proxy chamado com path: {path}")
+    print(f"DEBUG - Query params: {request.GET}")
+    
     # Extrair parâmetros de busca
     search_query = request.GET.get('search', '').lower()
     
     # Determinar o endpoint
-    if path.startswith('api/mecanicas'):
-        endpoint = 'mecanicas'
-    elif path.startswith('api/temas'):
-        endpoint = 'temas'
-    elif path.startswith('api/componentes'):
+    if path.startswith('componentes'):
         endpoint = 'componentes'
+    elif path.startswith('mecanicas'):
+        endpoint = 'mecanicas'
+    elif path.startswith('temas'):
+        endpoint = 'temas'
     else:
+        print(f"DEBUG - Endpoint não encontrado para path: {path}")
         return JsonResponse({'error': 'Endpoint não encontrado'}, status=404)
+    
+    print(f"DEBUG - Endpoint determinado: {endpoint}")
+    print(f"DEBUG - Search query: {search_query}")
     
     try:
         # Usar API real
@@ -868,14 +942,18 @@ def api_proxy(request, path):
         if search_query:
             api_url += f'&search={search_query}'
         
+        print(f"DEBUG - Tentando API real: {api_url}")
         response = requests.get(api_url)
         if response.status_code == 200:
+            print(f"DEBUG - API real funcionou")
             return JsonResponse(response.json())
     except Exception as e:
-        print(f"Erro na API: {e}")
+        print(f"DEBUG - Erro na API real: {e}")
     
     # Fallback para dados locais
+    print(f"DEBUG - Usando fallback local")
     data = get_api_data(endpoint, page=1, per_page=1000, busca=search_query)
+    print(f"DEBUG - Dados locais retornados: {len(data.get('results', []))} itens")
     
     return JsonResponse(data)
 
@@ -1127,6 +1205,10 @@ def jogo_editar(request, jogo_id):
                 # Se não há nova imagem, usar a existente
                 if not imagem_path and i < len(anatomia_imagens_existentes) and anatomia_imagens_existentes[i]:
                     imagem_path = anatomia_imagens_existentes[i]
+                
+                # Atualizar componente correspondente se existir imagem
+                if imagem_path:
+                    atualizar_componente_com_imagem(nome, imagem_path, anatomia_tipos[i] if i < len(anatomia_tipos) else 'NEUTRO')
                 
                 jogo['anatomia_componentes'].append({
                     'nome': nome,
@@ -1593,7 +1675,13 @@ def buscar_componente_com_imagem(nome_componente):
         if comp['nome'] == nome_limpo:
             return comp
     
-    return None
+    # Se ainda não encontrou, criar um componente básico
+    return {
+        'nome': nome_limpo,
+        'tipo': 'NEUTRO',
+        'descricao': f'Componente: {nome_limpo}',
+        'imagem': None
+    }
 
 def calcular_classificacao_jogo(jogo_data):
     classificacoes = {
@@ -2528,6 +2616,23 @@ def cadastrar_componente_rapido(request):
     return JsonResponse({'success': False})
 
 @autor_or_admin_required
+def atualizar_componente_imagem(request):
+    """Atualiza imagem de um componente via AJAX"""
+    if request.method == 'POST':
+        nome_componente = request.POST.get('nome')
+        tipo_componente = request.POST.get('tipo', 'NEUTRO')
+        
+        if nome_componente and 'imagem' in request.FILES:
+            imagem_path = salvar_imagem_componente(request.FILES['imagem'])
+            if imagem_path:
+                atualizar_componente_com_imagem(nome_componente, imagem_path, tipo_componente)
+                return JsonResponse({
+                    'success': True, 
+                    'imagem_path': imagem_path,
+                    'message': f'Componente "{nome_componente}" atualizado com sucesso!'
+                })
+    
+    return JsonResponse({'success': False, 'error': 'Dados inválidos'})
 def download_template_json(request):
     """Download do template básico JSON"""
     template_path = 'templates/template_basico.json'

@@ -1451,7 +1451,7 @@ function setupSearch(input, type) {
             const query = this.value;
             console.log('Buscando:', query, 'em:', type);
             if (query.length >= 2) {
-                fetch(`/api/api/${type}/?search=${encodeURIComponent(query)}`)
+                fetch(`/api/${type}/?search=${encodeURIComponent(query)}`)
                     .then(response => {
                         console.log('Response status:', response.status);
                         return response.json();
@@ -1922,12 +1922,32 @@ function getComponentesCadastrados() {
     componentesInputs.forEach(input => {
         const nome = input.value.trim();
         if (nome && !componentes.find(c => c.nome === nome)) {
-            componentes.push({
-                nome: nome,
-                tipo: 'NEUTRO', // Tipo padrão
-                descricao: '',
-                imagem: ''
-            });
+            // Buscar dados do componente via AJAX para obter imagem atualizada
+            fetch(`/api/componentes/?search=${encodeURIComponent(nome)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        const comp = data.results.find(c => c.nome === nome);
+                        if (comp) {
+                            componentes.push({
+                                nome: comp.nome,
+                                tipo: comp.tipo || 'NEUTRO',
+                                descricao: comp.descricao || '',
+                                imagem: comp.imagem || ''
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('Erro ao buscar componente:', error);
+                    // Fallback para dados básicos
+                    componentes.push({
+                        nome: nome,
+                        tipo: 'NEUTRO',
+                        descricao: '',
+                        imagem: ''
+                    });
+                });
         }
     });
     
@@ -2055,7 +2075,7 @@ function adicionarAnatomiaComponente() {
                         </div>
                         <input type="hidden" name="anatomia_componente_imagem_existente[]" value="${imagemComponente}">
                     ` : '<input type="hidden" name="anatomia_componente_imagem_existente[]" value="">'}
-                    <input type="file" class="form-control" name="anatomia_componente_imagem[]" accept="image/*">
+                    <input type="file" class="form-control componente-imagem-upload" name="anatomia_componente_imagem[]" accept="image/*" data-componente="${nomeComponente}">
                     <input type="hidden" name="anatomia_componente_imagem_existente[]" value="">
                 </div>
                 <div class="col-md-2">
@@ -2083,6 +2103,18 @@ function adicionarAnatomiaComponente() {
     `;
     
     container.appendChild(card);
+    
+    // Adicionar evento para detectar quando uma imagem é carregada
+    const imageUpload = card.querySelector('.componente-imagem-upload');
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                console.log(`Imagem carregada para componente: ${nomeComponente}`);
+                // Marcar que este componente terá uma imagem atualizada
+                this.dataset.hasNewImage = 'true';
+            }
+        });
+    }
     
     // Resetar campos
     input.value = '';

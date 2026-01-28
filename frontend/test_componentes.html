@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Automático - Componentes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Automático - Sistema de Componentes</h1>
+    
+    <div class="test-section">
+        <h2>1. Teste da API de Busca</h2>
+        <input type="text" id="search-input" placeholder="Digite para buscar..." value="Cartas">
+        <button onclick="testAPISearch()">Testar Busca API</button>
+        <div id="api-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Teste de Cadastro Rápido</h2>
+        <input type="text" id="new-component" placeholder="Nome do novo componente" value="Teste Componente">
+        <button onclick="testQuickCreate()">Testar Cadastro</button>
+        <div id="create-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Teste da Lista de Componentes</h2>
+        <button onclick="testComponentsList()">Testar Lista</button>
+        <div id="list-results"></div>
+    </div>
+    
+    <div id="results">
+        <h2>📊 Resultados dos Testes</h2>
+        <div id="test-log"></div>
+    </div>
+
+    <script>
+        const testLog = document.getElementById('test-log');
+        
+        function logResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            testLog.appendChild(div);
+        }
+        
+        // Teste 1: API de Busca
+        async function testAPISearch() {
+            const query = document.getElementById('search-input').value;
+            const resultsDiv = document.getElementById('api-results');
+            
+            logResult(`🔍 Testando busca por: "${query}"`, 'info');
+            
+            try {
+                // Testar diferentes endpoints
+                const endpoints = ['componentes', 'mecanicas', 'temas'];
+                
+                for (const endpoint of endpoints) {
+                    const response = await fetch(`/api/${endpoint}/?search=${encodeURIComponent(query)}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        logResult(`✅ API ${endpoint}: ${data.results?.length || 0} resultados encontrados`, 'success');
+                        
+                        if (data.results && data.results.length > 0) {
+                            resultsDiv.innerHTML += `<p><strong>${endpoint}:</strong> ${data.results.map(r => r.nome).join(', ')}</p>`;
+                        }
+                    } else {
+                        logResult(`❌ API ${endpoint}: Erro ${response.status}`, 'error');
+                    }
+                }
+            } catch (error) {
+                logResult(`❌ Erro na busca: ${error.message}`, 'error');
+            }
+        }
+        
+        // Teste 2: Cadastro Rápido
+        async function testQuickCreate() {
+            const nome = document.getElementById('new-component').value;
+            const resultsDiv = document.getElementById('create-results');
+            
+            logResult(`➕ Testando cadastro de: "${nome}"`, 'info');
+            
+            try {
+                // Simular token CSRF (em produção seria obtido do DOM)
+                const csrfToken = 'test-token';
+                
+                const response = await fetch('/ajax/cadastrar-componente/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: `nome=${encodeURIComponent(nome)}`
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        logResult(`✅ Componente "${data.nome}" cadastrado com ID: ${data.id}`, 'success');
+                        resultsDiv.innerHTML = `<p class="success">Componente criado: ${data.nome} (ID: ${data.id})</p>`;
+                    } else {
+                        logResult(`❌ Falha no cadastro: ${data.error || 'Erro desconhecido'}`, 'error');
+                    }
+                } else {
+                    logResult(`❌ Erro HTTP: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Erro no cadastro: ${error.message}`, 'error');
+            }
+        }
+        
+        // Teste 3: Lista de Componentes
+        async function testComponentsList() {
+            const resultsDiv = document.getElementById('list-results');
+            
+            logResult(`📋 Testando lista de componentes`, 'info');
+            
+            try {
+                const response = await fetch('/componentes/');
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    
+                    // Verificar se a página contém elementos esperados
+                    const hasTable = html.includes('<table');
+                    const hasSearchInput = html.includes('name="busca"');
+                    const hasComponents = html.includes('componente');
+                    
+                    if (hasTable && hasSearchInput) {
+                        logResult(`✅ Lista de componentes carregada corretamente`, 'success');
+                        resultsDiv.innerHTML = `
+                            <p class="success">✅ Tabela encontrada: ${hasTable}</p>
+                            <p class="success">✅ Campo de busca encontrado: ${hasSearchInput}</p>
+                            <p class="info">📊 Componentes detectados: ${hasComponents}</p>
+                        `;
+                    } else {
+                        logResult(`⚠️ Lista carregada mas com problemas na estrutura`, 'error');
+                    }
+                } else {
+                    logResult(`❌ Erro ao carregar lista: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Erro na lista: ${error.message}`, 'error');
+            }
+        }
+        
+        // Teste automático ao carregar a página
+        window.onload = function() {
+            logResult('🚀 Iniciando testes automáticos...', 'info');
+            
+            // Executar testes em sequência
+            setTimeout(() => {
+                testAPISearch();
+                setTimeout(() => {
+                    testComponentsList();
+                }, 1000);
+            }, 500);
+        };
+    </script>
+</body>
+</html>
