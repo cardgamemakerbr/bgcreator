@@ -2619,12 +2619,27 @@ def exportar_jogo_json(request, jogo_id):
 
 @admin_required
 def gerenciamento_sistema(request):
-    global hosts_confiaveis
+    global hosts_confiaveis, jogos_criados, mecanicas_criadas, componentes_criados, temas_criados, usuarios_criados, comentarios_criados, complexidade_senha
     
     if request.method == 'POST':
         action = request.POST.get('action')
         
-        if action == 'adicionar_host':
+        # Ações de usuários
+        if action == 'configurar_complexidade':
+            nova_complexidade = int(request.POST.get('complexidade', 1))
+            complexidade_senha = nova_complexidade
+            
+            niveis = {
+                1: 'Desativado',
+                2: 'Letras e números, mínimo 6 dígitos',
+                3: 'Letras maiúsculas e minúsculas, números, mínimo 8 dígitos',
+                4: 'Letras maiúsculas e minúsculas, números, caractere especial, mínimo 10 dígitos'
+            }
+            
+            messages.success(request, f'Complexidade de senha alterada para: {niveis[nova_complexidade]}')
+            salvar_dados()
+        
+        elif action == 'adicionar_host':
             novo_host = request.POST.get('novo_host', '').strip()
             if novo_host:
                 if novo_host not in hosts_confiaveis:
@@ -2645,10 +2660,144 @@ def gerenciamento_sistema(request):
             else:
                 messages.error(request, 'Host não encontrado!')
         
+        elif action == 'criar_backup':
+            # Criar backup
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            backup_filename = f'bgcreator_backup_{timestamp}.zip'
+            backup_path = os.path.join('backups', backup_filename)
+            
+            # Criar diretório de backup se não existir
+            os.makedirs('backups', exist_ok=True)
+            
+            # Dados para backup
+            backup_data = {
+                'timestamp': timestamp,
+                'jogos': jogos_criados,
+                'mecanicas': mecanicas_criadas,
+                'componentes': componentes_criados,
+                'temas': temas_criados,
+                'usuarios': usuarios_criados,
+                'comentarios': comentarios_criados,
+                'complexidade_senha': complexidade_senha,
+                'hosts_confiaveis': hosts_confiaveis,
+                'senhas_sistema': senhas_mod.SENHAS_SISTEMA
+            }
+            
+            # Criar arquivo ZIP
+            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                # Adicionar dados JSON
+                zipf.writestr('dados.json', json.dumps(backup_data, indent=2, ensure_ascii=False))
+                
+                # Adicionar arquivos de mídia
+                media_dirs = ['media/capas', 'media/setup', 'media/glossario', 'media/componentes', 'media/avatars']
+                for media_dir in media_dirs:
+                    if os.path.exists(media_dir):
+                        for root, dirs, files in os.walk(media_dir):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                arcname = os.path.relpath(file_path, 'media')
+                                zipf.write(file_path, f'media/{arcname}')
+            
+            messages.success(request, f'Backup criado com sucesso: {backup_filename}')
+            
+        elif action == 'restaurar_backup':
+            # Restaurar backup
+            if 'backup_file' in request.FILES:
+                backup_file = request.FILES['backup_file']
+                
+                # Salvar arquivo temporariamente
+                temp_path = f'temp_{backup_file.name}'
+                with open(temp_path, 'wb+') as destination:
+                    for chunk in backup_file.chunks():
+                        destination.write(chunk)
+                
+                try:
+                    # Extrair e restaurar dados
+                    with zipfile.ZipFile(temp_path, 'r') as zipf:
+                        # Ler dados JSON
+                        dados_json = zipf.read('dados.json').decode('utf-8')
+                        backup_data = json.loads(dados_json)
+                        
+                        # Restaurar dados
+                        jogos_criados.clear()
+                        jogos_criados.extend(backup_data.get('jogos', []))
+                        
+                        mecanicas_criadas.clear()
+                        mecanicas_criadas.extend(backup_data.get('mecanicas', []))
+                        
+                        componentes_criados.clear()
+                        componentes_criados.extend(backup_data.get('componentes', []))
+                        
+                        temas_criados.clear()
+                        temas_criados.extend(backup_data.get('temas', []))
+                        
+                        usuarios_criados.clear()
+                        usuarios_criados.extend(backup_data.get('usuarios', []))
+                        
+                        comentarios_criados.clear()
+                        comentarios_criados.extend(backup_data.get('comentarios', []))
+                        
+                        # Restaurar hosts confiáveis
+                        hosts_confiaveis.clear()
+                        hosts_confiaveis.extend(backup_data.get('hosts_confiaveis', ['localhost:8000']))
+                        
+                        # Restaurar configuração de complexidade
+                        complexidade_senha = backup_data.get('complexidade_senha', 1)
+                        
+                        # Restaurar senhas do sistema
+                        senhas_salvas = backup_data.get('senhas_sistema', {
+                            'admin': 'admin', 'autor': '123', 'revisor': '123', 'leitor': '123'
+                        })
+                        senhas_mod.SENHAS_SISTEMA.update(senhas_salvas)
+                        
+                        # Restaurar arquivos de mídia
+                        for file_info in zipf.infolist():
+                            if file_info.filename.startswith('media/'):
+                                zipf.extract(file_info, '.')
+                    
+                    messages.success(request, 'Backup restaurado com sucesso!')
+                    
+                except Exception as e:
+                    messages.error(request, f'Erro ao restaurar backup: {str(e)}')
+                
+                finally:
+                    # Remover arquivo temporário
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+            else:
+                messages.error(request, 'Nenhum arquivo de backup selecionado.')
+        
         return redirect('gerenciamento_sistema')
     
+    # Listar backups existentes
+    backups = []
+    if os.path.exists('backups'):
+        for filename in os.listdir('backups'):
+            if filename.endswith('.zip'):
+                filepath = os.path.join('backups', filename)
+                stat = os.stat(filepath)
+                backups.append({
+                    'filename': filename,
+                    'size': round(stat.st_size / 1024 / 1024, 2),  # MB
+                    'created': datetime.fromtimestamp(stat.st_ctime).strftime('%d/%m/%Y %H:%M')
+                })
+    
+    # Processar busca de usuários
+    busca_usuario = request.GET.get('busca_usuario', '').strip().lower()
+    usuarios_filtrados = usuarios_criados
+    if busca_usuario:
+        usuarios_filtrados = []
+        for usuario in usuarios_criados:
+            if (busca_usuario in usuario.get('nome', '').lower() or 
+                busca_usuario in usuario.get('login', '').lower() or
+                busca_usuario in usuario.get('perfil', '').lower()):
+                usuarios_filtrados.append(usuario)
+    
     return render(request, 'gerenciamento/sistema.html', {
-        'hosts_confiaveis': hosts_confiaveis
+        'hosts_confiaveis': hosts_confiaveis,
+        'backups': backups,
+        'usuarios': usuarios_filtrados,
+        'complexidade_senha': complexidade_senha
     })
 
 # Funções de backup automático

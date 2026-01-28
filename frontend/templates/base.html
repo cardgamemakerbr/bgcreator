@@ -31,12 +31,6 @@
                 </a>
                 {% endif %}
                 {% if request.session.usuario_perfil == 'ADMINISTRADOR' %}
-                <a class="nav-link" href="{% url 'usuarios_lista' %}">
-                    <i class="fas fa-users"></i> USUÁRIOS
-                </a>
-                <a class="nav-link" href="{% url 'backup_sistema' %}">
-                    <i class="fas fa-database"></i> BACKUP
-                </a>
                 <a class="nav-link" href="{% url 'gerenciamento_sistema' %}">
                     <i class="fas fa-cog"></i> GERENCIAMENTO
                 </a>

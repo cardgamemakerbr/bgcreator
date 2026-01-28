@@ -7,6 +7,117 @@
     <h2><i class="fas fa-cog"></i> Gerenciamento do Sistema</h2>
 </div>
 
+<!-- Gerenciamento de Usuários -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5><i class="fas fa-users"></i> Gerenciamento de Usuários</h5>
+                <small class="text-muted">Gerencie usuários e configurações de segurança</small>
+            </div>
+            <a href="{% url 'usuario_novo' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Novo Usuário
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Configuração de Complexidade de Senha -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <form method="post" class="d-flex align-items-center">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="configurar_complexidade">
+                    <label class="form-label me-3 mb-0"><strong>Complexidade de Senha:</strong></label>
+                    <input type="range" class="form-range me-3" name="complexidade" min="1" max="4" value="{{ complexidade_senha }}" 
+                           style="width: 200px;" onchange="updateComplexityLabel(this.value)">
+                    <span id="complexity-label" class="me-3"></span>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </form>
+                <small class="text-muted d-block mt-1">
+                    1: Desativado | 2: Letras+números (6+) | 3: Maiúsc+minúsc+números (8+) | 4: Completa (10+)
+                </small>
+            </div>
+        </div>
+
+        <!-- Busca de Usuários -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <input type="text" class="form-control me-2" name="busca_usuario" value="{{ request.GET.busca_usuario }}" placeholder="Buscar usuários...">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Usuários -->
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Avatar</th>
+                        <th>Nome</th>
+                        <th>Login</th>
+                        <th>E-mail</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>
+                            {% if usuario.avatar %}
+                            <img src="{{ usuario.avatar }}" class="rounded-circle" alt="Avatar" style="width: 30px; height: 30px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                <i class="fas fa-user text-white" style="font-size: 12px;"></i>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>{{ usuario.nome }}</td>
+                        <td><code>{{ usuario.login }}</code></td>
+                        <td>{{ usuario.email|default:"-" }}</td>
+                        <td>
+                            <span class="badge bg-{% if usuario.perfil == 'ADMINISTRADOR' %}danger{% elif usuario.perfil == 'AUTOR' %}primary{% elif usuario.perfil == 'REVISOR' %}warning{% else %}secondary{% endif %}">
+                                {{ usuario.perfil }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if usuario.ativo %}
+                            <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge bg-danger">Bloqueado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'usuario_editar' usuario.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'usuario_bloquear' usuario.id %}" class="btn btn-sm btn-outline-{% if usuario.ativo %}warning{% else %}success{% endif %} me-1">
+                                <i class="fas fa-{% if usuario.ativo %}lock{% else %}unlock{% endif %}"></i>
+                            </a>
+                            <a href="{% url 'usuario_excluir' usuario.id %}" class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('Tem certeza que deseja excluir este usuário?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Nenhum usuário encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- Hosts DNS Confiáveis -->
 <div class="card mb-4">
     <div class="card-header">
@@ -88,6 +199,78 @@
     </div>
 </div>
 
+<!-- Sistema de Backup -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-database"></i> Sistema de Backup</h5>
+        <small class="text-muted">Crie e restaure backups completos do sistema</small>
+    </div>
+    <div class="card-body">
+        <!-- Botões de ação -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="criar_backup">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Criar Backup
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="restaurar_backup">
+                    <div class="input-group">
+                        <input type="file" class="form-control" name="backup_file" accept=".zip" required>
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Tem certeza? Isso substituirá todos os dados atuais!')">
+                            <i class="fas fa-upload"></i> Restaurar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de backups -->
+        {% if backups %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Arquivo</th>
+                        <th>Tamanho</th>
+                        <th>Data de Criação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr>
+                        <td><code>{{ backup.filename }}</code></td>
+                        <td>{{ backup.size }} MB</td>
+                        <td>{{ backup.created }}</td>
+                        <td>
+                            <a href="{% url 'backup_download' backup.filename %}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <a href="{% url 'backup_delete' backup.filename %}" class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('Tem certeza que deseja excluir este backup?')">
+                                <i class="fas fa-trash"></i> Excluir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Nenhum backup encontrado. Clique em "Criar Backup" para gerar o primeiro.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
 <!-- Informações do Sistema -->
 <div class="card">
     <div class="card-header">
@@ -108,4 +291,27 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Atualizar label da complexidade de senha
+function updateComplexityLabel(value) {
+    const labels = {
+        1: 'Desativado',
+        2: 'Letras+números (6+)',
+        3: 'Maiúsc+minúsc+números (8+)',
+        4: 'Completa (10+)'
+    };
+    document.getElementById('complexity-label').textContent = labels[value];
+}
+
+// Inicializar label
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('input[name="complexidade"]');
+    if (slider) {
+        updateComplexityLabel(slider.value);
+    }
+});
+</script>
 {% endblock %}
