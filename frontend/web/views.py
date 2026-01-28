@@ -147,6 +147,7 @@ temas_criados = []
 jogos_criados = []
 usuarios_criados = []
 comentarios_criados = []
+hosts_confiaveis = ['localhost:8000']  # Lista de hosts DNS confiáveis
 usuario_logado = None
 complexidade_senha = 1  # 1=Desativado, 2=Letras+números 6+, 3=Maiúsc+minúsc+números 8+, 4=Completa 10+
 
@@ -164,7 +165,7 @@ DATA_FILE = 'data/bgcreator_data.json'
 def salvar_dados():
     """Salva todos os dados em arquivo JSON"""
     global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados
-    global usuarios_criados, comentarios_criados, complexidade_senha, usuarios_sistema_status
+    global usuarios_criados, comentarios_criados, complexidade_senha, usuarios_sistema_status, hosts_confiaveis
     
     # Criar diretório se não existir
     Path('data').mkdir(exist_ok=True)
@@ -178,6 +179,7 @@ def salvar_dados():
         'comentarios_criados': comentarios_criados,
         'complexidade_senha': complexidade_senha,
         'usuarios_sistema_status': usuarios_sistema_status,
+        'hosts_confiaveis': hosts_confiaveis,
         'senhas_sistema': senhas_mod.SENHAS_SISTEMA,
         'timestamp': datetime.now().isoformat()
     }
@@ -191,7 +193,7 @@ def salvar_dados():
 def carregar_dados():
     """Carrega todos os dados do arquivo JSON"""
     global jogos_criados, mecanicas_criadas, componentes_criados, temas_criados
-    global usuarios_criados, comentarios_criados, complexidade_senha, usuarios_sistema_status
+    global usuarios_criados, comentarios_criados, complexidade_senha, usuarios_sistema_status, hosts_confiaveis
     
     try:
         if Path(DATA_FILE).exists():
@@ -208,6 +210,7 @@ def carregar_dados():
             usuarios_sistema_status = dados.get('usuarios_sistema_status', {
                 1: True, 2: True, 3: True, 4: True
             })
+            hosts_confiaveis = dados.get('hosts_confiaveis', ['localhost:8000'])
             
             # Carregar senhas do sistema
             senhas_salvas = dados.get('senhas_sistema', {
@@ -2613,6 +2616,40 @@ def exportar_jogo_json(request, jogo_id):
     response = HttpResponse(json.dumps(jogo_export, indent=2, ensure_ascii=False), content_type='application/json')
     response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}"'
     return response
+
+@admin_required
+def gerenciamento_sistema(request):
+    global hosts_confiaveis
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'adicionar_host':
+            novo_host = request.POST.get('novo_host', '').strip()
+            if novo_host:
+                if novo_host not in hosts_confiaveis:
+                    hosts_confiaveis.append(novo_host)
+                    salvar_dados()
+                    messages.success(request, f'Host "{novo_host}" adicionado com sucesso!')
+                else:
+                    messages.warning(request, f'Host "{novo_host}" já existe na lista!')
+            else:
+                messages.error(request, 'Host não pode estar vazio!')
+        
+        elif action == 'remover_host':
+            host_remover = request.POST.get('host_remover')
+            if host_remover in hosts_confiaveis:
+                hosts_confiaveis.remove(host_remover)
+                salvar_dados()
+                messages.success(request, f'Host "{host_remover}" removido com sucesso!')
+            else:
+                messages.error(request, 'Host não encontrado!')
+        
+        return redirect('gerenciamento_sistema')
+    
+    return render(request, 'gerenciamento/sistema.html', {
+        'hosts_confiaveis': hosts_confiaveis
+    })
 
 # Funções de backup automático
 def criar_backup_automatico():

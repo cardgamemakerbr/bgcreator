@@ -41,6 +41,7 @@ urlpatterns = [
     path('backup/', views.backup_sistema, name='backup_sistema'),
     path('backup/download/<str:filename>/', views.backup_download, name='backup_download'),
     path('backup/delete/<str:filename>/', views.backup_delete, name='backup_delete'),
+    path('gerenciamento/', views.gerenciamento_sistema, name='gerenciamento_sistema'),
     path('ajax/cadastrar-mecanica/', views.cadastrar_mecanica_rapido, name='cadastrar_mecanica_rapido'),
     path('ajax/cadastrar-tema/', views.cadastrar_tema_rapido, name='cadastrar_tema_rapido'),
     path('ajax/cadastrar-componente/', views.cadastrar_componente_rapido, name='cadastrar_componente_rapido'),

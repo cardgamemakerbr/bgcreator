@@ -7,6 +7,14 @@ SECRET_KEY = config('SECRET_KEY', default='frontend-secret-key')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['*']
 
+# Configuração inicial de hosts confiáveis (será atualizada dinamicamente pelo middleware)
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'https://localhost:8000',
+    'https://bgcreator-dev.rtla.com.br',
+    'http://bgcreator-dev.rtla.com.br',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,6 +29,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'web.middleware.DynamicHostsMiddleware',  # Middleware personalizado para hosts confiáveis
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciamento do Sistema - BGCreator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-cog"></i> Gerenciamento do Sistema</h2>
+</div>
+
+<!-- Hosts DNS Confiáveis -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-shield-alt"></i> Hosts DNS Confiáveis</h5>
+        <small class="text-muted">Configure os domínios autorizados para acessar a aplicação (resolve erro CSRF 403)</small>
+    </div>
+    <div class="card-body">
+        <!-- Formulário para adicionar novo host -->
+        <form method="post" class="mb-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="adicionar_host">
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="novo_host" placeholder="exemplo.com ou subdominio.exemplo.com:8000" required>
+                    <small class="form-text text-muted">
+                        <strong>Exemplos:</strong> localhost:8000, meusite.com, app.meusite.com:3000, 192.168.1.100:8000
+                    </small>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Adicionar Host
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Lista de hosts atuais -->
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Host Confiável</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for host in hosts_confiaveis %}
+                    <tr>
+                        <td>
+                            <code>{{ host }}</code>
+                            {% if host == 'localhost:8000' %}
+                            <span class="badge bg-info ms-2">Padrão</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if host != 'localhost:8000' %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remover_host">
+                                <input type="hidden" name="host_remover" value="{{ host }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('Tem certeza que deseja remover este host?')">
+                                    <i class="fas fa-trash"></i> Remover
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">Host padrão (não removível)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted">Nenhum host configurado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Informações sobre CSRF -->
+        <div class="alert alert-info mt-3">
+            <h6><i class="fas fa-info-circle"></i> Sobre Hosts Confiáveis</h6>
+            <p class="mb-2">Os hosts DNS confiáveis são domínios autorizados a fazer requisições para sua aplicação. Isso resolve o erro:</p>
+            <code class="d-block mb-2">Origin checking failed - https://seudominio.com does not match any trusted origins.</code>
+            <p class="mb-0">
+                <strong>Importante:</strong> Adicione apenas domínios que você controla. Inclua a porta se diferente de 80/443.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Informações do Sistema -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-info-circle"></i> Informações do Sistema</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Versão:</strong> BGCreator v1.0</p>
+                <p><strong>Ambiente:</strong> Desenvolvimento</p>
+                <p><strong>Hosts Configurados:</strong> {{ hosts_confiaveis|length }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Status CSRF:</strong> <span class="badge bg-success">Ativo</span></p>
+                <p><strong>Debug Mode:</strong> <span class="badge bg-warning">Ativo</span></p>
+                <p><strong>Última Atualização:</strong> {{ "now"|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
